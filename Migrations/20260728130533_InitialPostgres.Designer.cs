@@ -8,17 +8,17 @@ using PremierAuto.Data;
 
 #nullable disable
 
-namespace PremierAuto.Data.Migrations
+namespace PremierAuto.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260726210814_SimplifyMechanic")]
-    partial class SimplifyMechanic
+    [Migration("20260728130533_InitialPostgres")]
+    partial class InitialPostgres
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.1");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.4");
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -267,6 +267,38 @@ namespace PremierAuto.Data.Migrations
                     b.ToTable("Appointments");
                 });
 
+            modelBuilder.Entity("PremierAuto.Models.AppointmentMessage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AppointmentId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsAdmin")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SenderId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppointmentId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("AppointmentMessages");
+                });
+
             modelBuilder.Entity("PremierAuto.Models.ClientProfile", b =>
                 {
                     b.Property<int>("Id")
@@ -499,6 +531,25 @@ namespace PremierAuto.Data.Migrations
                     b.Navigation("Mechanic");
 
                     b.Navigation("Service");
+                });
+
+            modelBuilder.Entity("PremierAuto.Models.AppointmentMessage", b =>
+                {
+                    b.HasOne("PremierAuto.Models.Appointment", "Appointment")
+                        .WithMany()
+                        .HasForeignKey("AppointmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PremierAuto.Models.ApplicationUser", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Appointment");
+
+                    b.Navigation("Sender");
                 });
 
             modelBuilder.Entity("PremierAuto.Models.ClientProfile", b =>
