@@ -53,7 +53,7 @@ else
 
 app.UseHttpsRedirection();
 
-// Linia clasica care permite accesul la folderul wwwroot
+
 app.UseStaticFiles(); 
 
 app.UseRouting();
@@ -68,7 +68,6 @@ app.MapControllerRoute(
 app.MapRazorPages();
 
 
-// Creaza automat baza de date din modele la pornire
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;

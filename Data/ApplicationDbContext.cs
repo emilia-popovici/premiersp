@@ -26,7 +26,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     builder.Entity<Mechanic>()
         .HasIndex(m => m.UserId)
         .IsUnique()
-        .HasFilter("[UserId] IS NOT NULL");
+        .HasFilter("\"UserId\" IS NOT NULL");
     
     builder.Entity<Appointment>()
         .HasOne(a => a.Review)

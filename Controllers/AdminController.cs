@@ -25,7 +25,7 @@ namespace PremierAuto.Controllers
             _userManager = userManager;
         }
 
-        // 1. DASHBOARD & STATISTICI
+        //Dashboard
         public async Task<IActionResult> Index()
         {
             int pendingAppointments = await _context.Appointments
@@ -43,7 +43,6 @@ namespace PremierAuto.Controllers
 
             ViewBag.TopServices = topServices;
 
-            // --- DISTRIBUȚIA SERVICIILOR ÎN DASHBOARD ---
             var services = await _context.Services.ToListAsync();
             var appointments = await _context.Appointments
                 .Include(a => a.Service)
@@ -76,7 +75,7 @@ namespace PremierAuto.Controllers
             return View();
         }
 
-        // 2. GESTIONARE PROGRAMARI
+        //Programari
         public async Task<IActionResult> Appointments(string searchString, string mechanicId, int? serviceId, DateTime? dateFilter, DateTime? weekDate)
         {
             var query = _context.Appointments
@@ -162,8 +161,6 @@ namespace PremierAuto.Controllers
             return RedirectToAction(nameof(Appointments));
         }
 
-        // --- 3. CHAT PENTRU PROGRAMĂRI ---
-
         [HttpGet]
         public async Task<IActionResult> AppointmentChat(int id)
         {
@@ -212,8 +209,7 @@ namespace PremierAuto.Controllers
             return RedirectToAction(nameof(AppointmentChat), new { id = appointmentId });
         }
 
-        // --- 4. GESTIONARE MECANICI (CRUD) ---
-
+        //Mecanici
         public async Task<IActionResult> Mechanics()
         {
             var mechanics = await _context.Mechanics
@@ -278,7 +274,6 @@ namespace PremierAuto.Controllers
                     if (!await _userManager.IsInRoleAsync(user, "Mecanic"))
                         await _userManager.AddToRoleAsync(user, "Mecanic");
 
-                    // Ștergem profilul de client dacă acesta exista pentru acest utilizator
                     var clientProf = await _context.ClientProfiles.FirstOrDefaultAsync(cp => cp.UserId == model.UserId);
                     if (clientProf != null)
                     {
@@ -323,7 +318,6 @@ namespace PremierAuto.Controllers
             {
                 mechanic.UserId = userId;
 
-                // Dacă utilizatorul avea profil de client, îl ștergem pentru că devine mecanic
                 var clientProf = await _context.ClientProfiles.FirstOrDefaultAsync(cp => cp.UserId == userId);
                 if (clientProf != null)
                 {
@@ -382,8 +376,7 @@ namespace PremierAuto.Controllers
             return RedirectToAction(nameof(Mechanics));
         }
 
-        // --- 5. GESTIONARE SERVICII (CRUD) ---
-
+        //Servicii
         public async Task<IActionResult> Services()
         {
             var services = await _context.Services.OrderBy(s => s.Name).ToListAsync();
@@ -482,18 +475,14 @@ namespace PremierAuto.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // --- 6. GESTIONARE CLIENȚI ȘI STATISTICI ---
-
         [HttpGet]
         public async Task<IActionResult> UsersList()
         {
-            // 1. Identificăm ID-urile utilizatorilor care sunt mecanici
             var mechanicUserIds = await _context.Mechanics
                 .Where(m => m.UserId != null)
                 .Select(m => m.UserId!)
                 .ToListAsync();
 
-            // 2. Curățare automată: ștergem din ClientProfiles orice mecanic rămas din greșeală
             var misplacedProfiles = await _context.ClientProfiles
                 .Where(cp => mechanicUserIds.Contains(cp.UserId))
                 .ToListAsync();
@@ -504,7 +493,6 @@ namespace PremierAuto.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            // 3. Selectăm doar clienții reali (excluzând mecanicii)
             var clientUsers = await (from user in _context.Users
                                     join profile in _context.ClientProfiles on user.Id equals profile.UserId
                                     where !mechanicUserIds.Contains(user.Id)
@@ -543,7 +531,6 @@ namespace PremierAuto.Controllers
                 .Where(a => a.ClientId == user.Id || a.ClientId == userId)
                 .ToListAsync();
 
-            // A. Mecanicul preferat
             var favoriteMechanic = appointments
                 .Where(a => a.Mechanic != null)
                 .GroupBy(a => $"{a.Mechanic.FirstName} {a.Mechanic.LastName}")
@@ -551,10 +538,8 @@ namespace PremierAuto.Controllers
                 .Select(g => g.Key)
                 .FirstOrDefault() ?? "Niciunul";
 
-            // B. Număr programări finalizate
             int completedAppointmentsCount = appointments.Count(a => a.Status == AppointmentStatus.Done);
 
-            // C. Rating-ul mediu oferit
             var ratingsList = appointments
                 .Where(a => a.Review != null)
                 .Select(a => (double)a.Review.Rating)
@@ -562,7 +547,6 @@ namespace PremierAuto.Controllers
 
             double averageRatingGiven = ratingsList.Any() ? ratingsList.Average() : 0;
 
-            // D. Serviciul cel mai folosit
             string mostUsedService = appointments
                 .Where(a => a.Service != null)
                 .GroupBy(a => a.Service.Name)
@@ -570,12 +554,10 @@ namespace PremierAuto.Controllers
                 .Select(g => g.Key)
                 .FirstOrDefault() ?? "Niciunul";
 
-            // E. Total achitat
             decimal totalPaid = appointments
                 .Where(a => a.Status == AppointmentStatus.Done && a.Service != null)
                 .Sum(a => a.Service.Price);
 
-            // F. Ultima finalizare
             var lastCompletedDate = appointments
                 .Where(a => a.Status == AppointmentStatus.Done)
                 .OrderByDescending(a => a.AppointmentDate)

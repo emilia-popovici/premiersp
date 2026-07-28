@@ -16,7 +16,7 @@ public sealed class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Ap
             .Build();
 
         var options = new DbContextOptionsBuilder<ApplicationDbContext>();
-        options.UseSqlite(configuration.GetConnectionString("DefaultConnection"));
+        options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
         return new ApplicationDbContext(options.Options);
     }
 }
