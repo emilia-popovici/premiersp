@@ -4,6 +4,7 @@ using PremierAuto.Data;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using PremierAuto.Services;
 using PremierAuto.Models;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -75,6 +76,10 @@ app.MapControllerRoute(
 
 app.MapRazorPages();
 
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedProto
+});
 
 using (var scope = app.Services.CreateScope())
 {
