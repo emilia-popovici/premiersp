@@ -16,8 +16,8 @@ namespace PremierAuto.Services
         
         public Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
-            var fromMail = "MailAdd";
-            var fromPassword = "SecretKey"; 
+            var fromMail = _configuration["EmailSettings:MailAdd"] ?? _configuration["EmailSettings__MailAdd"];
+var fromPassword = _configuration["EmailSettings:SecretKey"] ?? _configuration["EmailSettings__SecretKey"];
 
             var client = new SmtpClient("smtp.gmail.com", 465)
             {
