@@ -1,0 +1,86 @@
+@model PremierAuto.Models.Mechanic
+
+@{
+    ViewData["Title"] = "Profilul Meu";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="card shadow-sm border-0 p-4 bg-white">
+                <h2 class="fw-bold text-navy mb-4"><i class="bi bi-person-badge me-2"></i> Profilul Meu</h2>
+                
+                <!-- Afișarea sumară a profilului -->
+                <div class="d-flex align-items-center mb-4 p-3 bg-light rounded">
+                    <div class="position-relative me-4">
+                        @if (!string.IsNullOrEmpty(Model.PhotoUrl))
+                        {
+                            <img src="@Model.PhotoUrl" alt="Avatar" class="rounded-circle shadow-sm" style="width: 100px; height: 100px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 100px; height: 100px; font-size: 2.5rem;">🔧</div>
+                        }
+                        
+                        <!-- Indicator status poză -->
+                        @if (!string.IsNullOrEmpty(Model.PhotoUrl) && !Model.IsPictureApproved)
+                        {
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark border border-light" title="Poza așteaptă aprobarea administratorului">
+                                <i class="bi bi-hourglass-split"></i>
+                            </span>
+                        }
+                    </div>
+                    <div>
+                        <h3 class="fw-bold text-navy mb-1">@Model.FirstName @Model.LastName</h3>
+                        <p class="text-muted mb-0"><i class="bi bi-envelope me-1"></i> @(Model.User?.Email ?? "Fără email asociat")</p>
+                        <div class="text-warning mt-1">
+                            <span class="fw-bold text-dark me-1">@Model.Rating.ToString("0.0")</span>
+                            <i class="bi bi-star-fill"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formularul de editare -->
+                <h5 class="fw-bold text-navy mb-3">Actualizare Date</h5>
+                <form asp-controller="Mechanic" asp-action="UpdateProfile" method="post" enctype="multipart/form-data">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Prenume</label>
+                            <input type="text" name="firstName" class="form-control" value="@Model.FirstName" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Nume</label>
+                            <input type="text" name="lastName" class="form-control" value="@Model.LastName" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Poză Profil (Opțional)</label>
+                        <input type="file" name="newPhoto" class="form-control" accept="image/*" />
+                        <div class="form-text">Dacă încarci o poză nouă, aceasta nu va fi vizibilă publicului până nu este aprobată de administrator.</div>
+                    </div>
+                    
+                    <div class="d-flex gap-3 align-items-center mt-4">
+                        <button type="submit" class="btn btn-primary fw-bold px-4">
+                            <i class="bi bi-save me-1"></i> Salvează Modificările
+                        </button>
+
+                        <a asp-controller="Profile" asp-action="ChangeEmail" class="btn btn-outline-secondary fw-bold px-4">
+                            <i class="bi bi-envelope-at me-1"></i> Schimbă Email
+                        </a>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>

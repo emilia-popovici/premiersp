@@ -1,0 +1,66 @@
+@model PremierAuto.ViewModels.ClientProfileViewModel
+
+@{
+    ViewData["Title"] = "Profilul Meu";
+}
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-5 bg-light">
+                    <h2 class="text-center text-navy fw-bold mb-4">Datele Tale</h2>
+                    <p class="text-center text-muted mb-4">Completează aceste detalii pentru a putea fi contactat în legătură cu programările tale.</p>
+                    
+                    <div class="text-center mb-4">
+                        @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
+                        {
+                            <img src="@Model.ProfilePictureUrl" alt="Poză profil" class="rounded-circle shadow-sm border border-3 border-white" style="width: 120px; height: 120px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <div class="rounded-circle bg-white d-inline-flex align-items-center justify-content-center shadow-sm border border-3 border-light" style="width: 120px; height: 120px;">
+                                <i class="bi bi-person text-secondary" style="font-size: 4rem;"></i>
+                            </div>
+                        }
+                    </div>
+
+                    <form asp-controller="Profile" asp-action="Index" method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label asp-for="FirstName" class="form-label fw-bold text-navy">Prenume</label>
+                            <input asp-for="FirstName" class="form-control" placeholder="ex: Ion" />
+                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="LastName" class="form-label fw-bold text-navy">Nume de familie</label>
+                            <input asp-for="LastName" class="form-control" placeholder="ex: Popescu" />
+                            <span asp-validation-for="LastName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="PhoneNumber" class="form-label fw-bold text-navy">Număr de Telefon</label>
+                            <input asp-for="PhoneNumber" class="form-control" placeholder="ex: 07xx xxx xxx" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-navy">Poză de profil (Opțional)</label>
+                            <input type="file" name="profilePicture" class="form-control" accept="image/*" />
+                        </div>
+
+                        <div class="d-grid gap-3 mt-4">
+                            <button type="submit" class="btn btn-primary-cta btn-lg fw-bold">
+                                <i class="bi bi-save me-2"></i> Salvează Profilul
+                            </button>
+                            
+                            <a asp-controller="Profile" asp-action="ChangeEmail" class="btn btn-outline-secondary btn-lg fw-bold">
+                                <i class="bi bi-envelope-at me-2"></i> Schimbă Email
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

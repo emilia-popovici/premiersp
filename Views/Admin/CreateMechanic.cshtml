@@ -1,0 +1,41 @@
+@model PremierAuto.Models.Mechanic
+@{
+    ViewData["Title"] = "Adaugă Mecanic";
+    Layout = "_AdminLayout";
+    var users = ViewBag.UnlinkedUsers as List<PremierAuto.Models.ApplicationUser>;
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 p-4">
+            <h3 class="text-navy fw-bold mb-3">Adaugă Mecanic Nou</h3>
+            <form asp-action="CreateMechanic" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Nume</label>
+                    <input asp-for="LastName" class="form-control" required />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="UserId" class="form-label fw-bold">Cont utilizator</label>
+                    <select asp-for="UserId" class="form-select">
+                        <option value="">-- Se poate conecta mai târziu --</option>
+                        @foreach (var user in users ?? new List<PremierAuto.Models.ApplicationUser>())
+                        {
+                            <option value="@user.Id">@(string.IsNullOrWhiteSpace(user.FirstName) ? user.Email : $"{user.FirstName} {user.LastName} ({user.Email})")</option>
+                        }
+                    </select>
+                    <div class="form-text">Contul ales va primi automat rolul Mecanic.</div>
+                    <span asp-validation-for="UserId" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Prenume</label>
+                    <input asp-for="FirstName" class="form-control" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Poză Profil (Opțional)</label>
+                    <input type="file" name="photo" class="form-control" accept="image/*" />
+                </div>
+                <button type="submit" class="btn btn-primary-cta fw-bold w-100">Salvează Mecanicul</button>
+            </form>
+        </div>
+    </div>
+</div>

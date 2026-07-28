@@ -1,0 +1,41 @@
+@model IEnumerable<PremierAuto.Models.Service>
+@{
+    ViewData["Title"] = "Gestionare Servicii";
+    Layout = "_AdminLayout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-navy fw-bold mb-0">Lista Serviciilor</h2>
+    <a asp-action="CreateService" class="btn btn-primary-cta fw-bold">+ Adaugă Serviciu Nou</a>
+</div>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger fw-bold">@TempData["ErrorMessage"]</div>
+}
+
+<table class="table table-hover bg-white shadow-sm rounded align-middle">
+    <thead class="bg-navy text-white">
+        <tr>
+            <th>Nume</th>
+            <th>Descriere</th>
+            <th>Durată</th>
+            <th>Preț</th>
+            <th>Acțiuni</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var s in Model)
+        {
+            <tr>
+                <td class="fw-bold">@s.Name</td>
+                <td class="small text-muted">@s.Description</td>
+                <td>@s.DurationMinutes min</td>
+                <td>@s.Price.ToString("0.00") MDL</td>
+                <td>
+                    <div class="d-flex gap-2"><a asp-action="EditService" asp-route-id="@s.Id" class="btn btn-sm btn-outline-primary fw-bold">Editează</a><form asp-action="DeleteService" method="post" onsubmit="return confirm('Sigur vrei să ștergi acest serviciu?');"><input type="hidden" name="id" value="@s.Id" /><button type="submit" class="btn btn-sm btn-danger fw-bold">Șterge</button></form></div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

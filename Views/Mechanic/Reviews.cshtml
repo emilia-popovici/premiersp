@@ -1,0 +1,48 @@
+@model IEnumerable<PremierAuto.Models.Review>
+
+@{
+    ViewData["Title"] = "Recenziile Clienților";
+}
+
+<div class="container py-5">
+    <div class="mb-4">
+        <h2 class="fw-bold text-navy"><i class="bi bi-star-fill text-warning me-2"></i> Recenziile Primite</h2>
+        <p class="text-muted">Aici poți vedea feedback-ul direct lăsat de clienții tăi.</p>
+    </div>
+
+    <div class="d-flex flex-column gap-3">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="card shadow-sm border-0 bg-white p-5 text-center text-muted">
+                <i class="bi bi-chat-square-text fs-1 mb-2 text-secondary"></i>
+                Nu există recenzii înregistrate încă.
+            </div>
+        }
+        else
+        {
+            @foreach (var review in Model)
+            {
+                <div class="card shadow-sm border-0 p-4 bg-white">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <!-- Numele real al clientului (neanonimizat) -->
+                            <h5 class="fw-bold text-navy mb-0">
+                                <i class="bi bi-person-circle me-1 text-primary"></i> 
+                                @(review.Appointment?.Client != null ? $"{review.Appointment.Client.FirstName} {review.Appointment.Client.LastName}" : "Client")
+                            </h5>
+                            <small class="text-muted">Serviciu: @(review.Appointment?.Service?.Name ?? "N/A")</small>
+                        </div>
+                        <div class="text-warning fs-5">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <i class="bi bi-star@(i <= review.Rating ? "-fill" : "")"></i>
+                            }
+                        </div>
+                    </div>
+                    <hr class="my-2" />
+                    <p class="mb-0 text-dark mt-2">@review.Comment</p>
+                </div>
+            }
+        }
+    </div>
+</div>

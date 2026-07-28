@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin PremierAuto</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <!-- Standard Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="~/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="~/favicon-16x16.png">
+    <link rel="shortcut icon" href="~/favicon.ico">
+
+    <!-- Apple Touch Icon (pentru iPhone/iPad) -->
+    <link rel="apple-touch-icon" sizes="180x180" href="~/apple-touch-icon.png">
+
+    <!-- Android / PWA Manifest -->
+    <link rel="manifest" href="~/site.webmanifest">
+</head>
+<body>
+    <div class="d-flex" style="min-height: 100vh;">
+        
+        <div class="bg-navy text-white p-3 d-flex flex-column shadow sticky-top vh-100" style="width: 280px; overflow-y: auto;">
+            <a href="/" class="d-flex align-items-center mb-4 text-white text-decoration-none">
+                <span class="fs-4 fw-bold">PREMIER SP AUTO</span>
+            </a>
+            <hr class="text-white-50">
+            <ul class="nav nav-pills flex-column mb-auto mt-2">
+                <li class="nav-item mb-2">
+                    <a asp-controller="Admin" asp-action="Index" class="nav-link text-white @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active bg-danger" : "")">
+                        <i class="bi bi-bar-chart-fill me-2"></i> Statistici & Dashboard
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a asp-controller="Admin" asp-action="UsersList" class="nav-link text-white @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["Action"]?.ToString() == "UsersList" ? "active bg-danger" : "")">
+                        <i class="bi bi-people-fill me-2"></i> Clienți
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a asp-controller="Admin" asp-action="Mechanics" class="nav-link text-white @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["Action"]?.ToString() == "Mechanics" ? "active bg-danger" : "")">
+                        <i class="bi bi-tools me-2"></i> Mecanici
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a asp-controller="Admin" asp-action="Services" class="nav-link text-white @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["Action"]?.ToString() == "Services" ? "active bg-danger" : "")">
+                        <i class="bi bi-wrench-adjustable-circle-fill me-2"></i> Servicii
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a asp-controller="Admin" asp-action="Appointments" class="nav-link text-white @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["Action"]?.ToString() == "Appointments" ? "active bg-danger" : "")">
+                        <i class="bi bi-calendar-check-fill me-2"></i> Programări
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a asp-controller="Admin" asp-action="AllChats" class="nav-link text-white @(ViewContext.RouteData.Values["Action"]?.ToString() == "AllChats" ? "active bg-danger" : "")">
+                        <i class="bi bi-chat-dots-fill me-2"></i> Chat-uri Active
+                    </a>
+                </li>
+            </ul>
+            <hr class="text-white-50">
+            <div class="mt-2">
+                <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                    <button type="submit" class="btn btn-outline-light w-100 fw-bold">
+                        <i class="bi bi-box-arrow-right me-2"></i> Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Conținutul Principal (Dreapta) -->
+        <div class="flex-grow-1 bg-light d-flex flex-column">
+            
+            <!-- Topbar (Bara de sus) -->
+            <nav class="navbar navbar-light bg-white border-bottom shadow-sm px-4 py-3">
+                <div class="container-fluid">
+                    <span class="navbar-brand mb-0 h3 fw-bold text-navy">Panou de Administrare</span>
+                </div>
+            </nav>
+
+            <!-- Zona unde se încarcă paginile efective -->
+            <main class="p-4 flex-grow-1">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show fw-bold shadow-sm" role="alert">
+                        @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                
+                @RenderBody()
+            </main>
+            
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,24 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using PremierAuto.Models
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<ul class="navbar-nav">
+@if (SignInManager.IsSignedIn(User))
+{
+    <li class="nav-item d-flex align-items-center">
+        <form id="logoutForm" class="form-inline m-0" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+            <button id="logout" type="submit" class="btn btn-outline-light btn-sm fw-bold">Deconectare</button>
+        </form>
+    </li>
+}
+else
+{
+    <li class="nav-item">
+        <a class="nav-link" id="login" asp-area="Identity" asp-page="/Account/Login">Autentificare</a>
+    </li>
+    <li class="nav-item ms-lg-2 d-flex align-items-center">
+        <a class="btn btn-primary-cta btn-sm mt-2 mt-lg-0 fw-bold" id="register" asp-area="Identity" asp-page="/Account/Register">Înregistrare</a>
+    </li>
+}
+</ul>

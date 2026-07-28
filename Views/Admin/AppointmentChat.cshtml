@@ -1,0 +1,94 @@
+@model PremierAuto.Models.Appointment
+
+@{
+    ViewData["Title"] = "Detalii & Chat Programare";
+    Layout = "_AdminLayout";
+    var messages = ViewBag.Messages as IEnumerable<PremierAuto.Models.AppointmentMessage>;
+}
+
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-navy fw-bold mb-0">Chat Programare #@Model.Id</h2>
+        <a asp-action="Appointments" class="btn btn-outline-secondary fw-bold">Înapoi la Programări</a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success fw-bold">@TempData["SuccessMessage"]</div>
+    }
+
+    <div class="row g-4">
+        <!-- COLOANA STÂNGA: Detalii Programare -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-steel border-0">
+                <div class="card-header bg-navy text-white fw-bold py-3">
+                    <i class="bi bi-info-circle me-2"></i> Detalii Mașină & Client
+                </div>
+                <div class="card-body">
+                    <p class="mb-1 text-muted small text-uppercase fw-bold">Client</p>
+                    <p class="fw-bold fs-5 mb-0">@Model.Client?.FirstName @Model.Client?.LastName</p>
+                    <p class="text-muted mb-4"><i class="bi bi-telephone"></i> @Model.Client?.PhoneNumber</p>
+
+                    <p class="mb-1 text-muted small text-uppercase fw-bold">Mașină</p>
+                    <p class="fw-bold mb-4">@Model.CarMake @Model.CarModel</p>
+
+                    <p class="mb-1 text-muted small text-uppercase fw-bold">Serviciu & Mecanic</p>
+                    <p class="fw-bold mb-1"><span class="badge bg-light text-dark border">@Model.Service?.Name</span></p>
+                    <p class="text-muted mb-4">Mecanic propus: @(Model.Mechanic != null ? Model.Mechanic.FirstName : "Nespecificat")</p>
+
+                    <p class="mb-1 text-muted small text-uppercase fw-bold">Data propusă</p>
+                    <p class="fw-bold text-navy">@Model.AppointmentDate.ToString("dd MMMM yyyy, HH:mm")</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLOANA DREAPTA: Fereastra de Chat -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-steel border-0 d-flex flex-column" style="height: 600px;">
+                <div class="card-header bg-light fw-bold py-3 border-bottom">
+                    <i class="bi bi-chat-text me-2 text-navy"></i> Conversație cu Clientul
+                </div>
+                
+                <!-- Istoric Mesaje -->
+                <div class="card-body overflow-auto bg-white p-4" style="flex-grow: 1;">
+                    @if (messages != null && messages.Any())
+                    {
+                        foreach (var msg in messages)
+                        {
+                            <div class="d-flex mb-3 @(msg.IsAdmin ? "justify-content-end" : "justify-content-start")">
+                                <div class="p-3 rounded shadow-sm" 
+                                     style="max-width: 75%; @(msg.IsAdmin ? "background-color: var(--navy); color: white; border-bottom-right-radius: 0 !important;" : "background-color: var(--paper); border: 1px solid var(--steel); border-bottom-left-radius: 0 !important;")">
+                                    <div class="small fw-bold mb-1 opacity-75">
+                                        @(msg.IsAdmin ? "Tu (Admin)" : (msg.Sender?.FirstName ?? "Client")) 
+                                        &bull; @msg.CreatedAt.ToString("HH:mm, dd/MM")
+                                    </div>
+                                    <p class="mb-0">@msg.Text</p>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted h-100 d-flex flex-column justify-content-center">
+                            <i class="bi bi-chat-square-dots fs-1 mb-2"></i>
+                            <p>Nu există niciun mesaj. Începe conversația propunând o altă oră sau mecanic.</p>
+                        </div>
+                    }
+                </div>
+
+                <!-- Input pentru a trimite un mesaj nou -->
+                <div class="card-footer bg-light border-top p-3">
+                    <form asp-action="SendAppointmentMessage" method="post">
+                        <input type="hidden" name="appointmentId" value="@Model.Id" />
+                        <div class="input-group">
+                            <input type="text" name="text" class="form-control form-control-lg" placeholder="Scrie un mesaj clientului..." required autocomplete="off" />
+                            <button class="btn btn-primary-cta px-4 fw-bold" type="submit">
+                                <i class="bi bi-send-fill"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

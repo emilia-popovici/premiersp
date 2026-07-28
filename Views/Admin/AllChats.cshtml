@@ -1,0 +1,54 @@
+@model IEnumerable<PremierAuto.Models.Appointment>
+
+@{
+    ViewData["Title"] = "Chat-uri Active";
+    Layout = "_AdminLayout";
+}
+
+<div class="container mt-4 mb-5">
+    <h2 class="text-navy fw-bold mb-4">Centru Mesaje / Chat-uri</h2>
+
+    <div class="card shadow-sm border-0 bg-white">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-navy text-white">
+                        <tr>
+                            <th class="py-3 px-3">Client</th>
+                            <th class="py-3">Mașină & Serviciu</th>
+                            <th class="py-3">Data Programării</th>
+                            <th class="py-3 text-center">Acțiune</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr><td colspan="4" class="text-center text-muted py-4">Nu există nicio programare activă pentru chat.</td></tr>
+                        }
+                        @foreach (var app in Model)
+                        {
+                            <tr>
+                                <td class="px-3">
+                                    <span class="fw-bold">@app.Client?.FirstName @app.Client?.LastName</span><br />
+                                    <small class="text-muted"><i class="bi bi-telephone"></i> @app.Client?.PhoneNumber</small>
+                                </td>
+                                <td>
+                                    <span class="fw-bold">@app.CarMake @app.CarModel</span><br />
+                                    <span class="badge bg-light text-dark border">@app.Service?.Name</span>
+                                </td>
+                                <td>
+                                    @app.AppointmentDate.ToString("dd/MM/yyyy HH:mm")
+                                </td>
+                                <td class="text-center">
+                                    <a asp-controller="Admin" asp-action="AppointmentChat" asp-route-id="@app.Id" class="btn btn-sm btn-primary-cta fw-bold">
+                                        <i class="bi bi-chat-text me-1"></i> Deschide Conversația
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

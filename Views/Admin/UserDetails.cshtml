@@ -1,0 +1,79 @@
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@model PremierAuto.Models.ApplicationUser
+@{
+    ViewData["Title"] = "Statistici Utilizator";
+    var profile = ViewBag.ClientProfile as PremierAuto.Models.ClientProfile;
+    var appointments = ViewBag.Appointments as List<PremierAuto.Models.Appointment>;
+}
+
+<div class="container py-5">
+    <div class="mb-4">
+        <a asp-action="UsersList" class="btn btn-outline-secondary btn-sm fw-bold mb-3">
+            <i class="bi bi-arrow-left me-1"></i> Înapoi la listă
+        </a>
+        <h2 class="fw-bold text-navy">Profil și Statistici: <br /> @Model.FirstName @Model.LastName</h2>
+    </div>
+
+    <!-- Informații Personale -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-4 bg-white h-100">
+                <h5 class="fw-bold text-navy mb-3"><i class="bi bi-person-badge me-2"></i> Date Personale</h5>
+                <p class="mb-2"><strong>Nume:</strong> @(profile != null ? $"{profile.FirstName} {profile.LastName}" : "Nespecificat")</p>
+                <p class="mb-2"><strong>Telefon:</strong> @(profile?.PhoneNumber ?? "Fără număr")</p>
+                <p class="mb-0"><strong>Email:</strong> <span class="text-primary fw-bold">@ViewBag.UserEmail</span></p>
+            </div>
+        </div>
+
+        <!-- Carduri Statistice Principale -->
+        <div class="col-md-8">
+            <div class="row g-3">
+                <div class="col-sm-6">
+                    <div class="card border-0 shadow-sm p-3 bg-light border-start border-4 border-success">
+                        <small class="text-muted fw-bold">TOTAL ACHITAT</small>
+                        <h3 class="fw-bold text-success mb-0">@ViewBag.TotalPaid RON</h3>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="card border-0 shadow-sm p-3 bg-light border-start border-4 border-primary">
+                        <small class="text-muted fw-bold">PROGRAMĂRI FINALIZATE</small>
+                        <h3 class="fw-bold text-navy mb-0">@ViewBag.CompletedCount</h3>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="card border-0 shadow-sm p-3 bg-light border-start border-4 border-warning">
+                        <small class="text-muted fw-bold">RATING MEDIU OFERIT</small>
+                        <h3 class="fw-bold text-dark mb-0">@(((double)ViewBag.AverageRating).ToString("0.0")) <i class="bi bi-star-fill text-warning fs-5"></i></h3>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="card border-0 shadow-sm p-3 bg-light border-start border-4 border-info">
+                        <small class="text-muted fw-bold">ULTIMA FINALIZARE</small>
+                        <h6 class="fw-bold text-dark mb-0 mt-2">
+                            @(ViewBag.LastCompletedDate != null ? ((DateTime)ViewBag.LastCompletedDate).ToString("dd.MM.yyyy HH:mm") : "Niciuna")
+                        </h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informații Suplimentare (Mecanic & Serviciu favorit) -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm p-4 bg-white">
+                <h6 class="text-muted fw-bold">Mecanicul preferat (frecventat cel mai des)</h6>
+                <h4 class="fw-bold text-navy mb-0"><i class="bi bi-wrench me-2"></i> @ViewBag.FavoriteMechanic</h4>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm p-4 bg-white">
+                <h6 class="text-muted fw-bold">Serviciul cel mai folosit</h6>
+                <h4 class="fw-bold text-navy mb-0"><i class="bi bi-gear-wide-connected me-2"></i> @ViewBag.MostUsedService</h4>
+            </div>
+        </div>
+    </div>
+</div>

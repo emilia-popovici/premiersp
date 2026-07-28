@@ -1,0 +1,608 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using PremierAuto.Data;
+using PremierAuto.Models;
+using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
+
+namespace PremierAuto.Controllers
+{
+    [Authorize(Roles = "Admin")]
+    public class AdminController : Controller
+    {
+        private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+
+        public AdminController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        {
+            _context = context;
+            _userManager = userManager;
+        }
+
+        // 1. DASHBOARD & STATISTICI
+        public async Task<IActionResult> Index()
+        {
+            int pendingAppointments = await _context.Appointments
+                .Where(a => a.Status == AppointmentStatus.Pending)
+                .CountAsync();
+            ViewBag.PendingAppointmentsCount = pendingAppointments;
+            
+            var topServices = await _context.Appointments
+                .Include(a => a.Service)
+                .GroupBy(a => a.Service.Name)
+                .Select(g => new { ServiceName = g.Key, Count = g.Count() })
+                .OrderByDescending(x => x.Count)
+                .Take(5)
+                .ToListAsync();
+
+            ViewBag.TopServices = topServices;
+
+            // --- DISTRIBUȚIA SERVICIILOR ÎN DASHBOARD ---
+            var services = await _context.Services.ToListAsync();
+            var appointments = await _context.Appointments
+                .Include(a => a.Service)
+                .Where(a => a.Status != AppointmentStatus.Canceled)
+                .ToListAsync();
+
+            var totalAppointments = appointments.Count;
+
+            var distributionData = services.Select(s => {
+                int countForService = appointments.Count(a => a.ServiceId == s.Id);
+                
+                double percentage = 0;
+                if (totalAppointments > 0)
+                {
+                    percentage = ((double)countForService / (double)totalAppointments) * 100;
+                }
+                
+                return new {
+                    ServiceName = s.Name,
+                    Description = s.Description,
+                    Price = s.Price,
+                    Count = countForService,
+                    Percentage = Math.Round(percentage, 1),
+                    TotalRevenue = appointments.Where(a => a.ServiceId == s.Id && a.Status == AppointmentStatus.Done).Sum(a => s.Price)
+                };
+            }).OrderByDescending(x => x.Count).ToList();
+
+            ViewBag.TotalAppointments = totalAppointments;
+            ViewBag.DistributionData = distributionData;
+            return View();
+        }
+
+        // 2. GESTIONARE PROGRAMARI
+        public async Task<IActionResult> Appointments(string searchString, string mechanicId, int? serviceId, DateTime? dateFilter, DateTime? weekDate)
+        {
+            var query = _context.Appointments
+                .Include(a => a.Client)
+                .Include(a => a.Mechanic)
+                .Include(a => a.Service)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                query = query.Where(a => 
+                    (a.Client != null && a.Client.FirstName.Contains(searchString)) ||
+                    (a.Client != null && a.Client.LastName.Contains(searchString)) ||
+                    (a.Client != null && a.Client.Email.Contains(searchString)) ||
+                    a.CarMake.Contains(searchString) ||
+                    a.CarModel.Contains(searchString)
+                );
+            }
+
+            if (!string.IsNullOrEmpty(mechanicId) && int.TryParse(mechanicId, out int parsedMechId))
+            {
+                query = query.Where(a => a.MechanicId == parsedMechId);
+            }
+
+            if (serviceId.HasValue)
+            {
+                query = query.Where(a => a.ServiceId == serviceId.Value);
+            }
+
+            if (dateFilter.HasValue)
+            {
+                query = query.Where(a => a.AppointmentDate.Date == dateFilter.Value.Date);
+            }
+
+            var appointments = await query.OrderByDescending(a => a.AppointmentDate).ToListAsync();
+
+            var targetDate = weekDate ?? DateTime.Today;
+            int diff = (7 + (targetDate.DayOfWeek - DayOfWeek.Monday)) % 7;
+            var startOfWeek = targetDate.AddDays(-diff).Date;
+            var endOfWeek = startOfWeek.AddDays(7).Date;
+
+            ViewBag.Mechanics = await _context.Mechanics.ToListAsync();
+            ViewBag.Services = await _context.Services.ToListAsync();
+            ViewBag.CurrentSearch = searchString;
+            ViewBag.SelectedMechanic = mechanicId;
+            ViewBag.SelectedService = serviceId;
+            ViewBag.SelectedDate = dateFilter?.ToString("yyyy-MM-dd");
+            
+            ViewBag.StartOfWeek = startOfWeek;
+            ViewBag.EndOfWeek = endOfWeek.AddDays(-1);
+            ViewBag.PrevWeekDate = startOfWeek.AddDays(-7).ToString("yyyy-MM-dd");
+            ViewBag.NextWeekDate = startOfWeek.AddDays(7).ToString("yyyy-MM-dd");
+
+            return View(appointments);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangeAppointmentStatus(int id, AppointmentStatus status)
+        {
+            var appointment = await _context.Appointments.FindAsync(id);
+            if (appointment != null)
+            {
+                appointment.Status = status;
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Statusul programării a fost actualizat!";
+            }
+            return RedirectToAction(nameof(Appointments));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RescheduleAppointment(int id, DateTime newDate)
+        {
+            var appointment = await _context.Appointments.FindAsync(id);
+            if (appointment != null)
+            {
+                appointment.AppointmentDate = newDate;
+                appointment.Status = AppointmentStatus.Rescheduled;
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Programarea a fost reprogramată.";
+            }
+            return RedirectToAction(nameof(Appointments));
+        }
+
+        // --- 3. CHAT PENTRU PROGRAMĂRI ---
+
+        [HttpGet]
+        public async Task<IActionResult> AppointmentChat(int id)
+        {
+            var appointment = await _context.Appointments
+                .Include(a => a.Client)
+                .Include(a => a.Mechanic)
+                .Include(a => a.Service)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (appointment == null) return NotFound();
+
+            var messages = await _context.AppointmentMessages
+                .Include(m => m.Sender)
+                .Where(m => m.AppointmentId == id)
+                .OrderBy(m => m.CreatedAt)
+                .ToListAsync();
+
+            ViewBag.Messages = messages;
+            return View(appointment);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendAppointmentMessage(int appointmentId, string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return RedirectToAction(nameof(AppointmentChat), new { id = appointmentId });
+            }
+
+            var adminUser = await _userManager.GetUserAsync(User);
+
+            var message = new AppointmentMessage
+            {
+                AppointmentId = appointmentId,
+                SenderId = adminUser.Id,
+                IsAdmin = true,
+                Text = text,
+                CreatedAt = DateTime.Now
+            };
+
+            _context.AppointmentMessages.Add(message);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Mesajul a fost trimis clientului.";
+            return RedirectToAction(nameof(AppointmentChat), new { id = appointmentId });
+        }
+
+        // --- 4. GESTIONARE MECANICI (CRUD) ---
+
+        public async Task<IActionResult> Mechanics()
+        {
+            var mechanics = await _context.Mechanics
+                .Include(m => m.User)
+                .ToListAsync();
+
+            await PopulateAvailableUsers(mechanics);
+            return View(mechanics);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CreateMechanic()
+        {
+            await PopulateAvailableUsers();
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateMechanic(Mechanic model, IFormFile? photo)
+        {
+            ModelState.Remove(nameof(model.PhotoUrl));
+            ModelState.Remove(nameof(model.ProfilePictureUrl));
+
+            if (ModelState.IsValid)
+            {
+                if (photo != null && photo.Length > 0)
+                {
+                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(photo.FileName);
+                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", fileName);
+
+                    var directory = Path.GetDirectoryName(filePath);
+                    if (!Directory.Exists(directory))
+                    {
+                        Directory.CreateDirectory(directory);
+                    }
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await photo.CopyToAsync(stream);
+                    }
+                    model.PhotoUrl = "/uploads/" + fileName;
+                }
+                else
+                {
+                    model.PhotoUrl = "/images/default-avatar.png";
+                }
+
+                model.ProfilePictureUrl = model.PhotoUrl;
+                model.IsPictureApproved = true;
+
+                if (!string.IsNullOrEmpty(model.UserId))
+                {
+                    var user = await _userManager.FindByIdAsync(model.UserId);
+                    if (user == null || await _context.Mechanics.AnyAsync(m => m.UserId == model.UserId))
+                    {
+                        ModelState.AddModelError(nameof(model.UserId), "Alege un cont disponibil pentru mecanic.");
+                        await PopulateAvailableUsers();
+                        return View(model);
+                    }
+
+                    if (!await _userManager.IsInRoleAsync(user, "Mecanic"))
+                        await _userManager.AddToRoleAsync(user, "Mecanic");
+
+                    // Ștergem profilul de client dacă acesta exista pentru acest utilizator
+                    var clientProf = await _context.ClientProfiles.FirstOrDefaultAsync(cp => cp.UserId == model.UserId);
+                    if (clientProf != null)
+                    {
+                        _context.ClientProfiles.Remove(clientProf);
+                    }
+                }
+
+                _context.Mechanics.Add(model);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Mecanicul a fost adăugat cu succes!";
+                return RedirectToAction(nameof(Mechanics));
+            }
+            
+            await PopulateAvailableUsers();
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteMechanic(int id)
+        {
+            var mechanic = await _context.Mechanics.FindAsync(id);
+            if (mechanic != null)
+            {
+                _context.Mechanics.Remove(mechanic);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Mecanicul a fost șters!";
+            }
+            return RedirectToAction(nameof(Mechanics));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LinkMechanicUser(int mechanicId, string userId)
+        {
+            var mechanic = await _context.Mechanics.FindAsync(mechanicId);
+            var user = string.IsNullOrEmpty(userId) ? null : await _userManager.FindByIdAsync(userId);
+            var alreadyLinked = !string.IsNullOrEmpty(userId) && await _context.Mechanics.AnyAsync(m => m.UserId == userId && m.Id != mechanicId);
+            
+            if (mechanic != null && user != null && !alreadyLinked)
+            {
+                mechanic.UserId = userId;
+
+                // Dacă utilizatorul avea profil de client, îl ștergem pentru că devine mecanic
+                var clientProf = await _context.ClientProfiles.FirstOrDefaultAsync(cp => cp.UserId == userId);
+                if (clientProf != null)
+                {
+                    _context.ClientProfiles.Remove(clientProf);
+                }
+
+                await _context.SaveChangesAsync();
+
+                if (!await _userManager.IsInRoleAsync(user, "Mecanic"))
+                {
+                    await _userManager.AddToRoleAsync(user, "Mecanic");
+                }
+
+                TempData["SuccessMessage"] = "Contul a fost legat de mecanic și i s-a atribuit rolul de Mecanic!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Contul ales nu este disponibil.";
+            }
+                
+            return RedirectToAction(nameof(Mechanics));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UnlinkMechanicUser(int mechanicId)
+        {
+            var mechanic = await _context.Mechanics.FindAsync(mechanicId);
+            if (mechanic != null)
+            {
+                mechanic.UserId = null;
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Contul a fost deconectat de la mecanic.";
+            }
+            return RedirectToAction(nameof(Mechanics));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApprovePicture(int id)
+        {
+            var mechanic = await _context.Mechanics.FindAsync(id);
+            if (mechanic != null)
+            {
+                if (!string.IsNullOrEmpty(mechanic.ProfilePictureUrl) && mechanic.ProfilePictureUrl != mechanic.PhotoUrl)
+                {
+                    mechanic.PhotoUrl = mechanic.ProfilePictureUrl; 
+                }
+                
+                mechanic.ProfilePictureUrl = null;              
+                mechanic.IsPictureApproved = true;              
+
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Poză aprobată și actualizată cu succes!";
+            }
+            return RedirectToAction(nameof(Mechanics));
+        }
+
+        // --- 5. GESTIONARE SERVICII (CRUD) ---
+
+        public async Task<IActionResult> Services()
+        {
+            var services = await _context.Services.OrderBy(s => s.Name).ToListAsync();
+            return View(services);
+        }
+
+        [HttpGet]
+        public IActionResult CreateService()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateService(Service model)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Services.Add(model);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Serviciul a fost adăugat cu succes!";
+                return RedirectToAction(nameof(Services));
+            }
+            return View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditService(int id)
+        {
+            var service = await _context.Services.FindAsync(id);
+            return service == null ? NotFound() : View(service);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditService(int id, Service model)
+        {
+            if (id != model.Id) return NotFound();
+            if (!ModelState.IsValid) return View(model);
+
+            _context.Services.Update(model);
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Serviciul a fost actualizat.";
+            return RedirectToAction(nameof(Services));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteService(int id)
+        {
+            var service = await _context.Services.FindAsync(id);
+            if (service != null)
+            {
+                var inUse = await _context.Appointments.AnyAsync(a => a.ServiceId == id);
+                if (inUse)
+                {
+                    TempData["ErrorMessage"] = "Acest serviciu are programări asociate și nu poate fi șters.";
+                    return RedirectToAction(nameof(Services));
+                }
+
+                _context.Services.Remove(service);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Serviciul a fost șters!";
+            }
+            return RedirectToAction(nameof(Services));
+        }
+
+        private async Task PopulateAvailableUsers(IEnumerable<Mechanic>? existingMechanics = null)
+        {
+            var linkedUserIds = (existingMechanics ?? await _context.Mechanics.ToListAsync())
+                .Where(m => !string.IsNullOrEmpty(m.UserId)).Select(m => m.UserId!).ToHashSet();
+            var adminIds = (await _userManager.GetUsersInRoleAsync("Admin")).Select(u => u.Id).ToHashSet();
+            ViewBag.UnlinkedUsers = await _userManager.Users
+                .Where(u => !linkedUserIds.Contains(u.Id) && !adminIds.Contains(u.Id))
+                .OrderBy(u => u.FirstName).ThenBy(u => u.LastName).ThenBy(u => u.Email)
+                .ToListAsync();
+        }
+
+        public async Task<IActionResult> AllChats()
+        {
+            var appointments = await _context.Appointments
+                .Include(a => a.Client)
+                .Include(a => a.Service)
+                .Include(a => a.Mechanic)
+                .Where(a => a.Status == AppointmentStatus.Pending || 
+                            a.Status == AppointmentStatus.Accepted || 
+                            a.Status == AppointmentStatus.Rescheduled)
+                .OrderByDescending(a => a.AppointmentDate)
+                .ToListAsync();
+
+            return View(appointments);
+        }
+
+        public async Task<IActionResult> ServiceDistribution()
+        {
+            return RedirectToAction(nameof(Index));
+        }
+
+        // --- 6. GESTIONARE CLIENȚI ȘI STATISTICI ---
+
+        [HttpGet]
+        public async Task<IActionResult> UsersList()
+        {
+            // 1. Identificăm ID-urile utilizatorilor care sunt mecanici
+            var mechanicUserIds = await _context.Mechanics
+                .Where(m => m.UserId != null)
+                .Select(m => m.UserId!)
+                .ToListAsync();
+
+            // 2. Curățare automată: ștergem din ClientProfiles orice mecanic rămas din greșeală
+            var misplacedProfiles = await _context.ClientProfiles
+                .Where(cp => mechanicUserIds.Contains(cp.UserId))
+                .ToListAsync();
+
+            if (misplacedProfiles.Any())
+            {
+                _context.ClientProfiles.RemoveRange(misplacedProfiles);
+                await _context.SaveChangesAsync();
+            }
+
+            // 3. Selectăm doar clienții reali (excluzând mecanicii)
+            var clientUsers = await (from user in _context.Users
+                                    join profile in _context.ClientProfiles on user.Id equals profile.UserId
+                                    where !mechanicUserIds.Contains(user.Id)
+                                    orderby user.Email
+                                    select new ClientUserViewModel
+                                    {
+                                        UserId = user.Id,
+                                        Email = user.Email,
+                                        FirstName = profile.FirstName,
+                                        LastName = profile.LastName,
+                                        PhoneNumber = profile.PhoneNumber,
+                                        EmailConfirmed = user.EmailConfirmed
+                                    }).ToListAsync();
+
+            return View(clientUsers);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> UserDetails(string userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return NotFound("Utilizatorul nu a fost găsit.");
+
+            var clientProfile = await _context.ClientProfiles.FirstOrDefaultAsync(c => c.UserId == userId);
+            
+            if (clientProfile == null)
+            {
+                TempData["ErrorMessage"] = "Acest utilizator nu deține un profil de client.";
+                return RedirectToAction(nameof(UsersList));
+            }
+
+            var appointments = await _context.Appointments
+                .Include(a => a.Mechanic)
+                .Include(a => a.Service)
+                .Include(a => a.Review)
+                .Where(a => a.ClientId == user.Id || a.ClientId == userId)
+                .ToListAsync();
+
+            // A. Mecanicul preferat
+            var favoriteMechanic = appointments
+                .Where(a => a.Mechanic != null)
+                .GroupBy(a => $"{a.Mechanic.FirstName} {a.Mechanic.LastName}")
+                .OrderByDescending(g => g.Count())
+                .Select(g => g.Key)
+                .FirstOrDefault() ?? "Niciunul";
+
+            // B. Număr programări finalizate
+            int completedAppointmentsCount = appointments.Count(a => a.Status == AppointmentStatus.Done);
+
+            // C. Rating-ul mediu oferit
+            var ratingsList = appointments
+                .Where(a => a.Review != null)
+                .Select(a => (double)a.Review.Rating)
+                .ToList();
+
+            double averageRatingGiven = ratingsList.Any() ? ratingsList.Average() : 0;
+
+            // D. Serviciul cel mai folosit
+            string mostUsedService = appointments
+                .Where(a => a.Service != null)
+                .GroupBy(a => a.Service.Name)
+                .OrderByDescending(g => g.Count())
+                .Select(g => g.Key)
+                .FirstOrDefault() ?? "Niciunul";
+
+            // E. Total achitat
+            decimal totalPaid = appointments
+                .Where(a => a.Status == AppointmentStatus.Done && a.Service != null)
+                .Sum(a => a.Service.Price);
+
+            // F. Ultima finalizare
+            var lastCompletedDate = appointments
+                .Where(a => a.Status == AppointmentStatus.Done)
+                .OrderByDescending(a => a.AppointmentDate)
+                .Select(a => (DateTime?)a.AppointmentDate)
+                .FirstOrDefault();
+
+            ViewBag.ClientProfile = clientProfile;
+            ViewBag.UserEmail = user.Email;
+            ViewBag.FavoriteMechanic = favoriteMechanic;
+            ViewBag.CompletedCount = completedAppointmentsCount;
+            ViewBag.AverageRating = averageRatingGiven;
+            ViewBag.MostUsedService = mostUsedService;
+            ViewBag.TotalPaid = totalPaid;
+            ViewBag.LastCompletedDate = lastCompletedDate;
+            ViewBag.Appointments = appointments;
+
+            return View(user);
+        }
+    }
+
+    public class ClientUserViewModel
+    {
+        public string UserId { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; } = string.Empty;
+        public bool EmailConfirmed { get; set; }
+    }
+}

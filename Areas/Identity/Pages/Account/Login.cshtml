@@ -1,0 +1,101 @@
+﻿@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Autentificare";
+}
+
+<!-- Fundal modern cu degrade fin și spațiu generos -->
+<div class="container-fluid d-flex justify-content-center align-items-center py-5" style="min-height: 85vh; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);">
+    <div class="col-md-7 col-lg-5 col-xl-4">
+        
+        <!-- Card principal aerisit și elegant -->
+        <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5 bg-white">
+            
+            <div class="text-center mb-4 pt-2">
+                <h3 class="fw-bold text-navy mb-2" style="font-size: 1.75rem;">Salut din nou!</h3>
+                <p class="text-muted" style="font-size: 0.95rem;">Intră în contul tău Premier SP Auto</p>
+            </div>
+
+            <!-- Formularul principal pentru Email și Parolă -->
+            <form id="account" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger small mb-3 text-center" role="alert"></div>
+
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.Email" class="form-control rounded-3 border-light bg-light shadow-none" autocomplete="username" aria-required="true" placeholder="nume@exemplu.com" style="height: 56px;" />
+                    <label asp-for="Input.Email" class="text-muted">Adresă Email</label>
+                    <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.Password" class="form-control rounded-3 border-light bg-light shadow-none" autocomplete="current-password" aria-required="true" placeholder="Parolă" style="height: 56px;" />
+                    <label asp-for="Input.Password" class="text-muted">Parolă</label>
+                    <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4 px-1">
+                    <div class="form-check">
+                        <input class="form-check-input rounded-1" asp-for="Input.RememberMe" style="width: 1.1em; height: 1.1em;" />
+                        <label class="form-check-label text-muted small ms-1" asp-for="Input.RememberMe">Ține-mă minte</label>
+                    </div>
+                    <a id="forgot-password" asp-page="./ForgotPassword" class="small text-decoration-none fw-semibold text-primary">Ai uitat parola?</a>
+                </div>
+
+                <!-- Buton Principal de Autentificare -->
+                <button id="login-submit" type="submit" class="w-100 btn py-3 fw-bold rounded-3 shadow-sm mb-4 text-white" style="background-color: #ff6b35; border: none; font-size: 1rem;">
+                    Conectare
+                </button>
+            </form> <!-- AICI SE ÎNCHEIE FORMULARUL PRINCIPAL -->
+
+            <!-- Separator elegant -->
+            <div class="position-relative text-center mb-4">
+                <hr class="text-muted opacity-25">
+                <span class="position-absolute top-50 start-50 translate-middle px-3 bg-white text-muted small fw-semibold" style="font-size: 0.75rem; letter-spacing: 1px;">SAU CONTINUĂ CU</span>
+            </div>
+
+            <!-- Formular separat pentru Logarea Externa (Google / Facebook) -->
+            @{
+                if ((Model.ExternalLogins?.Count ?? 0) == 0)
+                {
+                    <div class="text-center text-muted small my-3">
+                        <em>Niciun furnizor extern configurat momentan.</em>
+                    </div>
+                }
+                else
+                {
+                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                        <div class="d-grid gap-3 mb-4">
+                            @foreach (var provider in Model.ExternalLogins!)
+                            {
+                                @if (provider.Name == "Google")
+                                {
+                                    <button type="submit" class="btn btn-light border py-2.5 px-3 rounded-3 d-flex align-items-center justify-content-center gap-2 fw-semibold text-dark shadow-sm bg-white" style="border-color: #cbd5e1 !important;" name="provider" value="@provider.Name" title="Conectează-te cu @provider.DisplayName">
+                                        <i class="bi bi-google text-danger fs-5"></i> 
+                                        <span class="small">Google</span>
+                                    </button>
+                                }
+                                else if (provider.Name == "Facebook")
+                                {
+                                    <button type="submit" class="btn py-2.5 px-3 rounded-3 d-flex align-items-center justify-content-center gap-2 fw-semibold text-white shadow-sm" style="background-color: #1877f2;" name="provider" value="@provider.Name" title="Conectează-te cu @provider.DisplayName">
+                                        <i class="bi bi-facebook fs-5"></i> 
+                                        <span class="small">Facebook</span>
+                                    </button>
+                                }
+                            }
+                        </div>
+                    </form>
+                }
+            }
+
+            <!-- Link Inregistrare -->
+            <div class="text-center pt-2">
+                <p class="text-muted small mb-0">Nu ai un cont? <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="fw-bold text-decoration-none text-primary">Creează unul acum</a></p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

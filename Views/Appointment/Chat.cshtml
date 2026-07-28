@@ -1,0 +1,86 @@
+@model PremierAuto.Models.Appointment
+
+@{
+    ViewData["Title"] = "Detalii & Chat Programare";
+    var messages = ViewBag.Messages as IEnumerable<PremierAuto.Models.AppointmentMessage>;
+}
+
+<section class="section-space pb-5">
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title mb-0">Programare #@Model.Id</h2>
+            <a asp-action="Index" class="btn btn-outline-secondary fw-bold">Înapoi la Programările mele</a>
+        </div>
+
+        <div class="row g-4">
+            <!-- Detalii Programare -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-0 bg-white">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold text-navy mb-4"><i class="bi bi-car-front-fill me-2"></i> Datele tale</h5>
+                        
+                        <p class="mb-1 text-muted small text-uppercase fw-bold">Mașină</p>
+                        <p class="fw-bold mb-3">@Model.CarMake @Model.CarModel</p>
+
+                        <p class="mb-1 text-muted small text-uppercase fw-bold">Serviciu solicitat</p>
+                        <p class="fw-bold mb-3"><span class="badge bg-light text-dark border">@Model.Service?.Name</span></p>
+                        
+                        <p class="mb-1 text-muted small text-uppercase fw-bold">Data programării</p>
+                        <p class="fw-bold text-navy mb-0">@Model.AppointmentDate.ToString("dd MMMM yyyy, HH:mm")</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fereastra de Chat -->
+            <div class="col-lg-8">
+                <div class="card shadow-sm border-0 d-flex flex-column bg-white" style="height: 600px;">
+                    <div class="card-header bg-white fw-bold py-3 border-bottom d-flex align-items-center">
+                        <i class="bi bi-chat-text me-2 text-accent"></i> 
+                        <span>Discuție cu Premier SP Auto</span>
+                    </div>
+                    
+                    <!-- Istoric Mesaje -->
+                    <div class="card-body overflow-auto p-4" style="flex-grow: 1; background-color: var(--paper);">
+                        @if (messages != null && messages.Any())
+                        {
+                            foreach (var msg in messages)
+                            {
+                                <!-- Inversăm direcția: Admin e stânga, Client e dreapta -->
+                                <div class="d-flex mb-3 @(msg.IsAdmin ? "justify-content-start" : "justify-content-end")">
+                                    <div class="p-3 rounded shadow-sm" 
+                                         style="max-width: 75%; @(msg.IsAdmin ? "background-color: white; border: 1px solid var(--steel); border-bottom-left-radius: 0 !important;" : "background-color: var(--circuit); color: white; border-bottom-right-radius: 0 !important;")">
+                                        <div class="small fw-bold mb-1 opacity-75">
+                                            @(msg.IsAdmin ? "Admin Premier SP Auto" : "Tu") 
+                                            &bull; @msg.CreatedAt.ToString("HH:mm, dd/MM")
+                                        </div>
+                                        <p class="mb-0">@msg.Text</p>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted h-100 d-flex flex-column justify-content-center">
+                                <i class="bi bi-chat-square-dots fs-1 mb-2 opacity-50"></i>
+                                <p>Ai întrebări suplimentare sau vrei să modifici ceva?<br />Lasă un mesaj aici și echipa noastră îți va răspunde.</p>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Trimite mesaj nou -->
+                    <div class="card-footer bg-white border-top p-3">
+                        <form asp-action="SendMessage" method="post">
+                            <input type="hidden" name="appointmentId" value="@Model.Id" />
+                            <div class="input-group">
+                                <input type="text" name="text" class="form-control form-control-lg" placeholder="Scrie un mesaj..." required autocomplete="off" />
+                                <button class="btn btn-primary-cta px-4 fw-bold" type="submit">
+                                    Trimite <i class="bi bi-send-fill ms-1"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

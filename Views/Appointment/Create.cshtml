@@ -1,0 +1,147 @@
+@model PremierAuto.ViewModels.AppointmentCreateViewModel
+
+@{
+    ViewData["Title"] = "Programează-te";
+    var minDate = DateTime.Today.ToString("yyyy-MM-dd");
+}
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-5 bg-light">
+                    <h2 class="text-center text-navy fw-bold mb-4">Creează o programare nouă</h2>
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger fw-bold"></div>
+
+                    <!-- Am adăugat id="appointmentForm" pentru validarea din JavaScript -->
+                    <form asp-action="Create" method="post" id="appointmentForm">
+                        <div class="mb-3">
+                            <label asp-for="ServiceId" class="form-label fw-bold text-navy">Alege Serviciul</label>
+                            <select asp-for="ServiceId" asp-items="Model.Services" class="form-select" required>
+                                <option value="">-- Selectează un serviciu --</option>
+                            </select>
+                            <span asp-validation-for="ServiceId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="MechanicId" class="form-label fw-bold text-navy">Alege mecanicul</label>
+                            <!-- Am adăugat id="mechanicSelect" pentru a ști când își schimbă valoarea -->
+                            <select asp-for="MechanicId" asp-items="Model.Mechanics" class="form-select" id="mechanicSelect" required>
+                                <option value="">-- Selectează un mecanic --</option>
+                            </select>
+                            <span asp-validation-for="MechanicId" class="text-danger"></span>
+                        </div>
+
+                        <!-- Secțiunea Date & Time modificată pentru AJAX -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold text-navy">Data programării</label>
+                                <input type="date" id="appointmentDate" name="selectedDate" class="form-control" min="@minDate" required />
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-navy">Ora programării</label>
+                            <!-- Aici vor apărea butoanele cu ore -->
+                            <div id="timeSlotsContainer" class="d-flex flex-wrap gap-2 p-3 bg-white rounded border">
+                                <span class="text-muted small">Selectează un mecanic și o dată pentru a vedea orele disponibile.</span>
+                            </div>
+                            <div class="form-text mt-2">Intervale disponibile: luni–vineri între 09:00-17:00.</div>
+                            
+                            <!-- Câmp ascuns în care punem ora selectată prin JS -->
+                            <input type="hidden" id="selectedTime" name="selectedTime" required />
+                        </div>
+                        <!-- Final Secțiune Date & Time -->
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CarMake" class="form-label fw-bold text-navy">Marca Mașinii</label>
+                                <input asp-for="CarMake" class="form-control" placeholder="ex: Dacia" required />
+                                <span asp-validation-for="CarMake" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CarModel" class="form-label fw-bold text-navy">Modelul Mașinii</label>
+                                <input asp-for="CarModel" class="form-control" placeholder="ex: Logan" required />
+                                <span asp-validation-for="CarModel" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Notes" class="form-label fw-bold text-navy">Notițe (Simptome, Detalii problemă)</label>
+                            <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary-cta btn-lg fw-bold">Confirmă Programarea</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const serviceSelect = document.getElementById('ServiceId'); // Asigură-te că id-ul corespunde selectului tău
+            const mechanicSelect = document.getElementById('mechanicSelect');
+            const dateInput = document.getElementById('appointmentDate');
+            const timeSlotsContainer = document.getElementById('timeSlotsContainer');
+            const selectedTimeInput = document.getElementById('selectedTime');
+
+            function fetchAvailableHours() {
+                const serviceId = serviceSelect.value;
+                const mechanicId = mechanicSelect.value;
+                const date = dateInput.value;
+
+                // Verificăm să avem toate cele 3 câmpuri completate
+                if (!serviceId || !mechanicId || !date) {
+                    timeSlotsContainer.innerHTML = '<span class="text-muted small">Selectează serviciul, mecanicul și data pentru a vedea orele disponibile.</span>';
+                    return;
+                }
+
+                timeSlotsContainer.innerHTML = '<span class="spinner-border spinner-border-sm text-navy"></span> <span class="ms-2">Se calculează intervalele compatibile...</span>';
+
+                // Trimitem și serviceId în URL
+                fetch(`/Appointment/GetAvailableHours?mechanicId=${mechanicId}&serviceId=${serviceId}&date=${date}`)
+                    .then(response => response.json())
+                    .then(hours => {
+                        timeSlotsContainer.innerHTML = '';
+                        selectedTimeInput.value = '';
+
+                        if (hours.length === 0) {
+                            timeSlotsContainer.innerHTML = '<div class="alert alert-warning w-100 mb-0 py-2"><i class="bi bi-exclamation-triangle me-2"></i>Nu există un interval continuu suficient de mare pentru acest serviciu în data aleasă.</div>';
+                            return;
+                        }
+
+                        hours.forEach(hour => {
+                            const btn = document.createElement('button');
+                            btn.type = 'button';
+                            btn.className = 'btn btn-outline-primary fw-bold';
+                            btn.innerText = hour;
+                            
+                            btn.addEventListener('click', function () {
+                                Array.from(timeSlotsContainer.children).forEach(c => c.classList.remove('active'));
+                                this.classList.add('active');
+                                selectedTimeInput.value = hour;
+                            });
+
+                            timeSlotsContainer.appendChild(btn);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Eroare AJAX:', error);
+                        timeSlotsContainer.innerHTML = '<span class="text-danger small">A apărut o eroare la încărcarea orelor.</span>';
+                    });
+            }
+
+            // Ascultăm schimbările pe toate cele 3 elemente
+            serviceSelect.addEventListener('change', fetchAvailableHours);
+            mechanicSelect.addEventListener('change', fetchAvailableHours);
+            dateInput.addEventListener('change', fetchAvailableHours);
+        });
+    </script>
+}

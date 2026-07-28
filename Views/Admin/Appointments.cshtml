@@ -1,0 +1,376 @@
+@using PremierAuto.Models
+@model IEnumerable<PremierAuto.Models.Appointment>
+@{
+    ViewData["Title"] = "Gestionare Programări";
+    Layout = "_AdminLayout";
+
+    string StatusLabel(AppointmentStatus s) => s switch
+    {
+        AppointmentStatus.Pending => "În așteptare",
+        AppointmentStatus.Accepted => "Acceptată",
+        AppointmentStatus.Rejected => "Refuzată",
+        AppointmentStatus.Rescheduled => "Reprogramată",
+        AppointmentStatus.Done => "Finalizată",
+        AppointmentStatus.Canceled => "Anulată",
+        _ => s.ToString()
+    };
+
+    var startOfWeek = (DateTime)ViewBag.StartOfWeek;
+    var endOfWeek = (DateTime)ViewBag.EndOfWeek;
+
+    // Separăm listele
+    var pendingList = Model.Where(a => a.Status == AppointmentStatus.Pending).OrderBy(a => a.AppointmentDate).ToList();
+    
+    // Programările active din săptămâna selectată
+    var currentWeekList = Model.Where(a => (a.Status == AppointmentStatus.Accepted || a.Status == AppointmentStatus.Rescheduled) 
+        && a.AppointmentDate.Date >= startOfWeek && a.AppointmentDate.Date <= endOfWeek).OrderBy(a => a.AppointmentDate).ToList();
+
+    var otherActiveList = Model.Where(a => (a.Status == AppointmentStatus.Accepted || a.Status == AppointmentStatus.Rescheduled) 
+        && (a.AppointmentDate.Date < startOfWeek || a.AppointmentDate.Date > endOfWeek)).OrderBy(a => a.AppointmentDate).ToList();
+
+    var historyList = Model.Where(a => a.Status == AppointmentStatus.Done || a.Status == AppointmentStatus.Rejected || a.Status == AppointmentStatus.Canceled).OrderByDescending(a => a.AppointmentDate).ToList();
+}
+
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-navy fw-bold mb-0">Panou Programări</h2>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success fw-bold alert-dismissible fade show shadow-sm" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- BARĂ DE CĂUTARE ȘI FILTRE -->
+    <div class="card shadow-sm border-0 bg-white p-3 mb-4">
+        <form method="get" asp-action="Appointments" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-bold small text-muted">Caută (Client / Mașină)</label>
+                <input type="text" name="searchString" value="@ViewBag.CurrentSearch" class="form-control" placeholder="Nume, email sau mașină..." />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold small text-muted">Filtrează după Mecanic</label>
+                <select name="mechanicId" class="form-select">
+                    <option value="">Toți mecanicii</option>
+                    @foreach (var mech in (IEnumerable<Mechanic>)ViewBag.Mechanics)
+                    {
+                        <option value="@mech.Id" selected="@(ViewBag.SelectedMechanic == mech.Id.ToString())">@mech.FirstName @mech.LastName</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold small text-muted">Filtrează după Serviciu</label>
+                <select name="serviceId" class="form-select">
+                    <option value="">Toate serviciile</option>
+                    @foreach (var srv in (IEnumerable<Service>)ViewBag.Services)
+                    {
+                        <option value="@srv.Id" selected="@(ViewBag.SelectedService?.ToString() == srv.Id.ToString())">@srv.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold small text-muted">Dată specifică</label>
+                <input type="date" name="dateFilter" value="@ViewBag.SelectedDate" class="form-control" />
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary-cta w-100 fw-bold"><i class="bi bi-search"></i></button>
+                <a asp-action="Appointments" class="btn btn-outline-secondary w-100 fw-bold" title="Resetează filtrele"><i class="bi bi-arrow-counterclockwise"></i></a>
+            </div>
+        </form>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 1. SECȚIUNEA: NECESITĂ APROBARE (ÎN AȘTEPTARE) -->
+    <!-- ========================================== -->
+    <div class="card shadow-sm border-0 mb-4 border-start border-4 border-warning">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3" data-bs-toggle="collapse" href="#collapsePending" role="button" aria-expanded="true" style="cursor: pointer;">
+            <h4 class="fw-bold text-warning mb-0">
+                <i class="bi bi-hourglass-split me-2"></i> Necesită Aprobare / În Așteptare 
+                <span class="badge bg-warning text-dark ms-2">@pendingList.Count</span>
+            </h4>
+            <i class="bi bi-chevron-down fs-5 text-muted"></i>
+        </div>
+        <div class="collapse show" id="collapsePending">
+            <div class="card-body p-0">
+                <div class="table-responsive mb-0">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light text-navy">
+                            <tr>
+                                <th class="py-3 px-3">Data & Ora</th>
+                                <th class="py-3">Client</th>
+                                <th class="py-3">Serviciu / Mecanic</th>
+                                <th class="py-3">Mașină</th>
+                                <th class="py-3 text-center">Acțiuni & Chat</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!pendingList.Any())
+                            {
+                               <tr><td colspan="5" class="text-center text-muted py-4">Nu există programări în așteptare.</td></tr>
+                            }
+                            @foreach (var app in pendingList)
+                            {
+                                <tr>
+                                    <td class="px-3">
+                                        <span class="fw-bold text-navy">@app.AppointmentDate.ToString("dd/MM/yyyy")</span><br />
+                                        <small class="text-muted"><i class="bi bi-clock"></i> @app.AppointmentDate.ToString("HH:mm")</small>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold">@app.Client?.FirstName @app.Client?.LastName</span><br />
+                                        <small class="text-muted"><i class="bi bi-telephone"></i> @(string.IsNullOrEmpty(app.Client?.PhoneNumber) ? "Fără telefon" : app.Client.PhoneNumber)</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">@app.Service?.Name</span><br />
+                                        <small class="text-muted">Mecanic: @(app.Mechanic != null ? $"{app.Mechanic.FirstName} {app.Mechanic.LastName}" : "Neselectat")</small>
+                                    </td>
+                                    <td>@app.CarMake @app.CarModel</td>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-1 flex-wrap">
+                                            <form asp-controller="Admin" asp-action="ChangeAppointmentStatus" method="post">
+                                                <input type="hidden" name="id" value="@app.Id" />
+                                                <input type="hidden" name="status" value="Accepted" />
+                                                <button type="submit" class="btn btn-sm btn-success fw-bold">Acceptă</button>
+                                            </form>
+                                            <button type="button" class="btn btn-sm btn-warning fw-bold text-dark" data-bs-toggle="modal" data-bs-target="#reschedule@(app.Id)">Reprogramează</button>
+                                            <form asp-controller="Admin" asp-action="ChangeAppointmentStatus" method="post">
+                                                <input type="hidden" name="id" value="@app.Id" />
+                                                <input type="hidden" name="status" value="Rejected" />
+                                                <button type="submit" class="btn btn-sm btn-danger fw-bold">Refuză</button>
+                                            </form>
+                                            <a asp-controller="Admin" asp-action="AppointmentChat" asp-route-id="@app.Id" class="btn btn-sm btn-outline-info fw-bold">
+                                                <i class="bi bi-chat-dots"></i> Chat
+                                            </a>
+                                        </div>
+
+                                        <!-- Modal Reprogramare -->
+                                        <div class="modal fade text-start" id="reschedule@(app.Id)" tabindex="-1">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <form asp-controller="Admin" asp-action="RescheduleAppointment" method="post" class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title fw-bold text-navy">Reprogramează programarea</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <input type="hidden" name="id" value="@app.Id" />
+                                                        <label class="form-label fw-bold">Dată și oră nouă</label>
+                                                        <input type="datetime-local" name="newDate" class="form-control" value="@app.AppointmentDate.ToString("yyyy-MM-ddTHH:mm")" required />
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Anulează</button>
+                                                        <button type="submit" class="btn btn-primary-cta fw-bold">Salvează</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 2. SECȚIUNEA: PROGRAMĂRI SĂPTĂMÂNA ACEASTA (CU SĂGEȚI ȘI FĂRĂ COLLAPSE) -->
+    <!-- ========================================== -->
+    <div class="card shadow-sm border-0 mb-4 border-start border-4 border-primary">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+            <h4 class="fw-bold text-primary mb-0">
+                <i class="bi bi-calendar-week me-2"></i> Programări Săptămâna Aceasta 
+                <span class="text-muted fs-6 fw-normal ms-2">(@startOfWeek.ToString("dd.MM.yyyy") - @endOfWeek.ToString("dd.MM.yyyy"))</span>
+                <span class="badge bg-primary ms-2">@currentWeekList.Count</span>
+            </h4>
+            <!-- Săgeți de navigare între săptămâni -->
+            <div class="btn-group" role="group">
+                <a asp-action="Appointments" asp-route-weekDate="@ViewBag.PrevWeekDate" asp-route-searchString="@ViewBag.CurrentSearch" asp-route-mechanicId="@ViewBag.SelectedMechanic" asp-route-serviceId="@ViewBag.SelectedService" class="btn btn-outline-primary btn-sm fw-bold">
+                    <i class="bi bi-chevron-left"></i> Săpt. Anterioară
+                </a>
+                <a asp-action="Appointments" asp-route-weekDate="@DateTime.Today.ToString("yyyy-MM-dd")" class="btn btn-outline-secondary btn-sm fw-bold" title="Săptămâna curentă">
+                    Astăzi
+                </a>
+                <a asp-action="Appointments" asp-route-weekDate="@ViewBag.NextWeekDate" asp-route-searchString="@ViewBag.CurrentSearch" asp-route-mechanicId="@ViewBag.SelectedMechanic" asp-route-serviceId="@ViewBag.SelectedService" class="btn btn-outline-primary btn-sm fw-bold">
+                    Săpt. Următoare <i class="bi bi-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+        <div> <!-- Fără collapse, rămâne fix deschis -->
+            <div class="card-body p-0">
+                <div class="table-responsive mb-0">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light text-navy">
+                            <tr>
+                                <th class="py-3 px-3">Data & Ora</th>
+                                <th class="py-3">Client</th>
+                                <th class="py-3">Serviciu / Mecanic</th>
+                                <th class="py-3">Mașină</th>
+                                <th class="py-3 text-center">Status / Acțiuni</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!currentWeekList.Any())
+                            {
+                                <tr><td colspan="5" class="text-center text-muted py-4">Nu există programări active în această săptămână.</td></tr>
+                            }
+                            @foreach (var app in currentWeekList)
+                            {
+                                <tr>
+                                    <td class="px-3">
+                                        <span class="fw-bold text-navy">@app.AppointmentDate.ToString("dd/MM/yyyy")</span><br />
+                                        <small class="text-muted"><i class="bi bi-clock"></i> @app.AppointmentDate.ToString("HH:mm")</small>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold">@app.Client?.FirstName @app.Client?.LastName</span><br />
+                                        <small class="text-muted"><i class="bi bi-telephone"></i> @(string.IsNullOrEmpty(app.Client?.PhoneNumber) ? "Fără telefon" : app.Client.PhoneNumber)</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">@app.Service?.Name</span><br />
+                                        <small class="text-muted">Mecanic: @(app.Mechanic != null ? $"{app.Mechanic.FirstName} {app.Mechanic.LastName}" : "Neselectat")</small>
+                                    </td>
+                                    <td>@app.CarMake @app.CarModel</td>
+                                    <td class="text-center">
+                                        <span class="badge bg-success px-2 py-1 mb-1">@StatusLabel(app.Status)</span>
+                                        <div class="d-flex justify-content-center gap-1">
+                                            <form asp-controller="Admin" asp-action="ChangeAppointmentStatus" method="post">
+                                                <input type="hidden" name="id" value="@app.Id" />
+                                                <input type="hidden" name="status" value="Done" />
+                                                <button type="submit" class="btn btn-sm btn-outline-success fw-bold">Finalizează</button>
+                                            </form>
+                                            <a asp-controller="Admin" asp-action="AppointmentChat" asp-route-id="@app.Id" class="btn btn-sm btn-outline-info fw-bold">
+                                                <i class="bi bi-chat-dots"></i> Chat
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 3. SECȚIUNEA: RESTUL PROGRAMĂRILOR ACTIVE -->
+    <!-- ========================================== -->
+    <div class="card shadow-sm border-0 mb-4 border-start border-4 border-info">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3" data-bs-toggle="collapse" href="#collapseOther" role="button" aria-expanded="false" style="cursor: pointer;">
+            <h4 class="fw-bold text-info mb-0">
+                <i class="bi bi-calendar-range me-2"></i> Alte Programări viitoare / anterioare active 
+                <span class="badge bg-info text-dark ms-2">@otherActiveList.Count</span>
+            </h4>
+            <i class="bi bi-chevron-down fs-5 text-muted"></i>
+        </div>
+        <div class="collapse" id="collapseOther">
+            <div class="card-body p-0">
+                <div class="table-responsive mb-0">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light text-navy">
+                            <tr>
+                                <th class="py-3 px-3">Data & Ora</th>
+                                <th class="py-3">Client</th>
+                                <th class="py-3">Serviciu / Mecanic</th>
+                                <th class="py-3">Mașină</th>
+                                <th class="py-3 text-center">Status / Acțiuni</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!otherActiveList.Any())
+                            {
+                                <tr><td colspan="5" class="text-center text-muted py-4">Nu există alte programări active.</td></tr>
+                            }
+                            @foreach (var app in otherActiveList)
+                            {
+                                <tr>
+                                    <td class="px-3">
+                                        <span class="fw-bold text-navy">@app.AppointmentDate.ToString("dd/MM/yyyy")</span><br />
+                                        <small class="text-muted"><i class="bi bi-clock"></i> @app.AppointmentDate.ToString("HH:mm")</small>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold">@app.Client?.FirstName @app.Client?.LastName</span><br />
+                                        <small class="text-muted"><i class="bi bi-telephone"></i> @(string.IsNullOrEmpty(app.Client?.PhoneNumber) ? "Fără telefon" : app.Client.PhoneNumber)</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">@app.Service?.Name</span><br />
+                                        <small class="text-muted">Mecanic: @(app.Mechanic != null ? $"{app.Mechanic.FirstName} {app.Mechanic.LastName}" : "Neselectat")</small>
+                                    </td>
+                                    <td>@app.CarMake @app.CarModel</td>
+                                    <td class="text-center">
+                                        <span class="badge bg-info text-dark px-2 py-1 mb-1">@StatusLabel(app.Status)</span>
+                                        <div>
+                                            <a asp-controller="Admin" asp-action="AppointmentChat" asp-route-id="@app.Id" class="btn btn-sm btn-outline-info fw-bold">
+                                                <i class="bi bi-chat-dots"></i> Chat
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 4. SECȚIUNEA: ISTORIC (FINALIZATE / ANULATE) -->
+    <!-- ========================================== -->
+    <div class="card shadow-sm border-0 mb-4 border-start border-4 border-secondary">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3" data-bs-toggle="collapse" href="#collapseHistory" role="button" aria-expanded="false" style="cursor: pointer;">
+            <h4 class="fw-bold text-secondary mb-0">
+                <i class="bi bi-archive me-2"></i> Istoric (Finalizate / Anulate / Refuzate) 
+                <span class="badge bg-secondary ms-2">@historyList.Count</span>
+            </h4>
+            <i class="bi bi-chevron-down fs-5 text-muted"></i>
+        </div>
+        <div class="collapse" id="collapseHistory">
+            <div class="card-body p-0">
+                <div class="table-responsive mb-0">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light text-navy">
+                            <tr>
+                                <th class="py-3 px-3">Data & Ora</th>
+                                <th class="py-3">Client</th>
+                                <th class="py-3">Serviciu / Mecanic</th>
+                                <th class="py-3">Mașină</th>
+                                <th class="py-3 text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!historyList.Any())
+                            {
+                                <tr><td colspan="5" class="text-center text-muted py-4">Nu există istoric.</td></tr>
+                            }
+                            @foreach (var app in historyList)
+                            {
+                                <tr>
+                                    <td class="px-3">
+                                        <span class="text-muted">@app.AppointmentDate.ToString("dd/MM/yyyy")</span><br />
+                                        <small class="text-muted"><i class="bi bi-clock"></i> @app.AppointmentDate.ToString("HH:mm")</small>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold">@app.Client?.FirstName @app.Client?.LastName</span><br />
+                                        <small class="text-muted"><i class="bi bi-telephone"></i> @(string.IsNullOrEmpty(app.Client?.PhoneNumber) ? "Fără telefon" : app.Client.PhoneNumber)</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">@app.Service?.Name</span><br />
+                                        <small class="text-muted">Mecanic: @(app.Mechanic != null ? $"{app.Mechanic.FirstName} {app.Mechanic.LastName}" : "Neselectat")</small>
+                                    </td>
+                                    <td>@app.CarMake @app.CarModel</td>
+                                    <td class="text-center">
+                                        <span class="badge @(app.Status == AppointmentStatus.Done ? "bg-success" : "bg-danger") px-2 py-1">@StatusLabel(app.Status)</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

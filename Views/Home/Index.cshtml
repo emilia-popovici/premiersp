@@ -1,0 +1,248 @@
+@model PremierAuto.ViewModels.HomeViewModel
+
+@{
+    ViewData["Title"] = "Acasă";
+}
+
+<section class="hero">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-8">
+                <span class="section-kicker text-accent">Service auto &middot; Chișinău</span>
+                <h1 class="mt-3">Grijă reală pentru mașina ta.</h1>
+                <p class="mt-4 mb-4">Diagnoză precisă, mecanici specializați și programări simple, într-un singur loc.</p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a asp-controller="Appointment" asp-action="Create" class="btn btn-primary-cta btn-lg px-4 fw-bold">
+                        Fă o programare <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
+                    <a href="#servicii" class="btn btn-outline-light btn-lg px-4">Vezi servicii</a>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="gauge-signature mb-4 d-none d-lg-flex" aria-hidden="true">
+                    <svg viewBox="0 0 200 120" width="200" height="120">
+                        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#0d5ea6" stroke-width="10" stroke-linecap="round"/>
+                        <path d="M 20 100 A 80 80 0 0 1 100 20" fill="none" stroke="#ff6b35" stroke-width="10" stroke-linecap="round" opacity=".55"/>
+                        <g class="gauge-needle"><line x1="100" y1="100" x2="100" y2="34" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/></g>
+                        <circle cx="100" cy="100" r="7" fill="#ffffff"/>
+                        <circle cx="100" cy="100" r="3" fill="#ff6b35"/>
+                    </svg>
+                </div>
+                <div class="hero-metrics">
+                    <div><strong>30 min</strong><span>diagnoză rapidă</span></div>
+                    <div><strong>5 / 5</strong><span>evaluarea clienților</span></div>
+                    <div><strong>L–V &middot; 09–17</strong><span>program de lucru</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SECTIUNEA SERVICII DINAMICE (SLIDER) -->
+<section id="servicii" class="section-space">
+    <div class="container">
+        <!-- Titlul pe centru -->
+        <div class="text-center mb-5">
+            <div class="section-kicker">Ce facem</div>
+            <h2 class="section-title mt-2 mb-0">Servicii clare. Prețuri transparente.</h2>
+        </div>
+
+        <div class="position-relative">
+            <!-- Containerul care face scroll orizontal -->
+            <div id="servicesSlider" class="d-flex flex-nowrap gap-4 pb-3 pt-2 px-2" style="overflow-x: auto; scroll-behavior: smooth; scroll-snap-type: x mandatory; -ms-overflow-style: none; scrollbar-width: none;">
+                @if (Model != null && Model.Services != null && Model.Services.Any())
+                {
+                    foreach (var service in Model.Services)
+                    {
+                        <!-- Clasa service-card-wrapper ne ajută în JS -->
+                        <div class="col-10 col-md-5 col-lg-4 flex-shrink-0 service-card-wrapper" style="scroll-snap-align: start;">
+                            <article class="service-card h-100 p-4">
+                                <div class="service-icon"><i class="bi bi-wrench-adjustable"></i></div>
+                                <h3 class="h5 fw-bold text-navy mt-4">@service.Name</h3>
+                                <p class="text-muted">@service.Description</p>
+                                <div class="d-flex justify-content-between align-items-center border-top pt-3 mt-3">
+                                    <span><i class="bi bi-clock me-1"></i>aprox. <br /> @service.DurationMinutes min</span>
+                                    <span class="price-tag text-accent fw-bold">@service.Price.ToString("0.00") MDL</span>
+                                </div>
+                            </article>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12 text-center text-muted w-100">
+                        Nu există servicii adăugate momentan.
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Săgețile și Punctele (Dots) aliniate orizontal jos -->
+        @if (Model != null && Model.Services != null && Model.Services.Any())
+        {
+            <div class="d-flex justify-content-center align-items-center gap-4 mt-4">
+                <!-- Săgeată Stânga -->
+                <button id="btnPrevService" class="btn btn-light rounded-circle shadow-sm d-flex justify-content-center align-items-center" style="width: 45px; height: 45px; border: 1px solid var(--steel); transition: all 0.2s;">
+                    <i class="bi bi-chevron-left text-navy"></i>
+                </button>
+
+                <!-- Punctele (Generate de JS) -->
+                <div id="sliderDots" class="d-flex gap-2 align-items-center">
+                    <!-- Punctele vor apărea aici -->
+                </div>
+
+                <!-- Săgeată Dreapta -->
+                <button id="btnNextService" class="btn btn-light rounded-circle shadow-sm d-flex justify-content-center align-items-center" style="width: 45px; height: 45px; border: 1px solid var(--steel); transition: all 0.2s;">
+                    <i class="bi bi-chevron-right text-navy"></i>
+                </button>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- SECTIUNEA ECHIPA (MECANICI DINAMICI) -->
+<section class="bg-white section-space">
+    <div class="container">
+        <div class="row align-items-end mb-5">
+            <div class="col-lg-7">
+                <div class="section-kicker">Echipa noastră</div>
+                <h2 class="section-title mt-2 mb-0">Mecanici aleși pentru experiență.</h2>
+            </div>
+        </div>
+        <div class="row g-4 justify-content-center">
+            @if (Model != null && Model.Mechanics != null && Model.Mechanics.Any())
+            {
+                foreach (var mechanic in Model.Mechanics)
+                {
+                    <div class="col-sm-6 col-lg-3">
+                        <!-- Transformăm cardul într-un link care poate fi apăsat -->
+                        <a asp-controller="Home" asp-action="MechanicDetails" asp-route-id="@mechanic.Id" class="text-decoration-none">
+                            <article class="mechanic-card text-center h-100 p-4 shadow-sm hover-effect">
+                                @if (!string.IsNullOrEmpty(mechanic.PhotoUrl))
+                                {
+                                    <img src="@mechanic.PhotoUrl" alt="@mechanic.FirstName @mechanic.LastName" class="mechanic-avatar mx-auto mb-3" />
+                                }
+                                else
+                                {
+                                    <div class="mechanic-avatar mx-auto d-flex align-items-center justify-content-center mb-3" style="font-size:1.6rem;">🔧</div>
+                                }
+                                <h3 class="h5 fw-bold text-navy mb-1">@mechanic.FirstName @mechanic.LastName</h3>
+                                <span class="small text-muted"><i class="bi bi-star-fill text-warning me-1"></i> Vezi recenzii și detalii</span>
+                            </article>
+                        </a>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center text-muted">
+                    Nu există mecanici adăugați momentan.
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- CALL TO ACTION STRIP -->
+<section class="container py-5">
+    <div class="cta-strip p-4 p-md-5 d-md-flex align-items-center justify-content-between">
+        <div>
+            <h2 class="h2 fw-bold mb-2">Ai nevoie de ajutor urgent?</h2>
+            <p class="mb-0">Contactează-ne direct pentru consultație și situații neprevăzute.</p>
+        </div>
+        <div class="d-flex flex-wrap gap-3 mt-3 mt-md-0">
+            <a href="tel:+37369333694" class="btn btn-light fw-bold px-4 d-inline-flex align-items-center gap-2">
+                <i class="bi bi-telephone-fill"></i> Contactează-ne
+            </a>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <style>
+        /* Ascunde bara de scroll pe toate browserele */
+        #servicesSlider::-webkit-scrollbar { display: none; }
+        
+        /* Design pentru Puncte (Dots) */
+        .slider-dot {
+            width: 10px; 
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--steel);
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        .slider-dot.active {
+            background-color: var(--brass);
+            transform: scale(1.4); /* Punctul activ e puțin mai mare */
+        }
+        .slider-dot:hover {
+            background-color: var(--ink-soft);
+        }
+        /* Efect hover pentru săgeți */
+        #btnPrevService:hover, #btnNextService:hover {
+            background-color: var(--paper);
+            border-color: var(--circuit) !important;
+        }
+    </style>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const slider = document.getElementById('servicesSlider');
+            const btnNext = document.getElementById('btnNextService');
+            const btnPrev = document.getElementById('btnPrevService');
+            const dotsContainer = document.getElementById('sliderDots');
+            const cards = document.querySelectorAll('.service-card-wrapper');
+
+            if (!slider || cards.length === 0) return;
+
+            // 1. Generăm punctele automat în funcție de câte carduri avem
+            cards.forEach((card, index) => {
+                const dot = document.createElement('div');
+                dot.classList.add('slider-dot');
+                if (index === 0) dot.classList.add('active'); // Primul e activ by default
+
+                // Când dai click pe un punct, te duce la cardul respectiv
+                dot.addEventListener('click', () => {
+                    slider.scrollTo({
+                        left: card.offsetLeft - slider.offsetLeft,
+                        behavior: 'smooth'
+                    });
+                });
+                dotsContainer.appendChild(dot);
+            });
+
+            const dots = document.querySelectorAll('.slider-dot');
+
+            // 2. Când faci scroll (sau dai swipe pe telefon), actualizăm punctul activ
+            slider.addEventListener('scroll', () => {
+                // Calculăm la al câtelea card ne aflăm
+                let activeIndex = Math.round(slider.scrollLeft / cards[0].offsetWidth);
+                
+                // Ne asigurăm că nu depășim limitele
+                activeIndex = Math.max(0, Math.min(activeIndex, dots.length - 1));
+
+                // Colorăm punctul corect
+                dots.forEach((dot, idx) => {
+                    if (idx === activeIndex) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+            });
+
+            // 3. Logica pentru săgeți (stânga / dreapta)
+            if (btnNext && btnPrev) {
+                btnNext.addEventListener('click', () => {
+                    // Derulăm un card (lățimea cardului + 24px marginea dintre ele)
+                    slider.scrollBy({ left: cards[0].offsetWidth + 24, behavior: 'smooth' });
+                });
+
+                btnPrev.addEventListener('click', () => {
+                    slider.scrollBy({ left: -(cards[0].offsetWidth + 24), behavior: 'smooth' });
+                });
+            }
+        });
+    </script>
+}
