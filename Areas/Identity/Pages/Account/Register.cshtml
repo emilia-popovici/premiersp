@@ -19,8 +19,8 @@
                 <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
                     <div asp-validation-summary="ModelOnly" class="text-danger small mb-3" role="alert"></div>
 
+                    <p class="text-muted small">PE SERVERUL GRATIS NU MA LASA SA TRIMIT MAIL🥲💔</p>
                     <div class="form-floating mb-3">
-                        <p class="text-muted small">PE SERVERUL GRATIS NU MA LASA SA TRIMIT MAIL🥲💔</p>
                         <input asp-for="Input.Email" class="form-control rounded-3" autocomplete="username" aria-required="true" placeholder="nume@exemplu.com" />
                         <label asp-for="Input.Email" class="text-muted">Email</label>
                         <span asp-validation-for="Input.Email" class="text-danger small"></span>
