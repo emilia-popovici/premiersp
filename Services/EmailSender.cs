@@ -19,7 +19,7 @@ namespace PremierAuto.Services
             var fromMail = "MailAdd";
             var fromPassword = "SecretKey"; 
 
-            var client = new SmtpClient("smtp.gmail.com", 587)
+            var client = new SmtpClient("smtp.gmail.com", 465)
             {
                 EnableSsl = true,
                 UseDefaultCredentials = false,
