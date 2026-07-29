@@ -67,6 +67,11 @@
                             <i class="bi bi-chat-dots-fill me-2"></i> Chat-uri Active
                         </a>
                     </li>
+                    <li class="nav-item mb-1">
+                        <a class="nav-link text-white @(ViewContext.RouteData.Values["Action"].ToString() == "ChatHistory" ? "active bg-white bg-opacity-10 rounded" : "")" asp-controller="Admin" asp-action="ChatHistory">
+                            <i class="bi bi-clock-history me-2"></i> Istoric Chat-uri
+                        </a>
+                    </li>
                 </ul>
                 
                 <div class="mt-3 pt-3 border-top border-secondary">

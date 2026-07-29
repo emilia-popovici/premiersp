@@ -1,0 +1,125 @@
+@model IEnumerable<PremierAuto.Models.Appointment>
+
+@{
+    ViewData["Title"] = "Istoric Chat-uri";
+    Layout = "_AdminLayout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="h4 fw-bold text-navy mb-0">Istoric Chat-uri</h2>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body bg-light rounded">
+        <form asp-action="ChatHistory" method="get" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label text-muted small fw-bold">Caută client sau mașină</label>
+                <input type="text" name="searchString" value="@ViewBag.CurrentSearch" class="form-control" placeholder="Nume, Email, Marcă, Model...">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label text-muted small fw-bold">Filtru Serviciu</label>
+                <select name="serviceId" class="form-select">
+                    <option value="">Toate serviciile</option>
+                    @foreach (var s in ViewBag.Services)
+                    {
+                        if (ViewBag.SelectedService != null && ViewBag.SelectedService == s.Id)
+                        {
+                            <option value="@s.Id" selected>@s.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@s.Id">@s.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label text-muted small fw-bold">Filtru Mecanic</label>
+                <select name="mechanicId" class="form-select">
+                    <option value="">Toți mecanicii</option>
+                    @foreach (var m in ViewBag.Mechanics)
+                    {
+                        if (ViewBag.SelectedMechanic != null && ViewBag.SelectedMechanic == m.Id.ToString())
+                        {
+                            <option value="@m.Id" selected>@m.FirstName @m.LastName</option>
+                        }
+                        else
+                        {
+                            <option value="@m.Id">@m.FirstName @m.LastName</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-navy w-100 fw-bold">
+                    <i class="bi bi-search me-2"></i> Aplică
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="text-muted small fw-bold px-4 py-3">Client</th>
+                        <th class="text-muted small fw-bold py-3">Mașină</th>
+                        <th class="text-muted small fw-bold py-3">Serviciu / Mecanic</th>
+                        <th class="text-muted small fw-bold py-3">Data Prog.</th>
+                        <th class="text-muted small fw-bold py-3">Status</th>
+                        <th class="text-muted small fw-bold py-3 text-end px-4">Acțiuni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="px-4 py-3">
+                                    <div class="fw-bold text-dark">@(item.Client?.FirstName) @(item.Client?.LastName)</div>
+                                    <div class="small text-muted">@(item.Client?.Email)</div>
+                                </td>
+                                <td>
+                                    <span class="fw-bold">@item.CarMake</span> @item.CarModel
+                                </td>
+                                <td>
+                                    <div><i class="bi bi-wrench-adjustable text-accent me-1"></i> @(item.Service?.Name ?? "N/A")</div>
+                                    <div class="small text-muted"><i class="bi bi-person me-1"></i> @(item.Mechanic?.FirstName ?? "Nespecificat")</div>
+                                </td>
+                                <td>@item.AppointmentDate.ToString("dd MMM yyyy, HH:mm")</td>
+                                <td>
+                                    @if (item.Status == PremierAuto.Models.AppointmentStatus.Done)
+                                    {
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success">Finalizată</span>
+                                    }
+                                    else if (item.Status == PremierAuto.Models.AppointmentStatus.Canceled || item.Status == PremierAuto.Models.AppointmentStatus.Rejected)
+                                    {
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger">Anulată/Respinsă</span>
+                                    }
+                                </td>
+                                <td class="text-end px-4">
+                                    <a asp-action="AppointmentChat" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-clock-history me-1"></i> Vezi Istoric Chat
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                Nu a fost găsit niciun istoric conform filtrelor selectate.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

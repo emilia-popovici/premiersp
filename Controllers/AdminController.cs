@@ -193,7 +193,7 @@ namespace PremierAuto.Controllers
                     Url = $"/Appointment/Chat/{appointment.Id}",
                     CreatedAt = DateTime.SpecifyKind(bucharestTime, DateTimeKind.Utc)
                 };
-                
+
                 _context.Notifications.Add(notification);
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Programarea a fost reprogramată.";
@@ -641,6 +641,48 @@ namespace PremierAuto.Controllers
             ViewBag.Appointments = appointments;
 
             return View(user);
+        }
+
+        public async Task<IActionResult> ChatHistory(string searchString, int? serviceId, string mechanicId)
+        {
+            var query = _context.Appointments
+                .Include(a => a.Client)
+                .Include(a => a.Service)
+                .Include(a => a.Mechanic)
+                .Include(a => a.Messages)
+                .Where(a => a.Status == AppointmentStatus.Done || 
+                            a.Status == AppointmentStatus.Canceled || 
+                            a.Status == AppointmentStatus.Rejected)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                query = query.Where(a => 
+                    (a.Client != null && (a.Client.FirstName.Contains(searchString) || a.Client.LastName.Contains(searchString) || a.Client.Email.Contains(searchString))) ||
+                    a.CarMake.Contains(searchString) ||
+                    a.CarModel.Contains(searchString)
+                );
+            }
+            
+            if (serviceId.HasValue)
+            {
+                query = query.Where(a => a.ServiceId == serviceId.Value);
+            }
+
+            if (!string.IsNullOrEmpty(mechanicId) && int.TryParse(mechanicId, out int parsedMechId))
+            {
+                query = query.Where(a => a.MechanicId == parsedMechId);
+            }
+
+            var appointments = await query.OrderByDescending(a => a.AppointmentDate).ToListAsync();
+            
+            ViewBag.Services = await _context.Services.ToListAsync();
+            ViewBag.Mechanics = await _context.Mechanics.ToListAsync();
+            ViewBag.CurrentSearch = searchString;
+            ViewBag.SelectedService = serviceId;
+            ViewBag.SelectedMechanic = mechanicId;
+            
+            return View(appointments);
         }
     }
 

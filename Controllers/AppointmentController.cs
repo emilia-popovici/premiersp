@@ -300,6 +300,8 @@ namespace PremierAuto.Controllers
 
             if (appointment == null) return NotFound("Nu am găsit programarea sau nu ai acces la ea.");
 
+            bool shouldSave = false;
+
             var unreadMessages = appointment.Messages.Where(m => m.IsAdmin && !m.IsRead).ToList();
             if (unreadMessages.Any())
             {
@@ -307,9 +309,28 @@ namespace PremierAuto.Controllers
                 {
                     msg.IsRead = true;
                 }
+                shouldSave = true;
                 await _context.SaveChangesAsync();
             }
-            
+
+            var unreadNotifications = await _context.Notifications
+                .Where(n => n.UserId == user.Id && !n.IsRead && n.Url.Contains(id.ToString()))
+                .ToListAsync();
+
+            if (unreadNotifications.Any())
+            {
+                foreach (var notif in unreadNotifications)
+                {
+                    notif.IsRead = true;
+                }
+                shouldSave = true;
+            }
+
+            if (shouldSave)
+            {
+                await _context.SaveChangesAsync();
+            }
+
             var messages = await _context.AppointmentMessages
                 .Include(m => m.Sender)
                 .Where(m => m.AppointmentId == id)
