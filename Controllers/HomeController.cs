@@ -23,7 +23,6 @@ namespace PremierAuto.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // 1. Dacă utilizatorul este logat și are rolul de Admin, îl trimitem direct în panou
             if (User.Identity.IsAuthenticated)
             {
                 var user = await _userManager.GetUserAsync(User);
@@ -38,7 +37,6 @@ namespace PremierAuto.Controllers
                 }
             }
 
-            // 2. Altfel, încărcăm serviciile pentru pagina principală publică
             var viewModel = new HomeViewModel
             {
                 Services = await _context.Services.ToListAsync(),
@@ -46,6 +44,25 @@ namespace PremierAuto.Controllers
             };
 
             return View(viewModel);
+        }
+
+        public async Task<IActionResult> Services(string searchString)
+        {
+            var servicesQuery = _context.Services.AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                var searchLower = searchString.ToLower();
+
+                servicesQuery = servicesQuery.Where(s => 
+                    s.Name.ToLower().Contains(searchLower) || 
+                    s.Description.ToLower().Contains(searchLower));
+            }
+
+            ViewData["CurrentFilter"] = searchString;
+
+            var services = await servicesQuery.ToListAsync();
+            return View(services);
         }
 
         public IActionResult Privacy()
@@ -61,7 +78,6 @@ namespace PremierAuto.Controllers
 
             if (mechanic == null) return NotFound();
 
-            // Preluăm recenziile lăsate la programările acestui mecanic
             var reviews = await _context.Reviews
                 .Include(r => r.Appointment)
                 .ThenInclude(a => a.Client)

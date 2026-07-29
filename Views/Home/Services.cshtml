@@ -1,0 +1,58 @@
+@model IEnumerable<PremierAuto.Models.Service>
+
+@{
+    ViewData["Title"] = "Servicii Auto";
+}
+
+<div class="container py-5 section-space">
+    <div class="text-center mb-5">
+        <div class="section-kicker">Ce facem</div>
+        <h1 class="section-title mt-2 mb-0">Toate serviciile noastre</h1>
+        <p class="text-muted mt-3">Transparență totală. Alege serviciul de care ai nevoie.</p>
+
+        <!-- SEARCH BAR -->
+        <form asp-action="Services" method="get" class="row justify-content-center mt-4">
+            <div class="col-md-6 col-lg-5">
+                <div class="input-group shadow-sm">
+                    <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="Caută diagnostic, ulei, frâne..." aria-label="Caută servicii">
+                    <button class="btn btn-primary px-4 fw-bold" type="submit" style="background-color: var(--navy); border-color: var(--navy);">
+                        <i class="bi bi-search me-1"></i> Caută
+                    </button>
+                    @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"]?.ToString()))
+                    {
+                        <a asp-action="Services" class="btn btn-outline-secondary" title="Resetează căutarea">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                    }
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- GRILA DE SERVICII -->
+    <div class="row g-4">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var service in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <article class="service-card h-100 p-4 shadow-sm">
+                        <div class="service-icon"><i class="bi bi-wrench-adjustable"></i></div>
+                        <h3 class="h5 fw-bold text-navy mt-4">@service.Name</h3>
+                        <p class="text-muted">@service.Description</p>
+                        <div class="d-flex justify-content-between align-items-center border-top pt-3 mt-3">
+                            <span><i class="bi bi-clock me-1"></i>aprox. @service.DurationMinutes min</span>
+                            <span class="price-tag text-accent fw-bold">@service.Price.ToString("0.00") MDL</span>
+                        </div>
+                    </article>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center text-muted py-4">
+                Nu am găsit niciun serviciu care să se potrivească căutării tale.
+            </div>
+        }
+    </div>
+</div>
