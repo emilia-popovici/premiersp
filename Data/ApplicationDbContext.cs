@@ -17,8 +17,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<ClientProfile> ClientProfiles { get; set; }
     public DbSet<Review> Reviews { get; set; }
     public DbSet<ContactMessage> ContactMessages { get; set; }
-
     public DbSet<AppointmentMessage> AppointmentMessages { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
 {

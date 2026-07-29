@@ -55,9 +55,25 @@
                             <div class="d-flex mb-3 @(msg.IsAdmin ? "justify-content-end" : "justify-content-start")">
                                 <div class="p-3 rounded shadow-sm" 
                                      style="max-width: 75%; @(msg.IsAdmin ? "background-color: var(--navy); color: white; border-bottom-right-radius: 0 !important;" : "background-color: var(--paper); border: 1px solid var(--steel); border-bottom-left-radius: 0 !important;")">
-                                    <div class="small fw-bold mb-1 opacity-75">
-                                        @(msg.IsAdmin ? "Tu (Admin)" : (msg.Sender?.FirstName ?? "Client")) 
-                                        &bull; @msg.CreatedAt.ToString("HH:mm, dd/MM")
+                                    <div class="small fw-bold mb-1 opacity-75 d-flex justify-content-between align-items-center">
+                                        <span>
+                                            @(msg.IsAdmin ? "Tu (Admin)" : (msg.Sender?.FirstName ?? "Client")) 
+                                            &bull; @msg.CreatedAt.ToString("HH:mm, dd/MM")
+                                        </span>
+
+                                        @if (msg.IsAdmin)
+                                        {
+                                            <span class="ms-2">
+                                                @if (msg.IsRead)
+                                                {
+                                                    <i class="bi bi-check2-all text-info" title="Seen"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-check2 text-white-50" title="Delivered"></i>
+                                                }
+                                            </span>
+                                        }
                                     </div>
                                     <p class="mb-0">@msg.Text</p>
                                 </div>

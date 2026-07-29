@@ -6,45 +6,83 @@
 }
 
 <div class="container mt-4 mb-5">
-    <h2 class="text-navy fw-bold mb-4">Centru Mesaje / Chat-uri</h2>
+    <h2 class="text-navy fw-bold mb-4">Centru Mesaje / Chat-uri Active</h2>
 
     <div class="card shadow-sm border-0 bg-white">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" style="min-width: 700px;">
-                    <thead class="bg-navy text-white">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light text-navy">
                         <tr>
                             <th class="py-3 px-3">Client</th>
-                            <th class="py-3">Mașină & Serviciu</th>
-                            <th class="py-3 text-nowrap">Data Programării</th>
-                            <th class="py-3 text-center">Acțiune</th>
+                            <th class="py-3">Mașină, Serviciu & Ultimul Mesaj</th>
+                            <th class="py-3">Data Programării</th>
+                            <th class="py-3 text-end px-3">Acțiune</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @if (!Model.Any())
-                        {
-                            <tr><td colspan="4" class="text-center text-muted py-4">Nu există nicio programare activă pentru chat.</td></tr>
-                        }
-                        @foreach (var app in Model)
+                        @if (Model == null || !Model.Any())
                         {
                             <tr>
-                                <td class="px-3">
-                                    <span class="fw-bold text-nowrap">@app.Client?.FirstName @app.Client?.LastName</span><br />
-                                    <small class="text-muted text-nowrap"><i class="bi bi-telephone"></i> @app.Client?.PhoneNumber</small>
-                                </td>
-                                <td>
-                                    <span class="fw-bold text-nowrap">@app.CarMake @app.CarModel</span><br />
-                                    <span class="badge bg-light text-dark border text-wrap">@app.Service?.Name</span>
-                                </td>
-                                <td class="text-nowrap">
-                                    @app.AppointmentDate.ToString("dd/MM/yyyy HH:mm")
-                                </td>
-                                <td class="text-center text-nowrap">
-                                    <a asp-controller="Admin" asp-action="AppointmentChat" asp-route-id="@app.Id" class="btn btn-sm btn-primary-cta fw-bold">
-                                        <i class="bi bi-chat-text me-1"></i> Deschide Conversația
-                                    </a>
-                                </td>
+                                <td colspan="4" class="text-center text-muted py-4">Nu există chat-uri active momentan.</td>
                             </tr>
+                        }
+                        else
+                        {
+                            foreach (var item in Model)
+                            {
+                                var lastMessage = item.Messages?.OrderByDescending(m => m.CreatedAt).FirstOrDefault();
+                                
+                                <tr>
+                                    <td class="px-3">
+                                        <span class="fw-bold text-navy">@item.Client?.FirstName @item.Client?.LastName</span><br />
+                                        <small class="text-muted"><i class="bi bi-telephone"></i> @item.Client?.PhoneNumber</small>
+                                    </td>
+                                    <td>
+                                        <div class="mb-1">
+                                            <span class="fw-bold">@item.CarMake @item.CarModel</span> 
+                                            <span class="badge bg-light text-dark border ms-2">@item.Service?.Name</span>
+                                        </div>
+
+                                        <!-- Preview-ul ultimului mesaj sub detalii -->
+                                        @if (lastMessage != null)
+                                        {
+                                            <div class="bg-light p-2 rounded border-start border-3 border-secondary text-muted small mt-1">
+                                                <div class="d-flex justify-content-between">
+                                                    <span class="fw-bold text-dark">@(lastMessage.IsAdmin ? "Tu: " : "Client: ")</span>
+                                                    <span>
+                                                        @lastMessage.CreatedAt.ToString("HH:mm, dd/MM")
+                                                        @if (lastMessage.IsAdmin)
+                                                        {
+                                                            @if (lastMessage.IsRead)
+                                                            {
+                                                                <i class="bi bi-check2-all text-primary ms-1" title="Seen"></i>
+                                                            }
+                                                            else
+                                                            {
+                                                                <i class="bi bi-check2 text-secondary ms-1" title="Delivered"></i>
+                                                            }
+                                                        }
+                                                    </span>
+                                                </div>
+                                                <div class="text-truncate" style="max-width: 350px;">@lastMessage.Text</div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <small class="text-muted fst-italic">Niciun mesaj trimis încă.</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold text-navy">@item.AppointmentDate.ToString("dd/MM/yyyy HH:mm")</span>
+                                    </td>
+                                    <td class="text-end px-3">
+                                        <a asp-action="AppointmentChat" asp-route-id="@item.Id" class="btn btn-sm btn-primary-cta fw-bold">
+                                            <i class="bi bi-chat-dots me-1"></i> Deschide Conversația
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
                         }
                     </tbody>
                 </table>

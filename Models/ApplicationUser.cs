@@ -10,4 +10,5 @@ public class ApplicationUser : IdentityUser
 
     [StringLength(60)]
     public string? LastName { get; set; }
+    public virtual ICollection<Notification> Notifications { get; set; }
 }

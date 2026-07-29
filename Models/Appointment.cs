@@ -35,5 +35,6 @@ namespace PremierAuto.Models
         public AppointmentStatus Status { get; set; } = AppointmentStatus.Pending;
 
         public Review Review { get; set; }
+        public virtual ICollection<AppointmentMessage> Messages { get; set; } = new List<AppointmentMessage>();
     }
 }

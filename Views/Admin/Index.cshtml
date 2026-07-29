@@ -15,6 +15,22 @@
             </div>
         </div>
     </div>
+
+    <!--card notificari-->
+    <div class="col-md-3 mb-4">
+        <a asp-controller="Admin" asp-action="AllChats" class="text-decoration-none">
+            <div class="card shadow-sm border-0 border-start border-4 border-warning h-100 py-2 hover-effect" style="transition: transform 0.2s;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-xs fw-bold text-warning text-uppercase mb-1">Mesaje de la Clienți</div>
+                        <i class="bi bi-chat-dots-fill fs-4 text-warning"></i>
+                    </div>
+                    <div class="h3 mb-0 fw-bold text-dark">@(ViewBag.UnreadMessagesCount ?? 0)</div>
+                    <small class="text-muted">Click pentru a vedea chat-urile</small>
+                </div>
+            </div>
+        </a>
+    </div>
 </div>
 
 <!-- distributie servicii si performanta -->

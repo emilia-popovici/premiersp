@@ -20,7 +20,8 @@ namespace PremierAuto.Models
         
         [Required]
         public string Text { get; set; }
+        public bool IsRead { get; set; } = false;
         
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

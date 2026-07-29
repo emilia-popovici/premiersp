@@ -57,6 +57,10 @@
                                 <a class="nav-link" asp-controller="Appointment" asp-action="Index">Programările mele</a>
                             </li>
                         }
+                        @if (User.Identity != null && User.Identity.IsAuthenticated && !User.IsInRole("Admin"))
+                        {
+                            @await Component.InvokeAsync("Notifications")
+                        }
                     </ul>
                     <partial name="_LoginPartial" />
                 </div>

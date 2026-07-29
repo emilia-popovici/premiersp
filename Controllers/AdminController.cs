@@ -25,13 +25,17 @@ namespace PremierAuto.Controllers
             _userManager = userManager;
         }
 
-        //Dashboard
         public async Task<IActionResult> Index()
         {
             int pendingAppointments = await _context.Appointments
                 .Where(a => a.Status == AppointmentStatus.Pending)
                 .CountAsync();
             ViewBag.PendingAppointmentsCount = pendingAppointments;
+
+            int unreadMessagesCount = await _context.AppointmentMessages
+                .Where(m => !m.IsAdmin)
+                .CountAsync();
+            ViewBag.UnreadMessagesCount = unreadMessagesCount;
             
             var topServices = await _context.Appointments
                 .Include(a => a.Service)
@@ -43,13 +47,17 @@ namespace PremierAuto.Controllers
 
             ViewBag.TopServices = topServices;
 
-            var services = await _context.Services.ToListAsync();
             var appointments = await _context.Appointments
                 .Include(a => a.Service)
-                .Where(a => a.Status != AppointmentStatus.Canceled)
+                .Where(a => a.Status == AppointmentStatus.Done)
                 .ToListAsync();
 
             var totalAppointments = appointments.Count;
+
+            var completedServiceIds = appointments.Select(a => a.ServiceId).Distinct();
+            var services = await _context.Services
+                .Where(s => completedServiceIds.Contains(s.Id))
+                .ToListAsync();
 
             var distributionData = services.Select(s => {
                 int countForService = appointments.Count(a => a.ServiceId == s.Id);
@@ -66,7 +74,7 @@ namespace PremierAuto.Controllers
                     Price = s.Price,
                     Count = countForService,
                     Percentage = Math.Round(percentage, 1),
-                    TotalRevenue = appointments.Where(a => a.ServiceId == s.Id && a.Status == AppointmentStatus.Done).Sum(a => s.Price)
+                    TotalRevenue = countForService * s.Price
                 };
             }).OrderByDescending(x => x.Count).ToList();
 
@@ -75,7 +83,6 @@ namespace PremierAuto.Controllers
             return View();
         }
 
-        //Programari
         public async Task<IActionResult> Appointments(string searchString, string mechanicId, int? serviceId, DateTime? dateFilter, DateTime? weekDate)
         {
             var query = _context.Appointments
@@ -141,6 +148,24 @@ namespace PremierAuto.Controllers
             {
                 appointment.Status = status;
                 await _context.SaveChangesAsync();
+
+                string statusText = status switch
+                {
+                    AppointmentStatus.Accepted => "confirmată",
+                    AppointmentStatus.Canceled => "respinsă / anulată",
+                    AppointmentStatus.Done => "finalizată",
+                    _ => "actualizată"
+                };
+
+                var notification = new Notification
+                {
+                    UserId = appointment.ClientId,
+                    Title = "Status programare actualizat",
+                    Message = $"Programarea ta pentru {appointment.CarMake} {appointment.CarModel} a fost {statusText}.",
+                    Url = $"/Appointment/Chat/{appointment.Id}"
+                };
+                _context.Notifications.Add(notification);
+                await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Statusul programării a fost actualizat!";
             }
             return RedirectToAction(nameof(Appointments));
@@ -156,6 +181,15 @@ namespace PremierAuto.Controllers
                 appointment.AppointmentDate = DateTime.SpecifyKind(newDate, DateTimeKind.Utc);
                 appointment.Status = AppointmentStatus.Rescheduled;
                 await _context.SaveChangesAsync();
+                var notification = new Notification
+                {
+                    UserId = appointment.ClientId,
+                    Title = "Programare reprogramată",
+                    Message = $"Programarea ta a fost reprogramată pentru data de {appointment.AppointmentDate:dd/MM/yyyy HH:mm}.",
+                    Url = $"/Appointment/Chat/{appointment.Id}"
+                };
+                _context.Notifications.Add(notification);
+                await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Programarea a fost reprogramată.";
             }
             return RedirectToAction(nameof(Appointments));
@@ -168,9 +202,20 @@ namespace PremierAuto.Controllers
                 .Include(a => a.Client)
                 .Include(a => a.Mechanic)
                 .Include(a => a.Service)
+                .Include(a => a.Messages)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
             if (appointment == null) return NotFound();
+
+            var unreadMessages = appointment.Messages.Where(m => !m.IsAdmin && !m.IsRead).ToList();
+            if (unreadMessages.Any())
+            {
+                foreach (var msg in unreadMessages)
+                {
+                    msg.IsRead = true;
+                }
+                await _context.SaveChangesAsync();
+            }
 
             var messages = await _context.AppointmentMessages
                 .Include(m => m.Sender)
@@ -206,6 +251,16 @@ namespace PremierAuto.Controllers
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Mesajul a fost trimis clientului.";
+
+            var appointment = await _context.Appointments.FindAsync(appointmentId);
+            var notification = new Notification
+            {
+                UserId = appointment.ClientId,
+                Title = "Mesaj nou de la service",
+                Message = "Ai primit un mesaj nou legat de programarea ta.",
+                Url = $"/Appointment/Chat/{appointmentId}"
+            };
+            _context.Notifications.Add(notification);
             return RedirectToAction(nameof(AppointmentChat), new { id = appointmentId });
         }
 
@@ -461,6 +516,7 @@ namespace PremierAuto.Controllers
                 .Include(a => a.Client)
                 .Include(a => a.Service)
                 .Include(a => a.Mechanic)
+                .Include(a => a.Messages)
                 .Where(a => a.Status == AppointmentStatus.Pending || 
                             a.Status == AppointmentStatus.Accepted || 
                             a.Status == AppointmentStatus.Rescheduled)

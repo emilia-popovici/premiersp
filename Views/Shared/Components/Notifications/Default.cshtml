@@ -1,0 +1,44 @@
+@model IEnumerable<PremierAuto.Models.Notification>
+
+@{
+    var unreadCount = ViewBag.UnreadCount ?? 0;
+}
+
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle position-relative" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-bell-fill fs-5"></i>
+        @if (unreadCount > 0)
+        {
+            <span class="position-absolute top-25 start-75 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                @unreadCount
+            </span>
+        }
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end shadow p-2" aria-labelledby="notificationsDropdown" style="width: 320px; max-height: 400px; overflow-y: auto;">
+        <li><h6 class="dropdown-header fw-bold text-navy px-2">Notificări</h6></li>
+        <li><hr class="dropdown-divider"></li>
+        
+        @if (Model != null && Model.Any())
+        {
+            foreach (var notif in Model)
+            {
+                <li>
+                    <a class="dropdown-item py-2 px-2 rounded @(notif.IsRead ? "" : "bg-light fw-bold")" href="@notif.Url">
+                        <div class="small text-dark">@notif.Title</div>
+                        <div class="text-muted" style="font-size: 0.8rem; white-space: normal;">@notif.Message</div>
+                        <div class="text-secondary" style="font-size: 0.7rem;">@notif.CreatedAt.ToString("HH:mm, dd/MM")</div>
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider my-1"></li>
+            }
+        }
+        else
+        {
+            <li>
+                <div class="text-center text-muted small py-3">
+                    Nu ai nicio notificare momentan.
+                </div>
+            </li>
+        }
+    </ul>
+</li>
