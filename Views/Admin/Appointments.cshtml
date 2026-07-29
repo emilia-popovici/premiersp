@@ -82,9 +82,7 @@
         </form>
     </div>
 
-    <!-- ========================================== -->
     <!-- 1. SECȚIUNEA: NECESITĂ APROBARE (ÎN AȘTEPTARE) -->
-    <!-- ========================================== -->
     <div class="card shadow-sm border-0 mb-4 border-start border-4 border-warning">
         <div class="card-header bg-white d-flex justify-content-between align-items-center py-3" data-bs-toggle="collapse" href="#collapsePending" role="button" aria-expanded="true" style="cursor: pointer;">
             <h4 class="fw-bold text-warning mb-0">
@@ -175,9 +173,7 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
     <!-- 2. SECȚIUNEA: PROGRAMĂRI SĂPTĂMÂNA ACEASTA (CU SĂGEȚI ȘI FĂRĂ COLLAPSE) -->
-    <!-- ========================================== -->
     <div class="card shadow-sm border-0 mb-4 border-start border-4 border-primary">
         <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
             <h4 class="fw-bold text-primary mb-0">
@@ -185,7 +181,6 @@
                 <span class="text-muted fs-6 fw-normal ms-2">(@startOfWeek.ToString("dd.MM.yyyy") - @endOfWeek.ToString("dd.MM.yyyy"))</span>
                 <span class="badge bg-primary ms-2">@currentWeekList.Count</span>
             </h4>
-            <!-- Săgeți de navigare între săptămâni -->
             <div class="btn-group" role="group">
                 <a asp-action="Appointments" asp-route-weekDate="@ViewBag.PrevWeekDate" asp-route-searchString="@ViewBag.CurrentSearch" asp-route-mechanicId="@ViewBag.SelectedMechanic" asp-route-serviceId="@ViewBag.SelectedService" class="btn btn-outline-primary btn-sm fw-bold">
                     <i class="bi bi-chevron-left"></i> Săpt. Anterioară
@@ -198,7 +193,7 @@
                 </a>
             </div>
         </div>
-        <div> <!-- Fără collapse, rămâne fix deschis -->
+        <div>
             <div class="card-body p-0">
                 <div class="table-responsive mb-0">
                     <table class="table table-hover align-middle mb-0">
@@ -254,9 +249,7 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
     <!-- 3. SECȚIUNEA: RESTUL PROGRAMĂRILOR ACTIVE -->
-    <!-- ========================================== -->
     <div class="card shadow-sm border-0 mb-4 border-start border-4 border-info">
         <div class="card-header bg-white d-flex justify-content-between align-items-center py-3" data-bs-toggle="collapse" href="#collapseOther" role="button" aria-expanded="false" style="cursor: pointer;">
             <h4 class="fw-bold text-info mb-0">
@@ -316,9 +309,7 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
     <!-- 4. SECȚIUNEA: ISTORIC (FINALIZATE / ANULATE) -->
-    <!-- ========================================== -->
     <div class="card shadow-sm border-0 mb-4 border-start border-4 border-secondary">
         <div class="card-header bg-white d-flex justify-content-between align-items-center py-3" data-bs-toggle="collapse" href="#collapseHistory" role="button" aria-expanded="false" style="cursor: pointer;">
             <h4 class="fw-bold text-secondary mb-0">

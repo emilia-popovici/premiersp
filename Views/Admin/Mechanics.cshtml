@@ -24,7 +24,7 @@
         <tr>
             <th>Poză</th>
             <th>Nume</th>
-            <th>Rating</th>§
+            <th>Rating</th>
             <th>Poză aprobată</th>
             <th>Cont legat</th>
             <th>Acțiuni</th>
@@ -42,7 +42,6 @@
                 <td>
                     @if (!m.IsPictureApproved && !string.IsNullOrEmpty(m.ProfilePictureUrl))
                     {
-                        <!-- Afișăm comparația dacă există o poză nouă în așteptare -->
                         <div class="d-flex align-items-center gap-3">
                             <div class="text-center">
                                 <small class="text-muted d-block" style="font-size: 0.75rem;">Publică</small>
@@ -66,7 +65,6 @@
                     }
                     else
                     {
-                        <!-- Afișăm normal dacă nu există modificări în așteptare -->
                         <div class="text-center">
                             <img src="@m.PhotoUrl" class="rounded-circle shadow-sm mb-1" style="width: 50px; height: 50px; object-fit: cover;" alt="Curenta" />
                             <span class="badge bg-success d-block" style="font-size: 0.7rem;"><i class="bi bi-check-circle me-1"></i>Aprobată</span>
