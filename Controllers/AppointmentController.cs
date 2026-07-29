@@ -295,10 +295,21 @@ namespace PremierAuto.Controllers
             var appointment = await _context.Appointments
                 .Include(a => a.Service)
                 .Include(a => a.Mechanic)
+                .Include(a => a.Messages)
                 .FirstOrDefaultAsync(a => a.Id == id && a.ClientId == user.Id);
 
             if (appointment == null) return NotFound("Nu am găsit programarea sau nu ai acces la ea.");
 
+            var unreadMessages = appointment.Messages.Where(m => m.IsAdmin && !m.IsRead).ToList();
+            if (unreadMessages.Any())
+            {
+                foreach (var msg in unreadMessages)
+                {
+                    msg.IsRead = true;
+                }
+                await _context.SaveChangesAsync();
+            }
+            
             var messages = await _context.AppointmentMessages
                 .Include(m => m.Sender)
                 .Where(m => m.AppointmentId == id)

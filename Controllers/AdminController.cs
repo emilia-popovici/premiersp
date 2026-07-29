@@ -184,14 +184,16 @@ namespace PremierAuto.Controllers
                 appointment.AppointmentDate = DateTime.SpecifyKind(newDate, DateTimeKind.Utc);
                 appointment.Status = AppointmentStatus.Rescheduled;
                 await _context.SaveChangesAsync();
+                var bucharestTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Europe/Bucharest"));
                 var notification = new Notification
                 {
                     UserId = appointment.ClientId,
                     Title = "Programare reprogramată",
                     Message = $"Programarea ta a fost reprogramată pentru data de {appointment.AppointmentDate:dd/MM/yyyy HH:mm}.",
                     Url = $"/Appointment/Chat/{appointment.Id}",
-                    CreatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Europe/Bucharest"))
+                    CreatedAt = DateTime.SpecifyKind(bucharestTime, DateTimeKind.Utc)
                 };
+                
                 _context.Notifications.Add(notification);
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Programarea a fost reprogramată.";
