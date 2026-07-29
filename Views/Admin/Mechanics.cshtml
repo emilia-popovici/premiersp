@@ -37,7 +37,7 @@
                 {
                     <tr>
                         <td class="ps-3">
-                            <img src="@(string.IsNullOrEmpty(m.PhotoUrl) ? "/images/default-avatar.png" : m.PhotoUrl)" alt="Avatar" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" />
+                            <img src="@(string.IsNullOrEmpty(m.PhotoUrl) ? "/images/default-avatar.svg" : m.PhotoUrl)" alt="Avatar" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" />
                         </td>
                         <td class="fw-bold text-nowrap">@m.LastName @m.FirstName</td>
                         <td class="text-nowrap">⭐ @m.Rating.ToString("0.0")</td>

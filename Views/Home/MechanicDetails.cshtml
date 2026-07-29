@@ -7,7 +7,7 @@
 
 <div class="container py-5 mt-3">
     <a asp-action="Index" class="btn btn-outline-secondary btn-sm mb-4 fw-bold">
-        <i class="bi bi-arrow-left me-1"></i> Înapoi la acasă
+        <i class="bi bi-arrow-left me-1"></i> Înapoi la pagina princilă
     </a>
 
     <div class="row g-4 align-items-center mb-5">
@@ -15,7 +15,11 @@
             <div class="position-relative d-inline-block">
                 @if (!string.IsNullOrWhiteSpace(Model.PhotoUrl))
                 {
-                    <img src="@Model.PhotoUrl" alt="Poza @Model.FirstName" class="img-fluid rounded shadow" style="max-width: 300px; width: 100%; object-fit: cover;" />
+                    <img src="@Model.PhotoUrl" 
+                                        alt="Poza @Model.FirstName" 
+                                        class="mechanic-avatar mx-auto mb-3 rounded-circle bg-white" 
+                                        style="width: 100px; height: 100px; object-fit: cover;" 
+                                        onerror="this.onerror=null; this.src='/images/default-avatar.svg';" />
                 }
                 else
                 {

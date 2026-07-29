@@ -24,7 +24,11 @@
                     <div class="position-relative me-4">
                         @if (!string.IsNullOrEmpty(Model.PhotoUrl))
                         {
-                            <img src="@Model.PhotoUrl" alt="Avatar" class="rounded-circle shadow-sm" style="width: 100px; height: 100px; object-fit: cover;" />
+                            <img src="@Model.PhotoUrl" 
+                                        alt="Poza @Model.FirstName" 
+                                        class="mechanic-avatar mx-auto mb-3 rounded-circle bg-white" 
+                                        style="width: 100px; height: 100px; object-fit: cover;" 
+                                        onerror="this.onerror=null; this.src='/images/default-avatar.svg';" />
                         }
                         else
                         {
