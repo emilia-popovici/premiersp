@@ -24,8 +24,6 @@ namespace PremierAuto.Models
         public string? ProfilePictureUrl { get; set; }
         public bool IsPictureApproved { get; set; } = false;
 
-        // Legătura cu contul de utilizator al mecanicului (rol "Mecanic").
-        // Nullable: un mecanic poate exista în echipă fără cont încă legat.
         public string? UserId { get; set; }
 
         [ForeignKey("UserId")]

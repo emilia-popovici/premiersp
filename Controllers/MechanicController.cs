@@ -24,7 +24,6 @@ namespace PremierAuto.Controllers
             _userManager = userManager;
         }
 
-        // 1. CALENDARUL CU PROGRAMĂRI (Prima pagină)
         public async Task<IActionResult> Calendar()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -42,7 +41,6 @@ namespace PremierAuto.Controllers
             return View(appointments);
         }
 
-        // 2. RECENZIILE CLIENȚILOR (Neanonimizate, cu nume și prenume)
         public async Task<IActionResult> Reviews()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -62,7 +60,6 @@ namespace PremierAuto.Controllers
             return View(reviews);
         }
 
-        // 3. PROFILUL MECANICULUI (Exact ca cel de la clienți)
         public async Task<IActionResult> Profile()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -84,17 +81,13 @@ namespace PremierAuto.Controllers
 
             if (mechanic == null) return NotFound();
 
-            // 1. Actualizăm datele personale
             mechanic.FirstName = firstName;
             mechanic.LastName = lastName;
 
-            // 2. Gestionăm încărcarea pozei noi
             if (newPhoto != null && newPhoto.Length > 0)
             {
-                // Generăm un nume unic pentru fișier pentru a evita suprascrierile
                 var fileName = Guid.NewGuid().ToString() + Path.GetExtension(newPhoto.FileName);
                 
-                // Asigură-te că ai un folder 'mechanics' în 'wwwroot/images/'
                 var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/mechanics");
                 if (!Directory.Exists(uploadsFolder))
                 {
@@ -106,11 +99,8 @@ namespace PremierAuto.Controllers
                 {
                     await newPhoto.CopyToAsync(stream);
                 }
-
-                // AICI AM MODIFICAT: Salvăm în ProfilePictureUrl, nu în PhotoUrl
-                mechanic.ProfilePictureUrl = $"/images/mechanics/{fileName}";
                 
-                // CRUCIAL: Setăm aprobarea pe false, dar poza veche (PhotoUrl) rămâne intactă și publică
+                mechanic.ProfilePictureUrl = $"/images/mechanics/{fileName}";
                 mechanic.IsPictureApproved = false; 
             }
 
