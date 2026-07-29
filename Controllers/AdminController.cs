@@ -153,7 +153,7 @@ namespace PremierAuto.Controllers
             var appointment = await _context.Appointments.FindAsync(id);
             if (appointment != null)
             {
-                appointment.AppointmentDate = newDate;
+                appointment.AppointmentDate = DateTime.SpecifyKind(newDate, DateTimeKind.Utc);
                 appointment.Status = AppointmentStatus.Rescheduled;
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Programarea a fost reprogramată.";
