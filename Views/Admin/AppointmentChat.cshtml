@@ -18,7 +18,6 @@
     }
 
     <div class="row g-4">
-        <!-- COLOANA STANGA: Detalii Programare -->
         <div class="col-lg-4">
             <div class="card shadow-sm border-steel border-0">
                 <div class="card-header bg-navy text-white fw-bold py-3">
@@ -42,14 +41,12 @@
             </div>
         </div>
 
-        <!-- COLOANA DREAPTA: Fereastra de Chat -->
         <div class="col-lg-8">
             <div class="card shadow-sm border-steel border-0 d-flex flex-column" style="height: 600px;">
                 <div class="card-header bg-light fw-bold py-3 border-bottom">
                     <i class="bi bi-chat-text me-2 text-navy"></i> Conversație cu Clientul
                 </div>
                 
-                <!-- Istoric Mesaje -->
                 <div class="card-body overflow-auto bg-white p-4" style="flex-grow: 1;">
                     @if (messages != null && messages.Any())
                     {
@@ -76,7 +73,6 @@
                     }
                 </div>
 
-                <!-- Input pentru a trimite un mesaj nou -->
                 <div class="card-footer bg-light border-top p-3">
                     <form asp-action="SendAppointmentMessage" method="post">
                         <input type="hidden" name="appointmentId" value="@Model.Id" />

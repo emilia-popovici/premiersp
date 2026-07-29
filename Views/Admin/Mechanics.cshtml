@@ -5,7 +5,7 @@
     var unlinkedUsers = ViewBag.UnlinkedUsers as List<PremierAuto.Models.ApplicationUser>;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
     <h2 class="text-navy fw-bold mb-0">Lista Mecanicilor</h2>
     <a asp-action="CreateMechanic" class="btn btn-primary-cta fw-bold">+ Adaugă Mecanic Nou</a>
 </div>
@@ -19,95 +19,96 @@
     <div class="alert alert-success fw-bold">@TempData["SuccessMessage"]</div>
 }
 
-<table class="table table-hover bg-white shadow-sm rounded align-middle">
-    <thead class="bg-navy text-white">
-        <tr>
-            <th>Poză</th>
-            <th>Nume</th>
-            <th>Rating</th>
-            <th>Poză aprobată</th>
-            <th>Cont legat</th>
-            <th>Acțiuni</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var m in Model)
-        {
-            <tr>
-                <td>
-                    <img src="@(string.IsNullOrEmpty(m.PhotoUrl) ? "/images/default-avatar.png" : m.PhotoUrl)" alt="Avatar" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" />
-                </td>
-                <td class="fw-bold">@m.LastName @m.FirstName</td>
-                <td>⭐ @m.Rating.ToString("0.0")</td>
-                <td>
-                    @if (!m.IsPictureApproved && !string.IsNullOrEmpty(m.ProfilePictureUrl))
-                    {
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="text-center">
-                                <small class="text-muted d-block" style="font-size: 0.75rem;">Publică</small>
-                                <img src="@m.PhotoUrl" class="rounded-circle shadow-sm" style="width: 50px; height: 50px; object-fit: cover; opacity: 0.7;" alt="Veche" />
-                            </div>
-                            
-                            <i class="bi bi-arrow-right text-secondary"></i>
-                            
-                            <div class="text-center border border-warning rounded p-2 bg-light">
-                                <small class="text-warning fw-bold d-block mb-1" style="font-size: 0.75rem;">NOUĂ (În așteptare)</small>
-                                <img src="@m.ProfilePictureUrl" class="rounded-circle shadow-sm border border-2 border-warning mb-2" style="width: 60px; height: 60px; object-fit: cover;" alt="Noua" />
-                                
-                                <form asp-action="ApprovePicture" method="post">
-                                    <input type="hidden" name="id" value="@m.Id" />
-                                    <button type="submit" class="btn btn-sm btn-success fw-bold">
-                                        <i class="bi bi-check-lg"></i> Aprobă
-                                    </button>
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0 table-responsive">
+        <table class="table table-hover bg-white mb-0 align-middle" style="min-width: 800px;">
+            <thead class="bg-navy text-white">
+                <tr>
+                    <th class="ps-3">Poză</th>
+                    <th class="text-nowrap">Nume</th>
+                    <th>Rating</th>
+                    <th>Poză aprobată</th>
+                    <th class="text-nowrap">Cont legat</th>
+                    <th class="pe-3 text-end">Acțiuni</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var m in Model)
+                {
+                    <tr>
+                        <td class="ps-3">
+                            <img src="@(string.IsNullOrEmpty(m.PhotoUrl) ? "/images/default-avatar.png" : m.PhotoUrl)" alt="Avatar" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" />
+                        </td>
+                        <td class="fw-bold text-nowrap">@m.LastName @m.FirstName</td>
+                        <td class="text-nowrap">⭐ @m.Rating.ToString("0.0")</td>
+                        <td>
+                            @if (!m.IsPictureApproved && !string.IsNullOrEmpty(m.ProfilePictureUrl))
+                            {
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="text-center">
+                                        <small class="text-muted d-block" style="font-size: 0.75rem;">Publică</small>
+                                        <img src="@m.PhotoUrl" class="rounded-circle shadow-sm" style="width: 50px; height: 50px; object-fit: cover; opacity: 0.7;" alt="Veche" />
+                                    </div>
+                                    <i class="bi bi-arrow-right text-secondary"></i>
+                                    <div class="text-center border border-warning rounded p-2 bg-light">
+                                        <small class="text-warning fw-bold d-block mb-1" style="font-size: 0.75rem;">NOUĂ (În așteptare)</small>
+                                        <img src="@m.ProfilePictureUrl" class="rounded-circle shadow-sm border border-2 border-warning mb-2" style="width: 60px; height: 60px; object-fit: cover;" alt="Noua" />
+                                        <form asp-action="ApprovePicture" method="post">
+                                            <input type="hidden" name="id" value="@m.Id" />
+                                            <button type="submit" class="btn btn-sm btn-success fw-bold text-nowrap">
+                                                <i class="bi bi-check-lg"></i> Aprobă
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center">
+                                    <img src="@m.PhotoUrl" class="rounded-circle shadow-sm mb-1" style="width: 50px; height: 50px; object-fit: cover;" alt="Curenta" />
+                                    <span class="badge bg-success d-block" style="font-size: 0.7rem;"><i class="bi bi-check-circle me-1"></i>Aprobată</span>
+                                </div>
+                            }
+                        </td>
+                        <td>
+                            @if (m.User != null)
+                            {
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-primary text-nowrap">@m.User.Email</span>
+                                    <form asp-action="UnlinkMechanicUser" method="post" onsubmit="return confirm('Deconectezi contul de la acest mecanic?');">
+                                        <input type="hidden" name="mechanicId" value="@m.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary text-nowrap">Deconectează</button>
+                                    </form>
+                                </div>
+                            }
+                            else if (unlinkedUsers != null && unlinkedUsers.Any())
+                            {
+                                <form asp-action="LinkMechanicUser" method="post" class="d-flex gap-2">
+                                    <input type="hidden" name="mechanicId" value="@m.Id" />
+                                    <select name="userId" class="form-select form-select-sm" style="min-width: 150px;" required>
+                                        <option value="">-- Alege contul --</option>
+                                        @foreach (var u in unlinkedUsers)
+                                        {
+                                            <option value="@u.Id">@(string.IsNullOrWhiteSpace(u.FirstName) ? u.Email : $"{u.FirstName} {u.LastName} ({u.Email})")</option>
+                                        }
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-primary-cta fw-bold">Leagă</button>
                                 </form>
-                            </div>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="text-center">
-                            <img src="@m.PhotoUrl" class="rounded-circle shadow-sm mb-1" style="width: 50px; height: 50px; object-fit: cover;" alt="Curenta" />
-                            <span class="badge bg-success d-block" style="font-size: 0.7rem;"><i class="bi bi-check-circle me-1"></i>Aprobată</span>
-                        </div>
-                    }
-                </td>
-                <td>
-                    @if (m.User != null)
-                    {
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="badge bg-primary">@m.User.Email</span>
-                            <form asp-action="UnlinkMechanicUser" method="post" onsubmit="return confirm('Deconectezi contul de la acest mecanic?');">
-                                <input type="hidden" name="mechanicId" value="@m.Id" />
-                                <button type="submit" class="btn btn-sm btn-outline-secondary">Deconectează</button>
+                            }
+                            else
+                            {
+                                <span class="text-muted small text-nowrap">Niciun cont disponibil</span>
+                            }
+                        </td>
+                        <td class="pe-3 text-end">
+                            <form asp-action="DeleteMechanic" method="post" onsubmit="return confirm('Sigur vrei să ștergi acest mecanic?');">
+                                <input type="hidden" name="id" value="@m.Id" />
+                                <button type="submit" class="btn btn-sm btn-danger fw-bold">Șterge</button>
                             </form>
-                        </div>
-                    }
-                    else if (unlinkedUsers != null && unlinkedUsers.Any())
-                    {
-                        <form asp-action="LinkMechanicUser" method="post" class="d-flex gap-2">
-                            <input type="hidden" name="mechanicId" value="@m.Id" />
-                            <select name="userId" class="form-select form-select-sm" required>
-                                <option value="">-- Alege contul --</option>
-                                @foreach (var u in unlinkedUsers)
-                                {
-                                    <option value="@u.Id">@(string.IsNullOrWhiteSpace(u.FirstName) ? u.Email : $"{u.FirstName} {u.LastName} ({u.Email})")</option>
-                                }
-                            </select>
-                            <button type="submit" class="btn btn-sm btn-primary-cta fw-bold">Leagă</button>
-                        </form>
-                    }
-                    else
-                    {
-                        <span class="text-muted small">Niciun cont disponibil</span>
-                    }
-                </td>
-                <td>
-                    <form asp-action="DeleteMechanic" method="post" onsubmit="return confirm('Sigur vrei să ștergi acest mecanic?');">
-                        <input type="hidden" name="id" value="@m.Id" />
-                        <button type="submit" class="btn btn-sm btn-danger fw-bold">Șterge</button>
-                    </form>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

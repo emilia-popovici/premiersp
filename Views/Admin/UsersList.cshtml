@@ -8,9 +8,9 @@
     ViewData["Title"] = "Clienți Înregistrați";
 }
 
-<div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-navy"><i class="bi bi-people-fill me-2"></i> Clienți Înregistrați</h2>
+<div class="container py-4 py-md-5">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <h2 class="fw-bold text-navy mb-0"><i class="bi bi-people-fill me-2"></i> Clienți Înregistrați</h2>
         <span class="badge bg-primary fs-6">Total: @Model.Count()</span>
     </div>
 
@@ -20,26 +20,26 @@
     }
 
     <div class="card shadow-sm border-0 bg-white">
-        <div class="card-body p-4">
+        <div class="card-body p-0 p-md-4">
             <div class="table-responsive">
-                <table class="table table-hover align-middle">
+                <table class="table table-hover align-middle mb-0" style="min-width: 700px;">
                     <thead class="table-light">
                         <tr>
-                            <th>Nume și Prenume</th>
-                            <th>Email</th>
-                            <th>Număr Telefon</th>
-                            <th class="text-end">Acțiuni</th>
+                            <th class="ps-3 ps-md-2 text-nowrap">Nume și Prenume</th>
+                            <th class="text-nowrap">Email</th>
+                            <th class="text-nowrap">Număr Telefon</th>
+                            <th class="text-end pe-3 pe-md-2 text-nowrap">Acțiuni</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var client in Model)
                         {
                             <tr>
-                                <td class="fw-bold text-navy">@client.LastName @client.FirstName</td>
-                                <td>@client.Email</td>
-                                <td>@(string.IsNullOrEmpty(client.PhoneNumber) ? "Nespecificat" : client.PhoneNumber)</td>
-                                <td class="text-end">
-                                    <a asp-action="UserDetails" asp-route-userId="@client.UserId" class="btn btn-sm btn-outline-primary fw-bold">
+                                <td class="ps-3 ps-md-2 fw-bold text-navy text-nowrap">@client.LastName @client.FirstName</td>
+                                <td class="text-nowrap">@client.Email</td>
+                                <td class="text-nowrap">@(string.IsNullOrEmpty(client.PhoneNumber) ? "Nespecificat" : client.PhoneNumber)</td>
+                                <td class="text-end pe-3 pe-md-2">
+                                    <a asp-action="UserDetails" asp-route-userId="@client.UserId" class="btn btn-sm btn-outline-primary fw-bold text-nowrap">
                                         <i class="bi bi-graph-up-arrow me-1"></i> Vezi Statistici
                                     </a>
                                 </td>

@@ -13,31 +13,30 @@
     <link rel="shortcut icon" href="~/favicon.ico">
 
     <link rel="apple-touch-icon" sizes="180x180" href="~/apple-touch-icon.png">
-
     <link rel="manifest" href="~/site.webmanifest">
 </head>
 <body>
-    <div class="d-md-none bg-navy text-white p-3 d-flex justify-content-between align-items-center shadow-sm">
+    <div class="d-md-none bg-navy text-white p-3 d-flex justify-content-between align-items-center shadow-sm sticky-top">
         <span class="fs-5 fw-bold">PREMIER SP AUTO</span>
         <button class="btn btn-outline-light border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#adminSidebar">
             <i class="bi bi-list fs-2"></i>
         </button>
     </div>
 
-    <div class="d-flex flex-nowrap" style="min-height: 100vh;">
-        <div id="adminSidebar" class="bg-navy text-white d-flex flex-column shadow offcanvas-md offcanvas-start" tabindex="-1" style="width: 280px;">
+    <div class="d-flex flex-nowrap align-items-start">
+        <div id="adminSidebar" class="bg-navy text-white d-flex flex-column shadow offcanvas-md offcanvas-start sticky-md-top vh-100" tabindex="-1" style="width: 280px; z-index: 1040;">
             <div class="offcanvas-header d-md-none border-bottom border-light pt-3 pb-3">
                 <h5 class="offcanvas-title fw-bold text-white">Meniu Admin</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" data-bs-target="#adminSidebar"></button>
             </div>
 
-            <div class="offcanvas-body d-flex flex-column p-3 flex-grow-1 overflow-y-auto">
+            <div class="offcanvas-body d-flex flex-column p-3 h-100 w-100">
                 <a href="/" class="d-none d-md-flex align-items-center mb-4 text-white text-decoration-none">
                     <span class="fs-4 fw-bold">PREMIER SP AUTO</span>
                 </a>
                 <hr class="text-white-50 d-none d-md-block mt-0">
                 
-                <ul class="nav nav-pills flex-column mb-auto mt-2 w-100">
+                <ul class="nav nav-pills flex-column mb-auto mt-2 w-100" style="overflow-y: auto;">
                     <li class="nav-item mb-2">
                         <a asp-controller="Admin" asp-action="Index" class="nav-link text-white @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active bg-danger" : "")">
                             <i class="bi bi-bar-chart-fill me-2"></i> Statistici & Dashboard
@@ -70,8 +69,7 @@
                     </li>
                 </ul>
                 
-                <hr class="text-white-50 mt-4">
-                <div class="mt-2">
+                <div class="mt-3 pt-3 border-top border-secondary">
                     <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
                         <button type="submit" class="btn btn-outline-light w-100 fw-bold">
                             <i class="bi bi-box-arrow-right me-2"></i> Logout
@@ -81,14 +79,14 @@
             </div>
         </div>
 
-        <div class="flex-grow-1 bg-light d-flex flex-column" style="min-width: 0;">
-            <nav class="navbar navbar-light bg-white border-bottom shadow-sm px-4 py-3 d-none d-md-block">
+        <div class="flex-grow-1 bg-light d-flex flex-column" style="min-width: 0; min-height: 100vh;">
+            <nav class="navbar navbar-light bg-white border-bottom shadow-sm px-4 py-3 d-none d-md-block sticky-top">
                 <div class="container-fluid">
                     <span class="navbar-brand mb-0 h4 fw-bold text-navy">Panou de Administrare</span>
                 </div>
             </nav>
 
-            <main class="p-3 p-md-4 flex-grow-1" style="overflow-x: hidden;">
+            <main class="p-3 p-md-4 flex-grow-1">
                 @if (TempData["SuccessMessage"] != null)
                 {
                     <div class="alert alert-success alert-dismissible fade show fw-bold shadow-sm" role="alert">

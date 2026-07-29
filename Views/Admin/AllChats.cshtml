@@ -11,12 +11,12 @@
     <div class="card shadow-sm border-0 bg-white">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-hover align-middle mb-0" style="min-width: 700px;">
                     <thead class="bg-navy text-white">
                         <tr>
                             <th class="py-3 px-3">Client</th>
                             <th class="py-3">Mașină & Serviciu</th>
-                            <th class="py-3">Data Programării</th>
+                            <th class="py-3 text-nowrap">Data Programării</th>
                             <th class="py-3 text-center">Acțiune</th>
                         </tr>
                     </thead>
@@ -29,17 +29,17 @@
                         {
                             <tr>
                                 <td class="px-3">
-                                    <span class="fw-bold">@app.Client?.FirstName @app.Client?.LastName</span><br />
-                                    <small class="text-muted"><i class="bi bi-telephone"></i> @app.Client?.PhoneNumber</small>
+                                    <span class="fw-bold text-nowrap">@app.Client?.FirstName @app.Client?.LastName</span><br />
+                                    <small class="text-muted text-nowrap"><i class="bi bi-telephone"></i> @app.Client?.PhoneNumber</small>
                                 </td>
                                 <td>
-                                    <span class="fw-bold">@app.CarMake @app.CarModel</span><br />
-                                    <span class="badge bg-light text-dark border">@app.Service?.Name</span>
+                                    <span class="fw-bold text-nowrap">@app.CarMake @app.CarModel</span><br />
+                                    <span class="badge bg-light text-dark border text-wrap">@app.Service?.Name</span>
                                 </td>
-                                <td>
+                                <td class="text-nowrap">
                                     @app.AppointmentDate.ToString("dd/MM/yyyy HH:mm")
                                 </td>
-                                <td class="text-center">
+                                <td class="text-center text-nowrap">
                                     <a asp-controller="Admin" asp-action="AppointmentChat" asp-route-id="@app.Id" class="btn btn-sm btn-primary-cta fw-bold">
                                         <i class="bi bi-chat-text me-1"></i> Deschide Conversația
                                     </a>
