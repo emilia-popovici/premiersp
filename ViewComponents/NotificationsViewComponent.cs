@@ -19,19 +19,14 @@ namespace PremierAuto.ViewComponents
         public async Task<IViewComponentResult> InvokeAsync()
         {
             var userId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null)
-            {
-                return Content(string.Empty);
-            }
-
+            
             var notifications = await _context.Notifications
-                .Where(n => n.UserId == userId)
                 .OrderByDescending(n => n.CreatedAt)
                 .Take(5)
                 .ToListAsync();
 
             ViewBag.UnreadCount = await _context.Notifications
-                .Where(n => n.UserId == userId && !n.IsRead)
+                .Where(n => !n.IsRead)
                 .CountAsync();
 
             return View(notifications);
