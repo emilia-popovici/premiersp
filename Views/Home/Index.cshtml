@@ -106,6 +106,7 @@
     </div>
 </section>
 
+<!-- SECTIUNEA ECHIPA (MECANICI DINAMICI) -->
 <section class="bg-white section-space">
     <div class="container">
         <div class="row align-items-end mb-5">
@@ -122,14 +123,18 @@
                     <div class="col-sm-6 col-lg-3">
                         <a asp-controller="Home" asp-action="MechanicDetails" asp-route-id="@mechanic.Id" class="text-decoration-none">
                             <article class="mechanic-card text-center h-100 p-4 shadow-sm hover-effect">
-                                @if (!string.IsNullOrEmpty(mechanic.PhotoUrl))
+                                
+                                @if (!string.IsNullOrWhiteSpace(mechanic.PhotoUrl))
                                 {
-                                    <img src="@mechanic.PhotoUrl" alt="@mechanic.FirstName @mechanic.LastName" class="mechanic-avatar mx-auto mb-3" />
+                                    <img src="@mechanic.PhotoUrl" alt="Poza @mechanic.FirstName" class="mechanic-avatar mx-auto mb-3 rounded-circle" style="width: 100px; height: 100px; object-fit: cover;" />
                                 }
                                 else
                                 {
-                                    <div class="mechanic-avatar mx-auto d-flex align-items-center justify-content-center mb-3" style="font-size:1.6rem;">🔧</div>
+                                    <div class="mechanic-avatar mx-auto d-flex align-items-center justify-content-center mb-3 rounded-circle bg-light border text-secondary" style="width: 100px; height: 100px; font-size:3rem;">
+                                        <i class="bi bi-person-fill"></i>
+                                    </div>
                                 }
+
                                 <h3 class="h5 fw-bold text-navy mb-1">@mechanic.FirstName @mechanic.LastName</h3>
                                 <span class="small text-muted"><i class="bi bi-star-fill text-warning me-1"></i> Vezi recenzii și detalii</span>
                             </article>
