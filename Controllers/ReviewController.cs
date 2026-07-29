@@ -48,11 +48,14 @@ namespace PremierAuto.Controllers
             }
             else
             {
+                var bucharestTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Europe/Bucharest"));
+
                 var review = new Review
                 {
                     AppointmentId = appointmentId,
                     Rating = rating,
-                    Comment = comment
+                    Comment = comment,
+                    CreatedAt = DateTime.SpecifyKind(bucharestTime, DateTimeKind.Utc)
                 };
                 _context.Reviews.Add(review);
             }
