@@ -196,33 +196,43 @@
 
             if (!slider || cards.length === 0) return;
 
-            // 1. Generăm punctele automat în funcție de câte carduri avem
-            cards.forEach((card, index) => {
-                const dot = document.createElement('div');
-                dot.classList.add('slider-dot');
-                if (index === 0) dot.classList.add('active'); // Primul e activ by default
+            let dots = [];
 
-                // Când dai click pe un punct, te duce la cardul respectiv
-                dot.addEventListener('click', () => {
-                    slider.scrollTo({
-                        left: card.offsetLeft - slider.offsetLeft,
-                        behavior: 'smooth'
-                    });
-                });
-                dotsContainer.appendChild(dot);
-            });
+            function initSlider() {
+                dotsContainer.innerHTML = '';
+                dots = [];
 
-            const dots = document.querySelectorAll('.slider-dot');
-
-            // 2. Când faci scroll (sau dai swipe pe telefon), actualizăm punctul activ
-            slider.addEventListener('scroll', () => {
-                // Calculăm la al câtelea card ne aflăm
-                let activeIndex = Math.round(slider.scrollLeft / cards[0].offsetWidth);
+                const maxScrollLeft = slider.scrollWidth - slider.clientWidth;
+                const cardWidth = cards[0].offsetWidth;
                 
-                // Ne asigurăm că nu depășim limitele
+                const maxIndex = maxScrollLeft > 0 ? Math.round(maxScrollLeft / cardWidth) : 0;
+
+                for (let i = 0; i <= maxIndex; i++) {
+                    const dot = document.createElement('div');
+                    dot.classList.add('slider-dot');
+                    if (i === 0) dot.classList.add('active');
+
+                    dot.addEventListener('click', () => {
+                        slider.scrollTo({
+                            left: cards[i].offsetLeft - slider.offsetLeft,
+                            behavior: 'smooth'
+                        });
+                    });
+                    
+                    dotsContainer.appendChild(dot);
+                    dots.push(dot);
+                }
+                
+                updateActiveDot();
+            }
+
+            function updateActiveDot() {
+                if(dots.length === 0) return;
+                const cardWidth = cards[0].offsetWidth;
+                let activeIndex = Math.round(slider.scrollLeft / cardWidth);
+                
                 activeIndex = Math.max(0, Math.min(activeIndex, dots.length - 1));
 
-                // Colorăm punctul corect
                 dots.forEach((dot, idx) => {
                     if (idx === activeIndex) {
                         dot.classList.add('active');
@@ -230,12 +240,18 @@
                         dot.classList.remove('active');
                     }
                 });
+            }
+
+            setTimeout(initSlider, 100);
+
+            window.addEventListener('resize', () => {
+                initSlider();
             });
 
-            // 3. Logica pentru săgeți (stânga / dreapta)
+            slider.addEventListener('scroll', updateActiveDot);
+
             if (btnNext && btnPrev) {
                 btnNext.addEventListener('click', () => {
-                    // Derulăm un card (lățimea cardului + 24px marginea dintre ele)
                     slider.scrollBy({ left: cards[0].offsetWidth + 24, behavior: 'smooth' });
                 });
 
