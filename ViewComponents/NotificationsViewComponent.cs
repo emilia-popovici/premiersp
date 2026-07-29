@@ -21,12 +21,13 @@ namespace PremierAuto.ViewComponents
             var userId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
             
             var notifications = await _context.Notifications
+                .Where(n => n.UserId == userId)
                 .OrderByDescending(n => n.CreatedAt)
                 .Take(5)
                 .ToListAsync();
 
             ViewBag.UnreadCount = await _context.Notifications
-                .Where(n => !n.IsRead)
+                .Where(n => n.UserId == userId && !n.IsRead)
                 .CountAsync();
 
             return View(notifications);
