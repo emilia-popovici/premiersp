@@ -86,18 +86,30 @@
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const serviceSelect = document.getElementById('ServiceId'); // Asigură-te că id-ul corespunde selectului tău
+            const serviceSelect = document.getElementById('ServiceId');
             const mechanicSelect = document.getElementById('mechanicSelect');
             const dateInput = document.getElementById('appointmentDate');
             const timeSlotsContainer = document.getElementById('timeSlotsContainer');
             const selectedTimeInput = document.getElementById('selectedTime');
+
+            dateInput.addEventListener('input', function () {
+                const dateVal = new Date(this.value);
+                const day = dateVal.getDay();
+
+                if (day === 0 || day === 6) {
+                    this.value = '';
+                    timeSlotsContainer.innerHTML = '<span class="text-danger small">Service-ul este închis în weekend (Sâmbătă și Duminică). Alegeți o zi lucrătoare (Luni–Vineri).</span>';
+                    selectedTimeInput.value = '';
+                } else {
+                    fetchAvailableHours();
+                }
+            });
 
             function fetchAvailableHours() {
                 const serviceId = serviceSelect.value;
                 const mechanicId = mechanicSelect.value;
                 const date = dateInput.value;
 
-                // Verificăm să avem toate cele 3 câmpuri completate
                 if (!serviceId || !mechanicId || !date) {
                     timeSlotsContainer.innerHTML = '<span class="text-muted small">Selectează serviciul, mecanicul și data pentru a vedea orele disponibile.</span>';
                     return;
@@ -105,7 +117,6 @@
 
                 timeSlotsContainer.innerHTML = '<span class="spinner-border spinner-border-sm text-navy"></span> <span class="ms-2">Se calculează intervalele compatibile...</span>';
 
-                // Trimitem și serviceId în URL
                 fetch(`/Appointment/GetAvailableHours?mechanicId=${mechanicId}&serviceId=${serviceId}&date=${date}`)
                     .then(response => response.json())
                     .then(hours => {
@@ -113,7 +124,7 @@
                         selectedTimeInput.value = '';
 
                         if (hours.length === 0) {
-                            timeSlotsContainer.innerHTML = '<div class="alert alert-warning w-100 mb-0 py-2"><i class="bi bi-exclamation-triangle me-2"></i>Nu există un interval continuu suficient de mare pentru acest serviciu în data aleasă.</div>';
+                            timeSlotsContainer.innerHTML = '<div class="alert alert-warning w-100 mb-0 py-2"><i class="bi bi-exclamation-triangle me-2"></i>Nu există un interval continuu suficient de mare pentru acest serviciu în data aleasă sau este zi de weekend.</div>';
                             return;
                         }
 
@@ -138,7 +149,6 @@
                     });
             }
 
-            // Ascultăm schimbările pe toate cele 3 elemente
             serviceSelect.addEventListener('change', fetchAvailableHours);
             mechanicSelect.addEventListener('change', fetchAvailableHours);
             dateInput.addEventListener('change', fetchAvailableHours);

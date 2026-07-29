@@ -172,6 +172,8 @@ namespace PremierAuto.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAvailableHours(int mechanicId, int serviceId, DateTime date)
         {
+            DateTime utcDate = DateTime.SpecifyKind(date, DateTimeKind.Utc);
+
             var service = await _context.Services.FindAsync(serviceId);
             int durationMinutes = service != null ? service.DurationMinutes : 30; 
 
@@ -184,7 +186,7 @@ namespace PremierAuto.Controllers
                 workingHours.Add(time);
             }
 
-            if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
+            if (utcDate.DayOfWeek == DayOfWeek.Saturday || utcDate.DayOfWeek == DayOfWeek.Sunday)
             {
                 return Json(new List<string>()); 
             }
@@ -192,7 +194,7 @@ namespace PremierAuto.Controllers
             var bookedAppointments = await _context.Appointments
                 .Include(a => a.Service)
                 .Where(a => a.MechanicId == mechanicId 
-                        && a.AppointmentDate.Date == date.Date 
+                        && a.AppointmentDate.Date == utcDate.Date 
                         && a.Status != AppointmentStatus.Canceled 
                         && a.Status != AppointmentStatus.Rejected)
                 .ToListAsync();
@@ -201,7 +203,7 @@ namespace PremierAuto.Controllers
 
             foreach (var slot in workingHours)
             {
-                var slotStart = date.Date + slot;
+                var slotStart = utcDate.Date + slot;
                 var slotEnd = slotStart.AddMinutes(durationMinutes);
 
                 bool isOverlap = bookedAppointments.Any(booked =>
@@ -215,7 +217,7 @@ namespace PremierAuto.Controllers
 
                 if (!isOverlap)
                 {
-                    if (date.Date != DateTime.Today || slotStart.TimeOfDay > DateTime.Now.TimeOfDay)
+                    if (utcDate.Date != DateTime.Today || slotStart.TimeOfDay > DateTime.Now.TimeOfDay)
                     {
                         availableHours.Add(slot.ToString(@"hh\:mm"));
                     }
