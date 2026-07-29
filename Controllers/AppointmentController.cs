@@ -332,7 +332,7 @@ namespace PremierAuto.Controllers
                 SenderId = user.Id,
                 IsAdmin = false,
                 Text = text,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Europe/Bucharest"))
             };
 
             _context.AppointmentMessages.Add(message);

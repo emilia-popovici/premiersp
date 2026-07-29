@@ -33,7 +33,7 @@ namespace PremierAuto.Controllers
             ViewBag.PendingAppointmentsCount = pendingAppointments;
 
             int unreadMessagesCount = await _context.AppointmentMessages
-                .Where(m => !m.IsAdmin)
+                .Where(m => !m.IsAdmin && !m.IsRead)
                 .CountAsync();
             ViewBag.UnreadMessagesCount = unreadMessagesCount;
             
@@ -162,7 +162,8 @@ namespace PremierAuto.Controllers
                     UserId = appointment.ClientId,
                     Title = "Status programare actualizat",
                     Message = $"Programarea ta pentru {appointment.CarMake} {appointment.CarModel} a fost {statusText}.",
-                    Url = $"/Appointment/Chat/{appointment.Id}"
+                    Url = $"/Appointment/Chat/{appointment.Id}",
+                    CreatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Europe/Bucharest"))
                 };
                 _context.Notifications.Add(notification);
                 await _context.SaveChangesAsync();
@@ -186,7 +187,8 @@ namespace PremierAuto.Controllers
                     UserId = appointment.ClientId,
                     Title = "Programare reprogramată",
                     Message = $"Programarea ta a fost reprogramată pentru data de {appointment.AppointmentDate:dd/MM/yyyy HH:mm}.",
-                    Url = $"/Appointment/Chat/{appointment.Id}"
+                    Url = $"/Appointment/Chat/{appointment.Id}",
+                    CreatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Europe/Bucharest"))
                 };
                 _context.Notifications.Add(notification);
                 await _context.SaveChangesAsync();
@@ -244,7 +246,7 @@ namespace PremierAuto.Controllers
                 SenderId = adminUser.Id,
                 IsAdmin = true,
                 Text = text,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Europe/Bucharest"))
             };
 
             _context.AppointmentMessages.Add(message);
