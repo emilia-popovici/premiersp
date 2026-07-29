@@ -96,10 +96,9 @@ namespace PremierAuto.Controllers
         {
             if (!await EnsureClientAccess()) return Forbid();
 
-            // Combinăm data cu ora aleasă prin AJAX
             if (TimeSpan.TryParse(selectedTime, out TimeSpan parsedTime))
             {
-                model.AppointmentDate = selectedDate.Date + parsedTime;
+                model.AppointmentDate = DateTime.SpecifyKind(selectedDate.Date + parsedTime, DateTimeKind.Utc);
             }
             else
             {
@@ -108,7 +107,6 @@ namespace PremierAuto.Controllers
                 return View(model);
             }
 
-            // Validare dacă intervalul mai este liber
             if (model.MechanicId.HasValue)
             {
                 var service = await _context.Services.FindAsync(model.ServiceId);
@@ -217,7 +215,7 @@ namespace PremierAuto.Controllers
 
                 if (!isOverlap)
                 {
-                    if (utcDate.Date != DateTime.Today || slotStart.TimeOfDay > DateTime.Now.TimeOfDay)
+                    if (utcDate.Date != DateTime.Today || slotStart.TimeOfDay > DateTime.UtcNow.TimeOfDay)
                     {
                         availableHours.Add(slot.ToString(@"hh\:mm"));
                     }
@@ -334,7 +332,7 @@ namespace PremierAuto.Controllers
                 SenderId = user.Id,
                 IsAdmin = false,
                 Text = text,
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.UtcNow
             };
 
             _context.AppointmentMessages.Add(message);

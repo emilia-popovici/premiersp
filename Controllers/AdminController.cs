@@ -199,7 +199,7 @@ namespace PremierAuto.Controllers
                 SenderId = adminUser.Id,
                 IsAdmin = true,
                 Text = text,
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.UtcNow
             };
 
             _context.AppointmentMessages.Add(message);
