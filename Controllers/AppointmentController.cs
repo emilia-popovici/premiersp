@@ -325,6 +325,7 @@ namespace PremierAuto.Controllers
                 .FirstOrDefaultAsync(a => a.Id == appointmentId && a.ClientId == user.Id);
                 
             if (appointment == null) return Unauthorized();
+            var bucharestTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Europe/Bucharest"));
 
             var message = new AppointmentMessage
             {
@@ -332,7 +333,7 @@ namespace PremierAuto.Controllers
                 SenderId = user.Id,
                 IsAdmin = false,
                 Text = text,
-                CreatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Europe/Bucharest"))
+                CreatedAt = DateTime.SpecifyKind(bucharestTime, DateTimeKind.Utc)
             };
 
             _context.AppointmentMessages.Add(message);
