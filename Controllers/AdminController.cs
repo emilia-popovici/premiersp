@@ -157,13 +157,15 @@ namespace PremierAuto.Controllers
                     _ => "actualizată"
                 };
 
+                var bucharestTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Europe/Bucharest"));
+
                 var notification = new Notification
                 {
                     UserId = appointment.ClientId,
                     Title = "Status programare actualizat",
                     Message = $"Programarea ta pentru {appointment.CarMake} {appointment.CarModel} a fost {statusText}.",
                     Url = $"/Appointment/Chat/{appointment.Id}",
-                    CreatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Europe/Bucharest"))
+                    CreatedAt = DateTime.SpecifyKind(bucharestTime, DateTimeKind.Utc)
                 };
                 _context.Notifications.Add(notification);
                 await _context.SaveChangesAsync();
@@ -239,6 +241,7 @@ namespace PremierAuto.Controllers
             }
 
             var adminUser = await _userManager.GetUserAsync(User);
+            var bucharestTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Europe/Bucharest"));
 
             var message = new AppointmentMessage
             {
@@ -246,7 +249,7 @@ namespace PremierAuto.Controllers
                 SenderId = adminUser.Id,
                 IsAdmin = true,
                 Text = text,
-                CreatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Europe/Bucharest"))
+                CreatedAt = DateTime.SpecifyKind(bucharestTime, DateTimeKind.Utc)
             };
 
             _context.AppointmentMessages.Add(message);
@@ -260,9 +263,12 @@ namespace PremierAuto.Controllers
                 UserId = appointment.ClientId,
                 Title = "Mesaj nou de la service",
                 Message = "Ai primit un mesaj nou legat de programarea ta.",
-                Url = $"/Appointment/Chat/{appointmentId}"
+                Url = $"/Appointment/Chat/{appointmentId}",
+                CreatedAt = DateTime.SpecifyKind(bucharestTime, DateTimeKind.Utc)
             };
             _context.Notifications.Add(notification);
+            await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(AppointmentChat), new { id = appointmentId });
         }
 
