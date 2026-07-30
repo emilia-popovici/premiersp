@@ -108,7 +108,6 @@ namespace PremierAuto.Controllers
         }
 
         //crud masini
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddCar(string carMake, string carModel, string? licensePlate)
@@ -146,6 +145,33 @@ namespace PremierAuto.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditCar(int id, string carMake, string carModel, string? licensePlate)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            var car = await _context.ClientCars.FirstOrDefaultAsync(c => c.Id == id && c.ClientId == user.Id);
+            if (car == null) return NotFound();
+
+            if (string.IsNullOrWhiteSpace(carMake) || string.IsNullOrWhiteSpace(carModel))
+            {
+                TempData["ErrorMessage"] = "Marca și modelul sunt obligatorii.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            car.CarMake = carMake.Trim();
+            car.CarModel = carModel.Trim();
+            car.LicensePlate = string.IsNullOrWhiteSpace(licensePlate) ? null : licensePlate.Trim().ToUpper();
+
+            _context.ClientCars.Update(car);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Mașina a fost actualizată cu succes!";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteCar(int id)
         {
             var user = await _userManager.GetUserAsync(User);
@@ -167,18 +193,20 @@ namespace PremierAuto.Controllers
             if (profilePicture != null && profilePicture.Length > 0)
             {
                 var fileName = Guid.NewGuid().ToString() + Path.GetExtension(profilePicture.FileName);
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", fileName);
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
                 
-                var directory = Path.GetDirectoryName(filePath);
-                if (!Directory.Exists(directory))
+                if (!Directory.Exists(uploadsFolder))
                 {
-                    Directory.CreateDirectory(directory);
+                    Directory.CreateDirectory(uploadsFolder);
                 }
+
+                var filePath = Path.Combine(uploadsFolder, fileName);
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
                     await profilePicture.CopyToAsync(stream);
                 }
+
                 profile.ProfilePictureUrl = "/uploads/" + fileName;
             }
         }
