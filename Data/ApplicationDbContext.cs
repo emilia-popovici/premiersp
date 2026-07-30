@@ -19,6 +19,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<ContactMessage> ContactMessages { get; set; }
     public DbSet<AppointmentMessage> AppointmentMessages { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<ClientCar> ClientCars { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
 {

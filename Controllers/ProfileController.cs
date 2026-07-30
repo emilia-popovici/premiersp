@@ -8,6 +8,7 @@ using PremierAuto.Models;
 using PremierAuto.ViewModels;
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PremierAuto.Controllers
@@ -33,7 +34,12 @@ namespace PremierAuto.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login", "Account");
+            
             var profile = await _context.ClientProfiles.FirstOrDefaultAsync(p => p.UserId == user.Id);
+
+            var cars = await _context.ClientCars.Where(c => c.ClientId == user.Id).ToListAsync();
+            ViewBag.ClientCars = cars;
+            ViewBag.HasPassword = await _userManager.HasPasswordAsync(user);
 
             var model = new ClientProfileViewModel();
             if (profile != null)
@@ -59,19 +65,16 @@ namespace PremierAuto.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Challenge();
             
-            // Actualizăm datele de bază din Identity
             user.FirstName = model.FirstName ?? user.FirstName;
             user.LastName = model.LastName ?? user.LastName;
             user.PhoneNumber = model.PhoneNumber;
             await _userManager.UpdateAsync(user);
             
-            // Căutăm profilul în tabelul nostru
             var profile = await _context.ClientProfiles
                 .FirstOrDefaultAsync(p => p.UserId == user.Id);
 
             if (profile == null)
             {
-                // Creare profil nou
                 profile = new ClientProfile
                 {
                     UserId = user.Id,
@@ -83,7 +86,6 @@ namespace PremierAuto.Controllers
                 await SaveProfilePicture(profile, profilePicture);
                 _context.ClientProfiles.Add(profile);
 
-                // Îi dăm rolul de Client doar dacă nu e Admin
                 if (!await _userManager.IsInRoleAsync(user, "Admin"))
                 {
                     await _userManager.AddToRoleAsync(user, "Client");
@@ -91,7 +93,6 @@ namespace PremierAuto.Controllers
             }
             else
             {
-                // Actualizare profil existent
                 profile.FirstName = model.FirstName ?? profile.FirstName;
                 profile.LastName = model.LastName ?? profile.LastName;
                 profile.PhoneNumber = model.PhoneNumber ?? profile.PhoneNumber;
@@ -103,7 +104,62 @@ namespace PremierAuto.Controllers
             await _context.SaveChangesAsync();
             
             TempData["SuccessMessage"] = "Profilul a fost salvat cu succes!";
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction(nameof(Index));
+        }
+
+        //crud masini
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddCar(string carMake, string carModel, string? licensePlate)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            int carCount = await _context.ClientCars.CountAsync(c => c.ClientId == user.Id);
+            if (carCount >= 5)
+            {
+                TempData["ErrorMessage"] = "Poți adăuga maxim 5 mașini în garaj.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (string.IsNullOrWhiteSpace(carMake) || string.IsNullOrWhiteSpace(carModel))
+            {
+                TempData["ErrorMessage"] = "Marca și modelul sunt obligatorii.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var car = new ClientCar
+            {
+                ClientId = user.Id,
+                CarMake = carMake.Trim(),
+                CarModel = carModel.Trim(),
+                LicensePlate = string.IsNullOrWhiteSpace(licensePlate) ? null : licensePlate.Trim().ToUpper()
+            };
+
+            _context.ClientCars.Add(car);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Mașina a fost adăugată cu succes în garaj!";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteCar(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            var car = await _context.ClientCars.FirstOrDefaultAsync(c => c.Id == id && c.ClientId == user.Id);
+            if (car != null)
+            {
+                _context.ClientCars.Remove(car);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Mașina a fost ștersă din garaj.";
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
         private async Task SaveProfilePicture(ClientProfile profile, IFormFile profilePicture)
@@ -142,7 +198,6 @@ namespace PremierAuto.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return NotFound("Utilizatorul nu a fost găsit.");
 
-            // 1. Verificăm dacă parola curentă este corectă
             var checkPassword = await _userManager.CheckPasswordAsync(user, model.CurrentPassword);
             if (!checkPassword)
             {
@@ -150,7 +205,6 @@ namespace PremierAuto.Controllers
                 return View(model);
             }
 
-            // 2. Verificăm dacă noul email este deja folosit de altcineva
             var existingUser = await _userManager.FindByEmailAsync(model.NewEmail);
             if (existingUser != null && existingUser.Id != user.Id)
             {
@@ -158,7 +212,6 @@ namespace PremierAuto.Controllers
                 return View(model);
             }
 
-            // 3. Schimbăm emailul și username-ul (Identity folosește adesea emailul ca username)
             var setEmailResult = await _userManager.SetEmailAsync(user, model.NewEmail);
             if (!setEmailResult.Succeeded)
             {
@@ -169,19 +222,15 @@ namespace PremierAuto.Controllers
                 return View(model);
             }
 
-            // Actualizăm și Username-ul pentru ca login-ul să funcționeze cu noul email
             await _userManager.SetUserNameAsync(user, model.NewEmail);
-
-            // 4. Re-autentificăm utilizatorul silențios ca să nu fie scos din cont
             await _signInManager.RefreshSignInAsync(user);
 
             TempData["SuccessMessage"] = "Adresa de email a fost actualizată cu succes!";
             
-            // Redirecționează către pagina principală de profil în funcție de rol
             if (await _userManager.IsInRoleAsync(user, "Admin")) return RedirectToAction("Index", "Admin");
             if (await _userManager.IsInRoleAsync(user, "Mecanic")) return RedirectToAction("Profile", "Mechanic");
             
-            return RedirectToAction("Index"); // Pentru clienți
+            return RedirectToAction("Index");
         }
     }
 }

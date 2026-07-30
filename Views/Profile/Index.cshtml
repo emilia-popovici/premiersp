@@ -1,13 +1,32 @@
+@using PremierAuto.Models
 @model PremierAuto.ViewModels.ClientProfileViewModel
 
 @{
     ViewData["Title"] = "Profilul Meu";
+    var clientCars = ViewBag.ClientCars as IEnumerable<ClientCar> ?? new List<ClientCar>();
+    int carsCount = clientCars.Count();
 }
 
 <div class="container mt-5 mb-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0">
+    
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success fw-bold alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger fw-bold alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row g-4 justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 mb-4">
                 <div class="card-body p-5 bg-light">
                     <h2 class="text-center text-navy fw-bold mb-4">Datele Tale</h2>
                     <p class="text-center text-muted mb-4">Completează aceste detalii pentru a putea fi contactat în legătură cu programările tale.</p>
@@ -28,13 +47,13 @@
                     <form asp-controller="Profile" asp-action="Index" method="post" enctype="multipart/form-data">
                         <div class="mb-3">
                             <label asp-for="FirstName" class="form-label fw-bold text-navy">Prenume</label>
-                            <input asp-for="FirstName" class="form-control" placeholder="ex: Ion" />
+                            <input asp-for="FirstName" class="form-control" placeholder="ex: Emilia" />
                             <span asp-validation-for="FirstName" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
                             <label asp-for="LastName" class="form-label fw-bold text-navy">Nume de familie</label>
-                            <input asp-for="LastName" class="form-control" placeholder="ex: Popescu" />
+                            <input asp-for="LastName" class="form-control" placeholder="ex: Popovici" />
                             <span asp-validation-for="LastName" class="text-danger"></span>
                         </div>
 
@@ -61,6 +80,113 @@
                     </form>
                 </div>
             </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 bg-light text-center">
+                    <h5 class="fw-bold text-navy mb-3"><i class="bi bi-shield-lock me-2"></i>Securitate Cont</h5>
+                    @if (ViewBag.HasPassword)
+                    {
+                        <a href="/Identity/Account/Manage/ChangePassword" class="btn btn-outline-secondary w-100 fw-bold">
+                            <i class="bi bi-key"></i> Schimbă Parola
+                        </a>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning small border-0 text-start">
+                            <i class="bi bi-info-circle me-1"></i> Te-ai autentificat cu Google, deci nu ai o parolă setată.
+                        </div>
+                        <a href="/Identity/Account/Manage/SetPassword" class="btn btn-warning w-100 fw-bold text-dark">
+                            <i class="bi bi-key-fill"></i> Setează o Parolă
+                        </a>
+                    }
+                </div>
+            </div>
         </div>
+
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body p-4 bg-light d-flex flex-column">
+                    <h4 class="text-navy fw-bold mb-2"><i class="bi bi-car-front-fill me-2 text-accent"></i>Garajul Meu</h4>
+                    <p class="text-muted small mb-4">Gestionează mașinile tale pentru o programare mai rapidă în service.</p>
+
+                    <div class="flex-grow-1">
+                        @if (clientCars.Any())
+                        {
+                            <div class="list-group mb-4">
+                                @foreach (var car in clientCars)
+                                {
+                                    <div class="list-group-item d-flex justify-content-between align-items-center bg-white border-0 shadow-sm mb-2 rounded-3">
+                                        <div>
+                                            <h6 class="mb-1 fw-bold text-navy">@car.CarMake @car.CarModel</h6>
+                                            @if (!string.IsNullOrEmpty(car.LicensePlate))
+                                            {
+                                                <span class="badge bg-secondary text-uppercase py-1">@car.LicensePlate</span>
+                                            }
+                                        </div>
+                                        <form asp-action="DeleteCar" method="post" class="m-0" onsubmit="return confirm('Ești sigur că vrei să ștergi această mașină?');">
+                                            <input type="hidden" name="id" value="@car.Id" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Șterge mașina">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-5">
+                                <i class="bi bi-car-front text-muted opacity-25" style="font-size: 4rem;"></i>
+                                <p class="text-muted mt-3">Nu ai adăugat nicio mașină în garaj.</p>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="mt-auto border-top pt-4">
+                        @if (carsCount < 5)
+                        {
+                            <button type="button" class="btn btn-outline-primary w-100 fw-bold" data-bs-toggle="modal" data-bs-target="#addCarModal">
+                                <i class="bi bi-plus-lg me-1"></i> Adaugă Mașină (@carsCount/5)
+                            </button>
+                        }
+                        else
+                        {
+                            <div class="alert alert-secondary text-center small mb-0 border-0">
+                                <i class="bi bi-info-circle me-1"></i> Ai atins limita maximă de 5 mașini.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addCarModal" tabindex="-1" aria-labelledby="addCarModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form asp-action="AddCar" method="post" class="modal-content border-0 shadow">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold text-navy" id="addCarModalLabel"><i class="bi bi-car-front me-2"></i>Adaugă o mașină nouă</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-navy">Marca</label>
+                    <input type="text" name="carMake" class="form-control" placeholder="ex: Dacia" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-navy">Model</label>
+                    <input type="text" name="carModel" class="form-control" placeholder="ex: Logan" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-navy">Număr înmatriculare <span class="text-muted fw-normal">(Opțional)</span></label>
+                    <input type="text" name="licensePlate" class="form-control text-uppercase" placeholder="ex: B 123 ABC" />
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anulează</button>
+                <button type="submit" class="btn btn-primary-cta fw-bold">Salvează Mașina</button>
+            </div>
+        </form>
     </div>
 </div>
