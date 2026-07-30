@@ -60,23 +60,24 @@ namespace PremierAuto.Controllers
                 .ToListAsync();
 
             var distributionData = services.Select(s => {
-                int countForService = appointments.Count(a => a.ServiceId == s.Id);
-                
-                double percentage = 0;
-                if (totalAppointments > 0)
-                {
-                    percentage = ((double)countForService / (double)totalAppointments) * 100;
-                }
-                
-                return new {
-                    ServiceName = s.Name,
-                    Description = s.Description,
-                    Price = s.Price,
-                    Count = countForService,
-                    Percentage = Math.Round(percentage, 1),
-                    TotalRevenue = countForService * s.Price
-                };
-            }).OrderByDescending(x => x.Count).ToList();
+            int countForService = appointments.Count(a => a.ServiceId == s.Id);
+            
+            double percentage = 0;
+            if (totalAppointments > 0)
+            {
+                percentage = ((double)countForService / (double)totalAppointments) * 100;
+            }
+            
+            decimal totalRevenue = appointments.Where(a => a.ServiceId == s.Id).Sum(a => a.FinalPrice ?? 0);
+
+            return new {
+                ServiceName = s.Name,
+                Description = s.Description,
+                Count = countForService,
+                Percentage = Math.Round(percentage, 1),
+                TotalRevenue = totalRevenue
+            };
+        }).OrderByDescending(x => x.Count).ToList();
 
             ViewBag.TotalAppointments = totalAppointments;
             ViewBag.DistributionData = distributionData;
@@ -621,8 +622,8 @@ namespace PremierAuto.Controllers
                 .FirstOrDefault() ?? "Niciunul";
 
             decimal totalPaid = appointments
-                .Where(a => a.Status == AppointmentStatus.Done && a.Service != null)
-                .Sum(a => a.Service.Price);
+            .Where(a => a.Status == AppointmentStatus.Done)
+            .Sum(a => a.FinalPrice ?? 0);
 
             var lastCompletedDate = appointments
                 .Where(a => a.Status == AppointmentStatus.Done)
@@ -694,6 +695,34 @@ namespace PremierAuto.Controllers
             ViewBag.SelectedDate = searchDate?.ToString("yyyy-MM-dd");
             
             return View(appointments);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CompleteAppointment(int id, int duration, decimal price)
+        {
+            var appointment = await _context.Appointments.FindAsync(id);
+            if (appointment != null)
+            {
+                appointment.Status = AppointmentStatus.Done;
+                appointment.FinalDurationMinutes = duration;
+                appointment.FinalPrice = price;
+                await _context.SaveChangesAsync();
+
+                var bucharestTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Europe/Bucharest"));
+                var notification = new Notification
+                {
+                    UserId = appointment.ClientId,
+                    Title = "Programare finalizată",
+                    Message = $"Programarea ta a fost finalizată. A durat {duration} min, iar costul total este {price} MDL.",
+                    Url = $"/Appointment/Chat/{appointment.Id}",
+                    CreatedAt = DateTime.SpecifyKind(bucharestTime, DateTimeKind.Utc)
+                };
+                _context.Notifications.Add(notification);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Programarea a fost marcată ca finalizată cu succes!";
+            }
+            return RedirectToAction(nameof(Appointments));
         }
     }
 

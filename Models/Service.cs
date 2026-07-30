@@ -17,7 +17,5 @@ namespace PremierAuto.Models
 
         [Required]
         public int DurationMinutes { get; set; }
-
-        public decimal Price { get; set; }
     }
 }

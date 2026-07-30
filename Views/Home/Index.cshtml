@@ -62,8 +62,10 @@
                                 <h3 class="h5 fw-bold text-navy mt-4">@service.Name</h3>
                                 <p class="text-muted">@service.Description</p>
                                 <div class="d-flex justify-content-between align-items-center border-top pt-3 mt-3">
-                                    <span><i class="bi bi-clock me-1"></i>aprox. <br /> @service.DurationMinutes min</span>
-                                    <span class="price-tag text-accent fw-bold">aprox. <br /> @service.Price.ToString("0.00") MDL</span>
+                                    <span class="text-muted small"><i class="bi bi-clock me-1"></i>aprox. <br /> @service.DurationMinutes min</span>
+                                    <a asp-controller="Appointment" asp-action="Create" asp-route-serviceId="@service.Id" class="btn btn-sm btn-navy fw-bold px-3">
+                                        Programare <i class="bi bi-arrow-right ms-1"></i>
+                                    </a>
                                 </div>
                             </article>
                         </div>

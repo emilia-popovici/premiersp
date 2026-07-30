@@ -36,5 +36,7 @@ namespace PremierAuto.Models
 
         public Review Review { get; set; }
         public virtual ICollection<AppointmentMessage> Messages { get; set; } = new List<AppointmentMessage>();
+        public int? FinalDurationMinutes { get; set; }
+        public decimal? FinalPrice { get; set; }
     }
 }

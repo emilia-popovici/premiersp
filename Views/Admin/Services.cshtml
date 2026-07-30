@@ -37,7 +37,6 @@
                     <th class="ps-3 text-nowrap">Nume</th>
                     <th style="width: 40%;">Descriere</th>
                     <th class="text-nowrap">Durată</th>
-                    <th class="text-nowrap">Preț</th>
                     <th class="pe-3 text-end text-nowrap">Acțiuni</th>
                 </tr>
             </thead>
@@ -48,7 +47,6 @@
                         <td class="ps-3 fw-bold text-nowrap">@s.Name</td>
                         <td class="small text-muted text-wrap">@s.Description</td>
                         <td class="text-nowrap">@s.DurationMinutes min</td>
-                        <td class="text-nowrap">@s.Price.ToString("0.00") MDL</td>
                         <td class="pe-3 text-end">
                             <div class="d-flex justify-content-end gap-2 flex-nowrap">
                                 <a asp-action="EditService" asp-route-id="@s.Id" class="btn btn-sm btn-outline-primary fw-bold">Editează</a>

@@ -8,7 +8,12 @@
     <div class="text-center mb-5">
         <div class="section-kicker">Ce facem</div>
         <h1 class="section-title mt-2 mb-0">Toate serviciile noastre</h1>
-        <p class="text-muted mt-3">Transparență totală. Alege serviciul de care ai nevoie.</p>
+        <p class="text-muted mt-3 mb-4">Transparență totală. Alege serviciul de care ai nevoie.</p>
+
+        <!-- BANNER INFORMATIV TARIF ORAR -->
+        <div class="alert alert-info border-info border-opacity-50 text-center shadow-sm fw-bold mx-auto" style="max-width: 700px;">
+            <i class="bi bi-info-circle-fill me-2 fs-5"></i> Tariful pentru manoperă se taxează la oră. Prețul este cuprins între <strong>450 și 650 MDL / oră</strong>, în funcție de complexitate.
+        </div>
 
         <!-- SEARCH BAR -->
         <form asp-action="Services" method="get" class="row justify-content-center mt-4">
@@ -36,13 +41,18 @@
             foreach (var service in Model)
             {
                 <div class="col-md-6 col-lg-4">
-                    <article class="service-card h-100 p-4 shadow-sm">
+                    <article class="service-card h-100 p-4 shadow-sm d-flex flex-column">
                         <div class="service-icon"><i class="bi bi-wrench-adjustable"></i></div>
                         <h3 class="h5 fw-bold text-navy mt-4">@service.Name</h3>
-                        <p class="text-muted">@service.Description</p>
-                        <div class="d-flex justify-content-between align-items-center border-top pt-3 mt-3">
-                            <span><i class="bi bi-clock me-1"></i>aprox. @service.DurationMinutes min</span>
-                            <span class="price-tag text-accent fw-bold">@service.Price.ToString("0.00") MDL</span>
+                        <p class="text-muted flex-grow-1">@service.Description</p>
+                        
+                        <div class="border-top pt-3 mt-3">
+                            <div class="mb-3 text-muted small fw-bold">
+                                <i class="bi bi-clock me-1"></i> Timp estimat: aprox. @service.DurationMinutes min
+                            </div>
+                            <a asp-controller="Appointment" asp-action="Create" asp-route-serviceId="@service.Id" class="btn btn-navy w-100 fw-bold">
+                                <i class="bi bi-calendar-check me-2"></i> Programează-te
+                            </a>
                         </div>
                     </article>
                 </div>

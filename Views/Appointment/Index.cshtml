@@ -86,11 +86,18 @@
                             <p class="mb-1 small text-muted"><strong>Notițe:</strong> @item.Notes</p>
                         }
 
-                        <!-- ZONA BUTOANE CLIENT (Aici am adăugat Chat-ul) -->
+                        @if (item.Status == AppointmentStatus.Done && item.FinalPrice.HasValue)
+                        {
+                            <div class="mt-3 p-2 bg-success bg-opacity-10 rounded border border-success border-opacity-25">
+                                <span class="d-block small text-muted fw-bold mb-1">Detalii Intervenție:</span>
+                                <span class="fw-bold text-dark"><i class="bi bi-clock-history me-1"></i> @item.FinalDurationMinutes minute</span> <span class="text-muted mx-1">|</span>
+                                <span class="fw-bold text-success"><i class="bi bi-cash-coin me-1"></i> @item.FinalPrice MDL</span>
+                            </div>
+                        }
+
                         @if (User.IsInRole("Client"))
                         {
                             <div class="d-flex flex-wrap gap-2 mt-3">
-                                <!-- Butonul de Chat apare DOAR dacă programarea este activă -->
                                 @if (item.Status == AppointmentStatus.Pending || item.Status == AppointmentStatus.Accepted || item.Status == AppointmentStatus.Rescheduled)
                                 {
                                     <a asp-controller="Appointment" asp-action="Chat" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary fw-bold">
