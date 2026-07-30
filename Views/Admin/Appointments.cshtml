@@ -551,10 +551,12 @@
                     <div class="col-md-12 mb-3">
                         <label class="form-label fw-bold small text-muted">Caută cont existent (Opțional - auto-completează datele)</label>
                         <select name="clientId" id="clientSelectDropdown" class="form-select">
-                            <option value="">-- Client fără cont sau introducere manuală --</option>
-                            @foreach (var c in (IEnumerable<ApplicationUser>)ViewBag.Clients ?? new List<ApplicationUser>())
+                            <option value="">Client fără cont sau introducere manuală</option>
+                            @foreach (var c in (IEnumerable<PremierAuto.Controllers.ClientUserViewModel>)ViewBag.Clients ?? new List<PremierAuto.Controllers.ClientUserViewModel>())
                             {
-                                <option value="@c.Id" data-firstname="@c.FirstName" data-lastname="@c.LastName" data-phone="@c.PhoneNumber">@c.FirstName @c.LastName (@c.Email)</option>
+                                <option value="@c.UserId" data-firstname="@c.FirstName" data-lastname="@c.LastName" data-phone="@c.PhoneNumber">
+                                    @c.FirstName @c.LastName (@c.Email)
+                                </option>
                             }
                         </select>
                     </div>
