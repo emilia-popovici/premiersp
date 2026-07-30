@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using PremierAuto.Data;
 using PremierAuto.Models;
@@ -19,15 +20,18 @@ namespace PremierAuto.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
         public ProfileController(
             ApplicationDbContext context, 
             UserManager<ApplicationUser> userManager, 
-            SignInManager<ApplicationUser> signInManager)
+            SignInManager<ApplicationUser> signInManager,
+            IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
             _userManager = userManager;
             _signInManager = signInManager;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public async Task<IActionResult> Index()
@@ -107,7 +111,6 @@ namespace PremierAuto.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        //crud masini
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddCar(string carMake, string carModel, string? licensePlate)
@@ -193,7 +196,9 @@ namespace PremierAuto.Controllers
             if (profilePicture != null && profilePicture.Length > 0)
             {
                 var fileName = Guid.NewGuid().ToString() + Path.GetExtension(profilePicture.FileName);
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                
+                string webRootPath = _webHostEnvironment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                var uploadsFolder = Path.Combine(webRootPath, "uploads");
                 
                 if (!Directory.Exists(uploadsFolder))
                 {
