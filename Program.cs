@@ -32,6 +32,13 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 builder.Services.AddAuthentication()
     .AddGoogle(options =>
     {
@@ -50,8 +57,8 @@ builder.Services.AddAuthentication()
 
 var app = builder.Build();
 
+app.UseForwardedHeaders();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
@@ -77,11 +84,6 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapRazorPages();
-
-app.UseForwardedHeaders(new ForwardedHeadersOptions
-{
-    ForwardedHeaders = ForwardedHeaders.XForwardedProto
-});
 
 using (var scope = app.Services.CreateScope())
 {
