@@ -119,8 +119,7 @@ namespace PremierAuto.Controllers
                     .Include(a => a.Service)
                     .Where(a => a.MechanicId == model.MechanicId &&
                                 a.AppointmentDate.Date == newStart.Date &&
-                                a.Status != AppointmentStatus.Rejected &&
-                                a.Status != AppointmentStatus.Canceled)
+                                a.Status != AppointmentStatus.Accepted)
                     .ToListAsync();
 
                 bool conflict = bookedAppointments.Any(booked =>
@@ -192,9 +191,8 @@ namespace PremierAuto.Controllers
             var bookedAppointments = await _context.Appointments
                 .Include(a => a.Service)
                 .Where(a => a.MechanicId == mechanicId 
-                        && a.AppointmentDate.Date == utcDate.Date 
-                        && a.Status != AppointmentStatus.Canceled 
-                        && a.Status != AppointmentStatus.Rejected)
+                        && a.AppointmentDate.Date == utcDate.Date
+                        && a.Status == AppointmentStatus.Accepted)
                 .ToListAsync();
 
             var availableHours = new List<string>();
