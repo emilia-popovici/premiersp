@@ -125,7 +125,22 @@ namespace PremierAuto.Controllers
             var startOfWeek = targetDate.AddDays(-diff).Date;
             var endOfWeek = startOfWeek.AddDays(7).Date;
 
-            ViewBag.Clients = await _userManager.GetUsersInRoleAsync("Client");
+            // Extragem clienții și profilurile pentru modalul de creare manuală
+            var clientRoles = await _userManager.GetUsersInRoleAsync("Client");
+            var clientProfiles = await _context.ClientProfiles.ToListAsync();
+
+            ViewBag.Clients = clientRoles.Select(c => {
+                var p = clientProfiles.FirstOrDefault(cp => cp.UserId == c.Id);
+                return new ClientUserViewModel
+                {
+                    UserId = c.Id,
+                    Email = c.Email,
+                    FirstName = p?.FirstName ?? c.FirstName ?? "",
+                    LastName = p?.LastName ?? c.LastName ?? "",
+                    PhoneNumber = p?.PhoneNumber ?? c.PhoneNumber ?? ""
+                };
+            }).ToList();
+
             ViewBag.Mechanics = await _context.Mechanics.ToListAsync();
             ViewBag.Services = await _context.Services.ToListAsync();
             ViewBag.CurrentSearch = searchString;
@@ -773,7 +788,21 @@ namespace PremierAuto.Controllers
         [HttpGet]
         public async Task<IActionResult> CreateAppointment()
         {
-            ViewBag.Clients = await _userManager.GetUsersInRoleAsync("Client");
+            var clientRoles = await _userManager.GetUsersInRoleAsync("Client");
+            var clientProfiles = await _context.ClientProfiles.ToListAsync();
+
+            ViewBag.Clients = clientRoles.Select(c => {
+                var p = clientProfiles.FirstOrDefault(cp => cp.UserId == c.Id);
+                return new ClientUserViewModel
+                {
+                    UserId = c.Id,
+                    Email = c.Email,
+                    FirstName = p?.FirstName ?? c.FirstName ?? "",
+                    LastName = p?.LastName ?? c.LastName ?? "",
+                    PhoneNumber = p?.PhoneNumber ?? c.PhoneNumber ?? ""
+                };
+            }).ToList();
+
             ViewBag.Services = await _context.Services.ToListAsync();
             ViewBag.Mechanics = await _context.Mechanics.ToListAsync();
             return View();
@@ -795,20 +824,33 @@ namespace PremierAuto.Controllers
                 return RedirectToAction(nameof(Appointments));
             }
 
-            string finalFirstName = clientFirstName.Trim();
-            string finalLastName = clientLastName?.Trim() ?? string.Empty;
-            string finalPhone = clientPhone.Trim();
-
             if (!string.IsNullOrEmpty(clientId))
             {
-                var existingUser = await _userManager.FindByIdAsync(clientId);
-                if (existingUser != null)
+                var user = await _userManager.FindByIdAsync(clientId);
+                if (user != null)
                 {
-                    finalFirstName = existingUser.FirstName ?? finalFirstName;
-                    finalLastName = existingUser.LastName ?? finalLastName;
-                    if (!string.IsNullOrEmpty(existingUser.PhoneNumber))
+                    user.FirstName = clientFirstName.Trim();
+                    user.LastName = clientLastName?.Trim() ?? string.Empty;
+                    user.PhoneNumber = clientPhone.Trim();
+                    await _userManager.UpdateAsync(user);
+
+                    var profile = await _context.ClientProfiles.FirstOrDefaultAsync(p => p.UserId == clientId);
+                    if (profile != null)
                     {
-                        finalPhone = existingUser.PhoneNumber;
+                        profile.FirstName = clientFirstName.Trim();
+                        profile.LastName = clientLastName?.Trim() ?? string.Empty;
+                        profile.PhoneNumber = clientPhone.Trim();
+                        _context.ClientProfiles.Update(profile);
+                    }
+                    else
+                    {
+                        _context.ClientProfiles.Add(new ClientProfile
+                        {
+                            UserId = clientId,
+                            FirstName = clientFirstName.Trim(),
+                            LastName = clientLastName?.Trim() ?? string.Empty,
+                            PhoneNumber = clientPhone.Trim()
+                        });
                     }
                 }
             }
