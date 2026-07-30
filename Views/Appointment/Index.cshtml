@@ -32,7 +32,16 @@
 }
 
 <div class="container mt-4">
-    <h2 class="text-navy fw-bold mb-4">@title</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-navy fw-bold mb-0">@title</h2>
+        
+        @if (User.IsInRole("Client"))
+        {
+            <a asp-controller="Appointment" asp-action="Create" class="btn btn-navy fw-bold shadow-sm">
+                <i class="bi bi-plus-circle me-2"></i> Programare Nouă
+            </a>
+        }
+    </div>
 
     @if (TempData["SuccessMessage"] != null)
     {
@@ -41,13 +50,6 @@
     @if (TempData["ErrorMessage"] != null)
     {
         <div class="alert alert-danger fw-bold">@TempData["ErrorMessage"]</div>
-    }
-
-    @if (User.IsInRole("Client"))
-    {
-        <a asp-action="Create" class="btn btn-primary-cta fw-bold mb-4">
-            + Adaugă Programare Nouă
-        </a>
     }
 
     @if (User.IsInRole("Mecanic") && ViewBag.NotLinked == true)
