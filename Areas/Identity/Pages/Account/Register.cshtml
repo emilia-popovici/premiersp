@@ -15,37 +15,45 @@
                     <p class="text-muted small">Completează datele de mai jos pentru a te alătura Premier Auto</p>
                 </div>
 
-                <!-- Formularul principal pentru Email și Parolă -->
                 <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
                     <div asp-validation-summary="ModelOnly" class="text-danger small mb-3" role="alert"></div>
 
-                    <p class="text-muted small">PE SERVERUL GRATIS NU MA LASA SA TRIMIT MAIL🥲💔</p>
+                    <p class="text-muted small fw-bold text-center">PE SERVERUL GRATIS NU MA LASA SA TRIMIT MAIL🥲💔</p>
+                    
                     <div class="form-floating mb-3">
-                        <input asp-for="Input.Email" class="form-control rounded-3" autocomplete="username" aria-required="true" placeholder="nume@exemplu.com" />
+                        <input asp-for="Input.Email" class="form-control rounded-3 border-light bg-light shadow-none" autocomplete="username" aria-required="true" placeholder="nume@exemplu.com" style="height: 56px;" />
                         <label asp-for="Input.Email" class="text-muted">Email</label>
                         <span asp-validation-for="Input.Email" class="text-danger small"></span>
                     </div>
 
-                    <div class="form-floating mb-3">
-                        <input asp-for="Input.Password" class="form-control rounded-3" autocomplete="new-password" aria-required="true" placeholder="Parolă" />
-                        <label asp-for="Input.Password" class="text-muted">Parolă</label>
+                    <div class="mb-3">
+                        <label asp-for="Input.Password" class="form-label text-muted ms-2 small d-none">Parolă</label>
+                        <div class="input-group">
+                            <input asp-for="Input.Password" id="passwordInput" class="form-control rounded-start-3 border-light bg-light shadow-none border-end-0" autocomplete="new-password" aria-required="true" placeholder="Parolă" style="height: 56px;" />
+                            <button class="btn btn-light bg-light border-light rounded-end-3 border-start-0" type="button" id="togglePassword">
+                                <i class="bi bi-eye text-muted" id="toggleIcon"></i>
+                            </button>
+                        </div>
                         <span asp-validation-for="Input.Password" class="text-danger small"></span>
                     </div>
 
-                    <div class="form-floating mb-4">
-                        <input asp-for="Input.ConfirmPassword" class="form-control rounded-3" autocomplete="new-password" aria-required="true" placeholder="Confirmă Parola" />
-                        <label asp-for="Input.ConfirmPassword" class="text-muted">Confirmă Parola</label>
+                    <div class="mb-4">
+                        <label asp-for="Input.ConfirmPassword" class="form-label text-muted ms-2 small d-none">Confirmă Parola</label>
+                        <div class="input-group">
+                            <input asp-for="Input.ConfirmPassword" id="confirmPasswordInput" class="form-control rounded-start-3 border-light bg-light shadow-none border-end-0" autocomplete="new-password" aria-required="true" placeholder="Confirmă Parola" style="height: 56px;" />
+                            <button class="btn btn-light bg-light border-light rounded-end-3 border-start-0" type="button" id="toggleConfirmPassword">
+                                <i class="bi bi-eye text-muted" id="toggleConfirmIcon"></i>
+                            </button>
+                        </div>
                         <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
                     </div>
 
                     <button id="registerSubmit" type="submit" class="w-100 btn btn-primary-cta btn-lg fw-bold rounded-3 mb-3">Înregistrare</button>
-                </form> <!-- AICI SE ÎNCHEIE FORMULARUL PRINCIPAL -->
+                </form>
 
                 <div class="text-center mb-3">
                     <span class="text-muted small">sau înregistrează-te cu</span>
                 </div>
-
-                <!-- Formular separat pentru Logarea Externa (Google / Facebook) -->
                 @{
                     if ((Model.ExternalLogins?.Count ?? 0) == 0)
                     {
@@ -57,7 +65,7 @@
                     {
                         <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
                             <div class="d-grid gap-3 mb-4">
-                                <p class="text-muted small">NICI ASTEA NU MERG PE SERVERUL ASTA LOL</p>
+                                <p class="text-muted small fw-bold text-center">NICI ASTEA NU MERG PE SERVERUL ASTA LOL</p>
                                 @foreach (var provider in Model.ExternalLogins!)
                                 {
                                     @if (provider.Name == "Google")
@@ -91,4 +99,32 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            function setupPasswordToggle(inputId, buttonId, iconId) {
+                const toggleBtn = document.getElementById(buttonId);
+                const passInput = document.getElementById(inputId);
+                const icon = document.getElementById(iconId);
+
+                if (toggleBtn && passInput && icon) {
+                    toggleBtn.addEventListener('click', function () {
+                        const type = passInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                        passInput.setAttribute('type', type);
+                        
+                        if (type === 'password') {
+                            icon.classList.remove('bi-eye-slash');
+                            icon.classList.add('bi-eye');
+                        } else {
+                            icon.classList.remove('bi-eye');
+                            icon.classList.add('bi-eye-slash');
+                        }
+                    });
+                }
+            }
+
+            setupPasswordToggle('passwordInput', 'togglePassword', 'toggleIcon');
+            setupPasswordToggle('confirmPasswordInput', 'toggleConfirmPassword', 'toggleConfirmIcon');
+        });
+    </script>
 }
