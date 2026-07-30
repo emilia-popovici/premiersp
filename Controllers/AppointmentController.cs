@@ -74,7 +74,8 @@ namespace PremierAuto.Controllers
         public async Task<IActionResult> Create()
         {
             if (!await EnsureClientAccess()) return Forbid();
-            
+            var user = await _userManager.GetUserAsync(User);
+            var firstCar = await _context.ClientCars.FirstOrDefaultAsync(c => c.ClientId == user.Id);
             var viewModel = new AppointmentCreateViewModel
             {
                 Services = await _context.Services
@@ -83,7 +84,10 @@ namespace PremierAuto.Controllers
 
                 Mechanics = await _context.Mechanics
                     .Select(m => new SelectListItem { Value = m.Id.ToString(), Text = m.FirstName + " " + m.LastName })
-                    .ToListAsync()
+                    .ToListAsync(),
+                    
+                CarMake = firstCar?.CarMake,
+                CarModel = firstCar?.CarModel
             };
 
             return View(viewModel);

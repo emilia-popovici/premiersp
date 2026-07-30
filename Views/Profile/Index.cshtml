@@ -172,11 +172,24 @@
             <div class="modal-body p-4">
                 <div class="mb-3">
                     <label class="form-label fw-bold text-navy">Marca</label>
-                    <input type="text" name="carMake" class="form-control" placeholder="ex: Dacia" required />
+                    <input type="text" name="carMake" id="profileCarMakeInput" list="profileCarMakes" class="form-control" placeholder="ex: Dacia" required autocomplete="off" />
+                    <datalist id="profileCarMakes">
+                        <option value="Dacia"></option>
+                        <option value="Volkswagen"></option>
+                        <option value="BMW"></option>
+                        <option value="Audi"></option>
+                        <option value="Skoda"></option>
+                        <option value="Mercedes-Benz"></option>
+                        <option value="Renault"></option>
+                        <option value="Ford"></option>
+                        <option value="Toyota"></option>
+                        <option value="Hyundai"></option>
+                    </datalist>
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-bold text-navy">Model</label>
-                    <input type="text" name="carModel" class="form-control" placeholder="ex: Logan" required />
+                    <input type="text" name="carModel" id="profileCarModelInput" list="profileCarModels" class="form-control" placeholder="ex: Logan" required autocomplete="off" />
+                    <datalist id="profileCarModels"></datalist>
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-bold text-navy">Număr înmatriculare <span class="text-muted fw-normal">(Opțional)</span></label>
@@ -190,3 +203,38 @@
         </form>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const carData = {
+                "Dacia": ["Logan", "Duster", "Sandero", "Spring", "Jogger", "Dokker", "Lodgy"],
+                "Volkswagen": ["Golf", "Passat", "Polo", "Tiguan", "Touareg", "Touran", "Jetta", "Arteon", "Caddy"],
+                "BMW": ["Seria 3", "Seria 5", "Seria 1", "X3", "X5", "X1", "Seria 4", "Seria 7", "X6"],
+                "Audi": ["A4", "A6", "A3", "Q5", "Q7", "A5", "Q3", "A8"],
+                "Skoda": ["Octavia", "Superb", "Fabia", "Kodiaq", "Rapid", "Scala", "Kamiq", "Karoq"],
+                "Renault": ["Clio", "Megane", "Captur", "Kadjar", "Symbol", "Laguna", "Talisman", "Twingo", "Trafic"],
+                "Ford": ["Focus", "Fiesta", "Mondeo", "Kuga", "Puma", "Transit", "Ecosport", "Mustang"],
+                "Mercedes-Benz": ["Clasa C", "Clasa E", "Clasa A", "GLE", "GLC", "Clasa S", "Vito", "Sprinter"],
+                "Toyota": ["Corolla", "Yaris", "RAV4", "C-HR", "Camry", "Auris", "Avensis", "Hilux"],
+                "Hyundai": ["Tucson", "i30", "i20", "Kona", "Santa Fe", "Elantra", "Accent"]
+            };
+
+            const makeInput = document.getElementById("profileCarMakeInput");
+            const modelsDatalist = document.getElementById("profileCarModels");
+
+            makeInput.addEventListener("input", function () {
+                const selectedMake = this.value.trim();
+                modelsDatalist.innerHTML = "";
+                
+                if (carData[selectedMake]) {
+                    carData[selectedMake].forEach(function (model) {
+                        const option = document.createElement("option");
+                        option.value = model;
+                        modelsDatalist.appendChild(option);
+                    });
+                }
+            });
+        });
+    </script>
+}

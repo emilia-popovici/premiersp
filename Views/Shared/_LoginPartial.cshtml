@@ -1,14 +1,32 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using PremierAuto.Models
+@using PremierAuto.Data
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext DbContext
+
+@{
+    string profilePic = null;
+    if (SignInManager.IsSignedIn(User))
+    {
+        var userId = UserManager.GetUserId(User);
+        profilePic = DbContext.ClientProfiles.Where(p => p.UserId == userId).Select(p => p.ProfilePictureUrl).FirstOrDefault();
+    }
+}
 
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
 {
     <li class="nav-item d-flex align-items-center">
         <a asp-controller="Profile" asp-action="Index" class="d-flex align-items-center text-decoration-none me-3" title="Profilul meu">
-            <img src="~/images/default-avatar.png" alt="Profil" class="rounded-circle border border-2 border-light" style="width: 35px; height: 35px; object-fit: cover;" />
+            @if (!string.IsNullOrEmpty(profilePic))
+            {
+                <img src="@profilePic" alt="Profil" class="rounded-circle border border-2 border-light shadow-sm" style="width: 35px; height: 35px; object-fit: cover;" />
+            }
+            else
+            {
+                <i class="bi bi-person-circle text-light fs-4"></i>
+            }
         </a>
 
         <form id="logoutForm" class="form-inline m-0" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
