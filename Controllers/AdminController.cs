@@ -114,9 +114,9 @@ namespace PremierAuto.Controllers
 
             if (dateFilter.HasValue)
             {
-                query = query.Where(a => a.AppointmentDate.Date == dateFilter.Value.Date);
+                var utcFilterDate = DateTime.SpecifyKind(dateFilter.Value.Date, DateTimeKind.Utc);
+                query = query.Where(a => a.AppointmentDate.Date == utcFilterDate);
             }
-
             var appointments = await query.OrderByDescending(a => a.AppointmentDate).ToListAsync();
 
             var targetDate = weekDate ?? DateTime.Today;
@@ -670,7 +670,8 @@ namespace PremierAuto.Controllers
 
             if (searchDate.HasValue)
             {
-                query = query.Where (a => a.AppointmentDate.Date == searchDate.Value.Date);
+                var utcSearchDate = DateTime.SpecifyKind(searchDate.Value.Date, DateTimeKind.Utc);
+                query = query.Where (a => a.AppointmentDate.Date == utcSearchDate);
             }
             
             if (serviceId.HasValue)
