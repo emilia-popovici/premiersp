@@ -71,7 +71,7 @@
             </div>
             <div class="col-md-2">
                 <label class="form-label fw-bold small text-muted">Dată specifică</label>
-                <input type="date" name="dateFilter" value="@ViewBag.SelectedDate" class="form-control" />
+                <input type="text" id="adminDateFilter" name="dateFilter" value="@ViewBag.SelectedDate" class="form-control" placeholder="Selectează data..." />
             </div>
             <div class="col-md-2 d-flex gap-2">
                 <button type="submit" class="btn btn-primary-cta w-100 fw-bold"><i class="bi bi-search"></i></button>
@@ -152,7 +152,7 @@
                                                     <div class="modal-body">
                                                         <input type="hidden" name="id" value="@app.Id" />
                                                         <label class="form-label fw-bold">Dată și oră nouă</label>
-                                                        <input type="datetime-local" name="newDate" class="form-control" value="@app.AppointmentDate.ToString("yyyy-MM-ddTHH:mm")" required />
+                                                        <input type="text" name="newDate" class="form-control flatpickr-datetime" value="@app.AppointmentDate.ToString("yyyy-MM-ddTHH:mm")" required />
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Anulează</button>
@@ -285,7 +285,7 @@
                                                     <div class="modal-body">
                                                         <input type="hidden" name="id" value="@app.Id" />
                                                         <label class="form-label fw-bold">Dată și oră nouă</label>
-                                                        <input type="datetime-local" name="newDate" class="form-control" value="@app.AppointmentDate.ToString("yyyy-MM-ddTHH:mm")" required />
+                                                        <input type="text" name="newDate" class="form-control flatpickr-datetime" value="@app.AppointmentDate.ToString("yyyy-MM-ddTHH:mm")" required />
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Anulează</button>
@@ -407,7 +407,7 @@
                                                     <div class="modal-body">
                                                         <input type="hidden" name="id" value="@app.Id" />
                                                         <label class="form-label fw-bold">Dată și oră nouă</label>
-                                                        <input type="datetime-local" name="newDate" class="form-control" value="@app.AppointmentDate.ToString("yyyy-MM-ddTHH:mm")" required />
+                                                        <input type="text" name="newDate" class="form-control flatpickr-datetime" value="@app.AppointmentDate.ToString("yyyy-MM-ddTHH:mm")" required />
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Anulează</button>
@@ -525,3 +525,25 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            flatpickr("#adminDateFilter", {
+                dateFormat: "Y-m-d",
+                altInput: true,
+                altFormat: "d/m/Y",
+                locale: "ro"
+            });
+
+            flatpickr(".flatpickr-datetime", {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                altInput: true,
+                altFormat: "d/m/Y H:i",
+                locale: "ro",
+                time_24hr: true
+            });
+        });
+    </script>
+}
