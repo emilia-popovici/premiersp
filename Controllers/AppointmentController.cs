@@ -119,7 +119,7 @@ namespace PremierAuto.Controllers
                     .Include(a => a.Service)
                     .Where(a => a.MechanicId == model.MechanicId &&
                                 a.AppointmentDate.Date == newStart.Date &&
-                                a.Status != AppointmentStatus.Accepted)
+                                a.Status == AppointmentStatus.Accepted)
                     .ToListAsync();
 
                 bool conflict = bookedAppointments.Any(booked =>
