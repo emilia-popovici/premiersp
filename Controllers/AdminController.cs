@@ -643,7 +643,7 @@ namespace PremierAuto.Controllers
             return View(user);
         }
 
-        public async Task<IActionResult> ChatHistory(string searchString, int? serviceId, string mechanicId)
+        public async Task<IActionResult> ChatHistory(string searchString, int? serviceId, string mechanicId, DateTime? searchDate)
         {
             var query = _context.Appointments
                 .Include(a => a.Client)
@@ -657,11 +657,20 @@ namespace PremierAuto.Controllers
 
             if (!string.IsNullOrEmpty(searchString))
             {
+                var searchLower = searchString.ToLower();
                 query = query.Where(a => 
-                    (a.Client != null && (a.Client.FirstName.Contains(searchString) || a.Client.LastName.Contains(searchString) || a.Client.Email.Contains(searchString))) ||
-                    a.CarMake.Contains(searchString) ||
-                    a.CarModel.Contains(searchString)
+                    (a.Client != null && (a.Client.FirstName.ToLower().Contains(searchLower) || a.Client.LastName.ToLower().Contains(searchLower) || 
+                                            (a.Client.FirstName.ToLower() + " " + a.Client.LastName.ToLower()).Contains(searchLower) ||
+                                            (a.Client.LastName.ToLower() + " " + a.Client.FirstName.ToLower()).Contains(searchLower) ||
+                                            a.Client.Email.ToLower().Contains(searchLower) || (a.Client.PhoneNumber != null && a.Client.PhoneNumber.Contains(searchLower))
+                    )) || 
+                    a.CarModel.ToLower().Contains(searchLower) || a.CarMake.ToLower().Contains(searchLower)
                 );
+            }
+
+            if (searchDate.HasValue)
+            {
+                query = query.Where (a => a.AppointmentDate.Date == searchDate.Value.Date);
             }
             
             if (serviceId.HasValue)
@@ -681,6 +690,7 @@ namespace PremierAuto.Controllers
             ViewBag.CurrentSearch = searchString;
             ViewBag.SelectedService = serviceId;
             ViewBag.SelectedMechanic = mechanicId;
+            ViewBag.SelectedDate = searchDate?.ToString("yyyy-MM-dd");
             
             return View(appointments);
         }

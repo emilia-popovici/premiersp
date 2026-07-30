@@ -38,6 +38,36 @@
                     <p class="mb-1 text-muted small text-uppercase fw-bold">Data propusă</p>
                     <p class="fw-bold text-navy">@Model.AppointmentDate.ToString("dd MMMM yyyy, HH:mm")</p>
                 </div>
+
+                @if (User.IsInRole("Admin") && (Model.Status == PremierAuto.Models.AppointmentStatus.Pending || Model.Status == PremierAuto.Models.AppointmentStatus.Accepted || Model.Status == PremierAuto.Models.AppointmentStatus.Rescheduled))
+                {
+                    <div class="card shadow-sm border-0 mt-3">
+                        <div class="card-body bg-light rounded">
+                            <h6 class="fw-bold text-navy mb-3"><i class="bi bi-gear me-1"></i> Acțiuni Admin</h6>
+
+                            <form asp-controller="Admin" asp-action="ChangeAppointmentStatus" method="post" class="mb-3">
+                                <input type="hidden" name="id" value="@Model.Id" />
+                                <input type="hidden" name="status" value="Canceled" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger w-100 fw-bold" onclick="return confirm('Ești sigur că vrei să anulezi această programare?');">
+                                    <i class="bi bi-x-circle me-1"></i> Anulează Programarea
+                                </button>
+                            </form>
+
+                            <hr class="text-muted opacity-25">
+
+                            <label class="form-label small fw-bold text-muted mb-1">Reprogramează pentru:</label>
+                            <form asp-controller="Admin" asp-action="RescheduleAppointment" method="post">
+                                <input type="hidden" name="id" value="@Model.Id" />
+                                <div class="input-group input-group-sm">
+                                    <input type="datetime-local" name="newDate" class="form-control" required />
+                                    <button type="submit" class="btn btn-warning fw-bold text-dark" onclick="return confirm('Confirmi reprogramarea?');">
+                                        Mută
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                }
             </div>
         </div>
 

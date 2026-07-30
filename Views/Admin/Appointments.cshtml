@@ -226,16 +226,47 @@
                                     </td>
                                     <td class="text-nowrap">@app.CarMake @app.CarModel</td>
                                     <td class="text-center text-nowrap">
-                                        <span class="badge bg-success px-2 py-1 mb-1">@StatusLabel(app.Status)</span>
-                                        <div class="d-flex justify-content-center gap-1">
+                                        <span class="badge bg-success px-2 py-1 mb-2 d-inline-block">@StatusLabel(app.Status)</span>
+                                        <div class="d-flex justify-content-center gap-1 flex-wrap">
                                             <form asp-controller="Admin" asp-action="ChangeAppointmentStatus" method="post">
                                                 <input type="hidden" name="id" value="@app.Id" />
                                                 <input type="hidden" name="status" value="Done" />
-                                                <button type="submit" class="btn btn-sm btn-outline-success fw-bold">Finalizează</button>
+                                                <button type="submit" class="btn btn-sm btn-outline-success fw-bold" title="Finalizează"><i class="bi bi-check2-circle"></i></button>
                                             </form>
-                                            <a asp-controller="Admin" asp-action="AppointmentChat" asp-route-id="@app.Id" class="btn btn-sm btn-outline-info fw-bold">
-                                                <i class="bi bi-chat-dots"></i> Chat
+                                            <button type="button" class="btn btn-sm btn-outline-warning fw-bold text-dark" data-bs-toggle="modal" data-bs-target="#reschedule@(app.Id)" title="Reprogramează">
+                                                <i class="bi bi-calendar-event"></i>
+                                            </button>
+                                            <form asp-controller="Admin" asp-action="ChangeAppointmentStatus" method="post">
+                                                <input type="hidden" name="id" value="@app.Id" />
+                                                <input type="hidden" name="status" value="Canceled" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger fw-bold" onclick="return confirm('Ești sigur că vrei să anulezi programarea?');" title="Anulează">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                            </form>
+                                            <a asp-controller="Admin" asp-action="AppointmentChat" asp-route-id="@app.Id" class="btn btn-sm btn-outline-info fw-bold" title="Chat">
+                                                <i class="bi bi-chat-dots"></i>
                                             </a>
+                                        </div>
+
+                                        <!-- modal reprogramare pt saptamana curenta -->
+                                        <div class="modal fade text-start" id="reschedule@(app.Id)" tabindex="-1">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <form asp-controller="Admin" asp-action="RescheduleAppointment" method="post" class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title fw-bold text-navy">Reprogramează programarea</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <input type="hidden" name="id" value="@app.Id" />
+                                                        <label class="form-label fw-bold">Dată și oră nouă</label>
+                                                        <input type="datetime-local" name="newDate" class="form-control" value="@app.AppointmentDate.ToString("yyyy-MM-ddTHH:mm")" required />
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Anulează</button>
+                                                        <button type="submit" class="btn btn-primary-cta fw-bold">Salvează</button>
+                                                    </div>
+                                                </form>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>
@@ -247,7 +278,7 @@
         </div>
     </div>
 
-    <!-- programari activ -->
+    <!-- programari active -->
     <div class="card shadow-sm border-0 mb-4 border-start border-4 border-info">
         <div class="card-header bg-white d-flex justify-content-between align-items-center py-3" data-bs-toggle="collapse" href="#collapseOther" role="button" aria-expanded="false" style="cursor: pointer;">
             <h4 class="fw-bold text-info mb-0">
@@ -291,11 +322,47 @@
                                     </td>
                                     <td class="text-nowrap">@app.CarMake @app.CarModel</td>
                                     <td class="text-center text-nowrap">
-                                        <span class="badge bg-info text-dark px-2 py-1 mb-1">@StatusLabel(app.Status)</span>
-                                        <div>
-                                            <a asp-controller="Admin" asp-action="AppointmentChat" asp-route-id="@app.Id" class="btn btn-sm btn-outline-info fw-bold">
-                                                <i class="bi bi-chat-dots"></i> Chat
+                                        <span class="badge bg-info text-dark px-2 py-1 mb-2 d-inline-block">@StatusLabel(app.Status)</span>
+                                        <div class="d-flex justify-content-center gap-1 flex-wrap">
+                                            <form asp-controller="Admin" asp-action="ChangeAppointmentStatus" method="post">
+                                                <input type="hidden" name="id" value="@app.Id" />
+                                                <input type="hidden" name="status" value="Done" />
+                                                <button type="submit" class="btn btn-sm btn-outline-success fw-bold" title="Finalizează"><i class="bi bi-check2-circle"></i></button>
+                                            </form>
+                                            <button type="button" class="btn btn-sm btn-outline-warning fw-bold text-dark" data-bs-toggle="modal" data-bs-target="#rescheduleOther@(app.Id)" title="Reprogramează">
+                                                <i class="bi bi-calendar-event"></i>
+                                            </button>
+                                            <form asp-controller="Admin" asp-action="ChangeAppointmentStatus" method="post">
+                                                <input type="hidden" name="id" value="@app.Id" />
+                                                <input type="hidden" name="status" value="Canceled" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger fw-bold" onclick="return confirm('Ești sigur că vrei să anulezi programarea?');" title="Anulează">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                            </form>
+                                            <a asp-controller="Admin" asp-action="AppointmentChat" asp-route-id="@app.Id" class="btn btn-sm btn-outline-info fw-bold" title="Chat">
+                                                <i class="bi bi-chat-dots"></i>
                                             </a>
+                                        </div>
+
+                                        <!-- modal reprogramare pt alte programari active -->
+                                        <div class="modal fade text-start" id="rescheduleOther@(app.Id)" tabindex="-1">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <form asp-controller="Admin" asp-action="RescheduleAppointment" method="post" class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title fw-bold text-navy">Reprogramează programarea</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <input type="hidden" name="id" value="@app.Id" />
+                                                        <label class="form-label fw-bold">Dată și oră nouă</label>
+                                                        <input type="datetime-local" name="newDate" class="form-control" value="@app.AppointmentDate.ToString("yyyy-MM-ddTHH:mm")" required />
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Anulează</button>
+                                                        <button type="submit" class="btn btn-primary-cta fw-bold">Salvează</button>
+                                                    </div>
+                                                </form>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>

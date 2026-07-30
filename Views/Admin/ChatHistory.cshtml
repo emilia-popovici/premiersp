@@ -11,10 +11,14 @@
 
 <div class="card shadow-sm border-0 mb-4">
     <div class="card-body bg-light rounded">
-        <form asp-action="ChatHistory" method="get" class="row g-3">
-            <div class="col-md-4">
-                <label class="form-label text-muted small fw-bold">Caută client sau mașină</label>
-                <input type="text" name="searchString" value="@ViewBag.CurrentSearch" class="form-control" placeholder="Nume, Email, Marcă, Model...">
+        <form asp-action="ChatHistory" method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label text-muted small fw-bold">Caută client, tel, mașină</label>
+                <input type="text" name="searchString" value="@ViewBag.CurrentSearch" class="form-control" placeholder="Nume, Tel, Email, Marcă...">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label text-muted small fw-bold">Data Prog.</label>
+                <input type="date" name="searchDate" value="@ViewBag.SelectedDate" class="form-control">
             </div>
             <div class="col-md-3">
                 <label class="form-label text-muted small fw-bold">Filtru Serviciu</label>
@@ -33,7 +37,7 @@
                     }
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label class="form-label text-muted small fw-bold">Filtru Mecanic</label>
                 <select name="mechanicId" class="form-select">
                     <option value="">Toți mecanicii</option>
@@ -50,7 +54,7 @@
                     }
                 </select>
             </div>
-            <div class="col-md-2 d-flex align-items-end">
+            <div class="col-md-2 d-flex">
                 <button type="submit" class="btn btn-navy w-100 fw-bold">
                     <i class="bi bi-search me-2"></i> Aplică
                 </button>
