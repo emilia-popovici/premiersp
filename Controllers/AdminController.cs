@@ -125,6 +125,7 @@ namespace PremierAuto.Controllers
             var startOfWeek = targetDate.AddDays(-diff).Date;
             var endOfWeek = startOfWeek.AddDays(7).Date;
 
+            ViewBag.Clients = await _userManager.GetUsersInRoleAsync("Client");
             ViewBag.Mechanics = await _context.Mechanics.ToListAsync();
             ViewBag.Services = await _context.Services.ToListAsync();
             ViewBag.CurrentSearch = searchString;
