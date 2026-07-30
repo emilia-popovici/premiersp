@@ -32,12 +32,23 @@
 <div class="container mt-4 mb-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="text-navy fw-bold mb-0">Panou Programări</h2>
+        <!-- Buton nou pentru adăugare programare manuală -->
+        <button type="button" class="btn btn-primary-cta fw-bold" data-bs-toggle="modal" data-bs-target="#adminCreateAppointmentModal">
+            <i class="bi bi-plus-lg me-2"></i> Adaugă Programare Manuală
+        </button>
     </div>
 
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success fw-bold alert-dismissible fade show shadow-sm" role="alert">
             @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger fw-bold alert-dismissible fade show shadow-sm" role="alert">
+            @TempData["ErrorMessage"]
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
@@ -523,6 +534,79 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Modal Creare Programare Manuală Admin -->
+<div class="modal fade text-start" id="adminCreateAppointmentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <form asp-action="CreateAppointment" method="post" class="modal-content border-0 shadow">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold text-navy"><i class="bi bi-calendar-plus me-2"></i>Adaugă Programare Nouă (Admin)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-navy">Selectează Clientul <span class="text-muted fw-normal">(Opțional)</span></label>
+                        <select name="clientId" class="form-select">
+                            <option value="">-- Fără cont / Client extern --</option>
+                            @foreach (var c in (IEnumerable<ApplicationUser>)ViewBag.Clients ?? new List<ApplicationUser>())
+                            {
+                                <option value="@c.Id">@c.FirstName @c.LastName (@c.Email)</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-navy">Alege Serviciul</label>
+                        <select name="serviceId" class="form-select" required>
+                            <option value="">-- Alege serviciul --</option>
+                            @foreach (var s in (IEnumerable<Service>)ViewBag.Services ?? new List<Service>())
+                            {
+                                <option value="@s.Id">@s.Name</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-navy">Alege Mecanicul</label>
+                        <select name="mechanicId" class="form-select" required>
+                            <option value="">-- Alege mecanicul --</option>
+                            @foreach (var m in (IEnumerable<Mechanic>)ViewBag.Mechanics ?? new List<Mechanic>())
+                            {
+                                <option value="@m.Id">@m.FirstName @m.LastName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-navy">Data și Ora Programării</label>
+                        <input type="text" name="appointmentDate" class="form-control flatpickr-datetime" placeholder="Selectează data și ora..." required />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-navy">Marca Mașinii</label>
+                        <input type="text" name="carMake" class="form-control" placeholder="ex: Dacia" required />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-navy">Modelul Mașinii</label>
+                        <input type="text" name="carModel" class="form-control" placeholder="ex: Logan" required />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-navy">Notițe (Opțional)</label>
+                    <textarea name="notes" class="form-control" rows="2" placeholder="Detalii suplimentare..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anulează</button>
+                <button type="submit" class="btn btn-primary-cta fw-bold">Creează Programarea</button>
+            </div>
+        </form>
     </div>
 </div>
 

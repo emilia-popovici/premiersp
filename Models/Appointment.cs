@@ -17,9 +17,9 @@ namespace PremierAuto.Models
         [ForeignKey("MechanicId")]
         public Mechanic Mechanic { get; set; }
 
-        public string ClientId { get; set; }
+        public string? ClientId { get; set; }
         [ForeignKey("ClientId")]
-        public ApplicationUser Client { get; set; }
+        public ApplicationUser? Client { get; set; }
 
         public DateTime AppointmentDate { get; set; }
         public string Notes { get; set; }

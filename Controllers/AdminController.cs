@@ -769,6 +769,44 @@ namespace PremierAuto.Controllers
             return View(appointments);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> CreateAppointment()
+        {
+            ViewBag.Clients = await _userManager.GetUsersInRoleAsync("Client");
+            ViewBag.Services = await _context.Services.ToListAsync();
+            ViewBag.Mechanics = await _context.Mechanics.ToListAsync();
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateAppointment(string? clientId, int serviceId, int mechanicId, DateTime appointmentDate, string carMake, string carModel, string? notes)
+        {
+            if (string.IsNullOrWhiteSpace(carMake) || string.IsNullOrWhiteSpace(carModel))
+            {
+                TempData["ErrorMessage"] = "Marca și modelul mașinii sunt obligatorii.";
+                return RedirectToAction(nameof(Appointments));
+            }
+
+            var appointment = new Appointment
+            {
+                ClientId = string.IsNullOrEmpty(clientId) ? null : clientId,
+                ServiceId = serviceId,
+                MechanicId = mechanicId,
+                AppointmentDate = DateTime.SpecifyKind(appointmentDate, DateTimeKind.Utc),
+                CarMake = carMake.Trim(),
+                CarModel = carModel.Trim(),
+                Notes = notes,
+                Status = AppointmentStatus.Accepted
+            };
+
+            _context.Appointments.Add(appointment);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Programarea a fost creată cu succes!";
+            return RedirectToAction(nameof(Appointments));
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CompleteAppointment(int id, int duration, decimal price)
