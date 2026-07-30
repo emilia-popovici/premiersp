@@ -34,7 +34,7 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold text-navy">Data programării</label>
-                                <input type="date" id="appointmentDate" name="selectedDate" class="form-control" min="@minDate" required />
+                                <input type="text" id="appointmentDate" name="selectedDate" class="form-control rounded-3 border-light bg-light shadow-none" style="height: 56px;" placeholder="dd/mm/yyyy" required />
                             </div>
                         </div>
 
@@ -167,6 +167,31 @@
             serviceSelect.addEventListener('change', fetchAvailableHours);
             mechanicSelect.addEventListener('change', fetchAvailableHours);
             dateInput.addEventListener('change', fetchAvailableHours);
+        });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            flatpickr("#appointmentDate", {
+                dateFormat: "Y-m-d",
+                altInput: true,
+                altFormat: "d/m/Y",
+                minDate: "today",
+                locale: "ro",
+                onChange: function(selectedDates, dateStr, instance) {
+                    if (selectedDates.length > 0) {
+                        const day = selectedDates[0].getDay();
+                        const timeSlotsContainer = document.getElementById('timeSlotsContainer');
+                        const selectedTimeInput = document.getElementById('selectedTime');
+
+                        if (day === 0 || day === 6) {
+                            instance.clear();
+                            timeSlotsContainer.innerHTML = '<span class="text-danger small">Service-ul este închis în weekend (Sâmbătă și Duminică). Alegeți o zi lucrătoare (Luni–Vineri).</span>';
+                            selectedTimeInput.value = '';
+                        } else {
+                            document.getElementById('appointmentDate').dispatchEvent(new Event('change'));
+                        }
+                    }
+                }
+            });
         });
     </script>
     

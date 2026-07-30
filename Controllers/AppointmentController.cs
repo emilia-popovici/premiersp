@@ -298,6 +298,12 @@ namespace PremierAuto.Controllers
 
             if (appointment == null) return NotFound("Nu am găsit programarea sau nu ai acces la ea.");
 
+            int clientAppointmentNumber = await _context.Appointments
+                .Where(a => a.ClientId == user.Id && a.AppointmentDate <= appointment.AppointmentDate)
+                .CountAsync();
+                
+            ViewBag.AppointmentNumber = clientAppointmentNumber;
+            
             bool shouldSave = false;
 
             var unreadMessages = appointment.Messages.Where(m => m.IsAdmin && !m.IsRead).ToList();
