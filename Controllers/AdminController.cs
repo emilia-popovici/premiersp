@@ -780,12 +780,36 @@ namespace PremierAuto.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateAppointment(string? clientId, int serviceId, int mechanicId, DateTime appointmentDate, string carMake, string carModel, string? notes)
+        public async Task<IActionResult> CreateAppointment(string? clientId, string clientFirstName, string clientLastName, string clientPhone, int serviceId, int mechanicId, DateTime appointmentDate, string carMake, string carModel, string? notes)
         {
             if (string.IsNullOrWhiteSpace(carMake) || string.IsNullOrWhiteSpace(carModel))
             {
                 TempData["ErrorMessage"] = "Marca și modelul mașinii sunt obligatorii.";
                 return RedirectToAction(nameof(Appointments));
+            }
+
+            if (string.IsNullOrWhiteSpace(clientFirstName) || string.IsNullOrWhiteSpace(clientPhone))
+            {
+                TempData["ErrorMessage"] = "Numele și numărul de telefon ale clientului sunt obligatorii.";
+                return RedirectToAction(nameof(Appointments));
+            }
+
+            string finalFirstName = clientFirstName.Trim();
+            string finalLastName = clientLastName?.Trim() ?? string.Empty;
+            string finalPhone = clientPhone.Trim();
+
+            if (!string.IsNullOrEmpty(clientId))
+            {
+                var existingUser = await _userManager.FindByIdAsync(clientId);
+                if (existingUser != null)
+                {
+                    finalFirstName = existingUser.FirstName ?? finalFirstName;
+                    finalLastName = existingUser.LastName ?? finalLastName;
+                    if (!string.IsNullOrEmpty(existingUser.PhoneNumber))
+                    {
+                        finalPhone = existingUser.PhoneNumber;
+                    }
+                }
             }
 
             var appointment = new Appointment
@@ -797,7 +821,7 @@ namespace PremierAuto.Controllers
                 CarMake = carMake.Trim(),
                 CarModel = carModel.Trim(),
                 Notes = notes,
-                Status = AppointmentStatus.Accepted
+                Status = AppointmentStatus.Accepted 
             };
 
             _context.Appointments.Add(appointment);

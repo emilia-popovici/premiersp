@@ -32,7 +32,6 @@
 <div class="container mt-4 mb-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="text-navy fw-bold mb-0">Panou Programări</h2>
-        <!-- Buton nou pentru adăugare programare manuală -->
         <button type="button" class="btn btn-primary-cta fw-bold" data-bs-toggle="modal" data-bs-target="#adminCreateAppointmentModal">
             <i class="bi bi-plus-lg me-2"></i> Adaugă Programare Manuală
         </button>
@@ -537,7 +536,7 @@
     </div>
 </div>
 
-<!-- Modal Creare Programare Manuală Admin -->
+<!-- programare manuala -->
 <div class="modal fade text-start" id="adminCreateAppointmentModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <form asp-action="CreateAppointment" method="post" class="modal-content border-0 shadow">
@@ -546,17 +545,40 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
+                
+                <h6 class="text-navy fw-bold mb-3"><i class="bi bi-person-badge me-2"></i>Informații Client</h6>
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold text-navy">Selectează Clientul <span class="text-muted fw-normal">(Opțional)</span></label>
-                        <select name="clientId" class="form-select">
-                            <option value="">-- Fără cont / Client extern --</option>
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-bold small text-muted">Caută cont existent (Opțional - auto-completează datele)</label>
+                        <select name="clientId" id="clientSelectDropdown" class="form-select">
+                            <option value="">-- Client fără cont sau introducere manuală --</option>
                             @foreach (var c in (IEnumerable<ApplicationUser>)ViewBag.Clients ?? new List<ApplicationUser>())
                             {
-                                <option value="@c.Id">@c.FirstName @c.LastName (@c.Email)</option>
+                                <option value="@c.Id" data-firstname="@c.FirstName" data-lastname="@c.LastName" data-phone="@c.PhoneNumber">@c.FirstName @c.LastName (@c.Email)</option>
                             }
                         </select>
                     </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold text-navy">Prenume Client</label>
+                        <input type="text" name="clientFirstName" id="clientFirstName" class="form-control" placeholder="ex: Ion" required />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold text-navy">Nume de familie</label>
+                        <input type="text" name="clientLastName" id="clientLastName" class="form-control" placeholder="ex: Popescu" />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold text-navy">Număr Telefon</label>
+                        <input type="text" name="clientPhone" id="clientPhone" class="form-control" placeholder="ex: 07xx xxx xxx" required />
+                    </div>
+                </div>
+
+                <hr class="my-3 text-muted">
+
+                <h6 class="text-navy fw-bold mb-3"><i class="bi bi-car-front me-2"></i>Detalii Auto & Serviciu</h6>
+                <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold text-navy">Alege Serviciul</label>
                         <select name="serviceId" class="form-select" required>
@@ -567,9 +589,6 @@
                             }
                         </select>
                     </div>
-                </div>
-
-                <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold text-navy">Alege Mecanicul</label>
                         <select name="mechanicId" class="form-select" required>
@@ -580,18 +599,18 @@
                             }
                         </select>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold text-navy">Data și Ora Programării</label>
-                        <input type="text" name="appointmentDate" class="form-control flatpickr-datetime" placeholder="Selectează data și ora..." required />
-                    </div>
                 </div>
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-navy">Data și Ora Programării</label>
+                        <input type="text" name="appointmentDate" class="form-control flatpickr-datetime" placeholder="Selectează data și ora..." required />
+                    </div>
+                    <div class="col-md-3 mb-3">
                         <label class="form-label fw-bold text-navy">Marca Mașinii</label>
                         <input type="text" name="carMake" class="form-control" placeholder="ex: Dacia" required />
                     </div>
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label class="form-label fw-bold text-navy">Modelul Mașinii</label>
                         <input type="text" name="carModel" class="form-control" placeholder="ex: Logan" required />
                     </div>
