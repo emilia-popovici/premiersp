@@ -123,6 +123,12 @@ namespace PremierAuto.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
+                    var roleManager = HttpContext.RequestServices.GetRequiredService<RoleManager<IdentityRole>>();
+                    if (!await roleManager.RoleExistsAsync("Client"))
+                    {
+                        await roleManager.CreateAsync(new IdentityRole("Client"));
+                    }
+                    await _userManager.AddToRoleAsync(user, "Client");
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));

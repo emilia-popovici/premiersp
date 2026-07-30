@@ -374,6 +374,78 @@ namespace PremierAuto.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangeUserRole(string userId, string newRole)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                TempData["ErrorMessage"] = "Utilizatorul nu a fost găsit.";
+                return RedirectToAction(nameof(UsersList));
+            }
+
+            if (newRole != "Client" && newRole != "Mecanic")
+            {
+                TempData["ErrorMessage"] = "Rol invalid.";
+                return RedirectToAction(nameof(UsersList));
+            }
+
+            var currentRoles = await _userManager.GetRolesAsync(user);
+
+            if (currentRoles.Contains(newRole))
+            {
+                TempData["SuccessMessage"] = "Utilizatorul are deja acest rol.";
+                return RedirectToAction(nameof(UsersList));
+            }
+
+            if (currentRoles.Any())
+            {
+                await _userManager.RemoveFromRolesAsync(user, currentRoles);
+            }
+
+            await _userManager.AddToRoleAsync(user, newRole);
+
+            if (newRole == "Mecanic")
+            {
+                var mechanicExists = await _context.Mechanics.AnyAsync(m => m.UserId == userId);
+                if (!mechanicExists)
+                {
+                    var mechanic = new Mechanic
+                    {
+                        UserId = userId,
+                        FirstName = user.FirstName ?? "Mecanic",
+                        LastName = user.LastName ?? "Nou",
+                        PhotoUrl = "/images/default-avatar.png",
+                        ProfilePictureUrl = "/images/default-avatar.png",
+                        IsPictureApproved = true,
+                        Rating = 5.0
+                    };
+                    _context.Mechanics.Add(mechanic);
+                    
+                    var clientProfile = await _context.ClientProfiles.FirstOrDefaultAsync(cp => cp.UserId == userId);
+                    if (clientProfile != null)
+                    {
+                        _context.ClientProfiles.Remove(clientProfile);
+                    }
+
+                    await _context.SaveChangesAsync();
+                }
+            }
+            else if (newRole == "Client")
+            {
+                var mechanic = await _context.Mechanics.FirstOrDefaultAsync(m => m.UserId == userId);
+                if (mechanic != null)
+                {
+                    mechanic.UserId = null;
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            TempData["SuccessMessage"] = $"Rolul utilizatorului a fost schimbat cu succes în {newRole}!";
+            return RedirectToAction(nameof(UsersList));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> LinkMechanicUser(int mechanicId, string userId)
         {
             var mechanic = await _context.Mechanics.FindAsync(mechanicId);
