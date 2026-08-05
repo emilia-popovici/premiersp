@@ -269,48 +269,83 @@
 
                 const results = await Promise.all(scanTasks);
                 const fullText = results.map(r => r.data.text.toUpperCase()).join(" \n ");
-                console.log("Text brut extras:", fullText);
+                
+                console.log("Text brut extras:\n", fullText); 
+
+                let d = {}; 
+
+                const vinMatch = fullText.match(/\b[A-HJ-NPR-Z0-9]{17}\b/);
+                if (vinMatch) d.fE = vinMatch[0];
+
+                const plateMatch = fullText.match(/\b([A-Z]{1,3}\s*\d{2,3}\s*[A-Z]{0,3})\b/);
+                if (plateMatch) d.fA = plateMatch[0].replace(/\s+/g, '');
+
+                const yearMatch = fullText.match(/\b(19[9][0-9]|20[0-2][0-9])\b/);
+                if (yearMatch) d.fB = yearMatch[0];
+
+                const popularMakes = ["DACIA", "VOLKSWAGEN", "VW", "BMW", "AUDI", "SKODA", "MERCEDES", "RENAULT", "FORD", "TOYOTA"];
+                for (let make of popularMakes) {
+                    if (fullText.includes(make)) {
+                        d.fD1 = make === "VW" ? "VOLKSWAGEN" : make;
+                        break;
+                    }
+                }
+
+                const d3d2Match = fullText.match(/D\.?[32][\s\:\.]+([A-Z0-9][A-Z0-9\-\s]{2,15})\b/i);
+                if (d3d2Match) {
+                    d.fD3 = d3d2Match[1].trim();
+                } else if (d.fD1) {
+                    const fallbackRegex = new RegExp(d.fD1 + "[\\s\\n]+(?:D\\.?2[\\s\\n]+)?([A-Z0-9]{3,})", "i");
+                    const fallbackMatch = fullText.match(fallbackRegex);
+                    if (fallbackMatch) d.fD3 = fallbackMatch[1].trim();
+                }
 
                 const lines = fullText.split('\n');
-                let d = {};
-
                 for (let line of lines) {
-                    line = line.trim();
+                    line = line.trim().replace(/,/g, '.');
                     if (!line) continue;
 
-                    if (line.match(/^A[\s\:\.]+(.+)/)) d.fA = RegExp.$1.replace(/[\s\-]/g, '');
-                    if (line.match(/^B[\s\:\.]+(\d{4})/)) d.fB = RegExp.$1;
-                    if (line.match(/^C\.?1\.?1[\s\:\.]+(.+)/)) d.fC1_1 = RegExp.$1.trim();
-                    if (line.match(/^C\.?1\.?2[\s\:\.]+(.+)/)) d.fC1_2 = RegExp.$1.trim();
-                    if (line.match(/^C\.?1\.?3[\s\:\.]+(.+)/)) d.fC1_3 = RegExp.$1.trim();
-                    if (line.match(/^C\.?4[\s\:\.]+(.+)/)) d.fC4 = RegExp.$1.trim();
-                    if (line.match(/^D\.?1[\s\:\.]+(.+)/)) d.fD1 = RegExp.$1.trim();
-                    if (line.match(/^D\.?2[\s\:\.]+(.+)/)) d.fD2 = RegExp.$1.trim();
-                    if (line.match(/^D\.?3[\s\:\.]+(.+)/)) d.fD3 = RegExp.$1.trim();
-                    if (line.match(/^E[\s\:\.]+(.+)/)) d.fE = RegExp.$1.trim();
-                    if (line.match(/^E\.?1[\s\:\.]+(.+)/)) d.fE1 = RegExp.$1.trim();
-                    if (line.match(/^E\.?2[\s\:\.]+(.+)/)) d.fE2 = RegExp.$1.trim();
-                    if (line.match(/^F\.?1[\s\:\.]+(\d+)/)) d.fF1 = RegExp.$1;
-                    if (line.match(/^G[\s\:\.]+(\d+)/)) d.fG = RegExp.$1;
-                    if (line.match(/^H[\s\:\.]+(.+)/)) d.fH = RegExp.$1.trim();
-                    if (line.match(/^I[\s\:\.]+(.+)/)) d.fI = RegExp.$1.trim();
-                    if (line.match(/^J\.?1[\s\:\.]+(.+)/)) d.fJ1 = RegExp.$1.trim();
-                    if (line.match(/^J\.?2[\s\:\.]+(.+)/)) d.fJ2 = RegExp.$1.trim();
-                    if (line.match(/^P\.?1[\s\:\.]+(\d+)/)) d.fP1 = RegExp.$1;
-                    if (line.match(/^P\.?3[\s\:\.]+(.+)/)) d.fP3 = RegExp.$1.trim();
-                    if (line.match(/^Q[\s\:\.]+(.+)/)) d.fQ = RegExp.$1.trim();
-                    if (line.match(/^R[\s\:\.]+(.+)/)) d.fR = RegExp.$1.trim();
-                    if (line.match(/^S\.?1[\s\:\.]+(\d+)/)) d.fS1 = RegExp.$1;
-                    if (line.match(/^X\.?1[\s\:\.]+(.+)/)) d.fX1 = RegExp.$1.trim();
-                    if (line.match(/^Z[\s\:\.]+(.+)/)) d.fZ = RegExp.$1.trim();
-                    if (line.match(/IDNV(?:[\s\:\.]+RST)?[\s\:\.]+(\d+)/)) d.fIDNV = RegExp.$1;
+                    if (line.match(/\bA[\s\:\.]+(.+)/) && !d.fA) d.fA = RegExp.$1.replace(/[\s\-]/g, '');
+                    if (line.match(/\bB[\s\:\.]+(\d{4})/)) d.fB = RegExp.$1;
+                    
+                    if (line.match(/\bC\.?1\.?1[\s\:\.]+(.+)/)) d.fC1_1 = RegExp.$1.trim();
+                    if (line.match(/\bC\.?1\.?2[\s\:\.]+(.+)/)) d.fC1_2 = RegExp.$1.trim();
+                    if (line.match(/\bC\.?1\.?3[\s\:\.]+(.+)/)) d.fC1_3 = RegExp.$1.trim();
+                    if (line.match(/\bC\.?4[\s\:\.]+(.+)/)) d.fC4 = RegExp.$1.trim();
+                    
+                    if (line.match(/\bD\.?1[\s\:\.]+(.+)/) && !d.fD1) d.fD1 = RegExp.$1.trim();
+                    if (line.match(/\bD\.?2[\s\:\.]+(.+)/)) d.fD2 = RegExp.$1.trim();
+                    if (line.match(/\bD\.?3[\s\:\.]+(.+)/) && !d.fD3) d.fD3 = RegExp.$1.trim();
+                    
+                    if (line.match(/\bE[\s\:\.]+(.+)/) && !d.fE) d.fE = RegExp.$1.trim();
+                    if (line.match(/\bE\.?1[\s\:\.]+(.+)/)) d.fE1 = RegExp.$1.trim();
+                    if (line.match(/\bE\.?2[\s\:\.]+(.+)/)) d.fE2 = RegExp.$1.trim();
+                    
+                    if (line.match(/\bF\.?1[\s\:\.]+(\d+)/)) d.fF1 = RegExp.$1;
+                    if (line.match(/\bG[\s\:\.]+(\d+)/)) d.fG = RegExp.$1;
+                    if (line.match(/\bH[\s\:\.]+(.+)/)) d.fH = RegExp.$1.trim();
+                    if (line.match(/\bI[\s\:\.]+(.+)/)) d.fI = RegExp.$1.trim();
+                    
+                    if (line.match(/\bJ\.?1[\s\:\.]+(.+)/)) d.fJ1 = RegExp.$1.trim();
+                    if (line.match(/\bJ\.?2[\s\:\.]+(.+)/)) d.fJ2 = RegExp.$1.trim();
+                    if (line.match(/\bP\.?1[\s\:\.]+(\d+)/)) d.fP1 = RegExp.$1;
+                    if (line.match(/\bP\.?3[\s\:\.]+(.+)/)) d.fP3 = RegExp.$1.trim();
+                    if (line.match(/\bQ[\s\:\.]+(.+)/)) d.fQ = RegExp.$1.trim();
+                    if (line.match(/\bR[\s\:\.]+(.+)/)) d.fR = RegExp.$1.trim();
+                    if (line.match(/\bS\.?1[\s\:\.]+(\d+)/)) d.fS1 = RegExp.$1;
+                    
+                    if (line.match(/\bX\.?1[\s\:\.]+(.+)/)) d.fX1 = RegExp.$1.trim();
+                    if (line.match(/\bZ[\s\:\.]+(.+)/)) d.fZ = RegExp.$1.trim();
+                    if (line.match(/\bIDNV(?:[\s\:\.]+RST)?[\s\:\.]+(\d+)/)) d.fIDNV = RegExp.$1;
                 }
 
                 for (let key in d) {
-                    if(document.getElementById(key)) document.getElementById(key).value = d[key];
+                    if (document.getElementById(key) && d[key] !== "") {
+                        document.getElementById(key).value = d[key];
+                    }
                 }
 
-                statusDiv.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> Scanare complexă completă!';
+                statusDiv.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> Scanare completă! Verifică datele introduse.';
                 statusDiv.classList.replace('text-primary', 'text-success');
                 
             } catch (err) {
