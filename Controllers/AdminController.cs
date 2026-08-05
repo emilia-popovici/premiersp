@@ -1093,6 +1093,27 @@ namespace PremierAuto.Controllers
 
             return Ok();
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveAdminNotes(int id, string? adminNotes, string? returnUrl)
+        {
+            var appointment = await _context.Appointments.FindAsync(id);
+            if (appointment != null)
+            {
+                appointment.AdminNotes = adminNotes;
+                await _context.SaveChangesAsync();
+                
+                TempData["SuccessMessage"] = "Notițele private au fost salvate cu succes!";
+            }
+
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+            
+            return RedirectToAction(nameof(AppointmentChat), new { id = id });
+        }
     }
 
     public class ClientUserViewModel

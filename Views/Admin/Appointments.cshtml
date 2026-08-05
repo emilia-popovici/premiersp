@@ -131,6 +131,15 @@
                                                 <input type="hidden" name="status" value="Rejected" />
                                                 <button type="submit" class="btn btn-sm btn-danger fw-bold">Refuză</button>
                                             </form>
+                                            
+                                            <button type="button" 
+                                                    class="btn btn-sm @(string.IsNullOrEmpty(app.AdminNotes) ? "btn-outline-secondary" : "btn-warning fw-bold text-dark")" 
+                                                    title="Notițe Private Admin" 
+                                                    data-notes="@app.AdminNotes" 
+                                                    onclick="openNotesModal(@app.Id, this.getAttribute('data-notes'))">
+                                                <i class="bi bi-journal-text"></i>
+                                            </button>
+
                                             <a asp-controller="Admin" asp-action="AppointmentChat" asp-route-id="@app.Id" class="btn btn-sm btn-outline-info fw-bold">
                                                 <i class="bi bi-chat-dots"></i> Chat
                                             </a>
@@ -257,6 +266,15 @@
                                             <button type="button" class="btn btn-sm btn-outline-warning fw-bold text-dark" data-bs-toggle="modal" data-bs-target="#reschedule@(app.Id)" title="Reprogramează">
                                                 <i class="bi bi-calendar-event"></i>
                                             </button>
+                                            
+                                            <button type="button" 
+                                                    class="btn btn-sm @(string.IsNullOrEmpty(app.AdminNotes) ? "btn-outline-secondary" : "btn-warning fw-bold text-dark")" 
+                                                    title="Notițe Private Admin" 
+                                                    data-notes="@app.AdminNotes" 
+                                                    onclick="openNotesModal(@app.Id, this.getAttribute('data-notes'))">
+                                                <i class="bi bi-journal-text"></i>
+                                            </button>
+
                                             <form asp-controller="Admin" asp-action="ChangeAppointmentStatus" method="post">
                                                 <input type="hidden" name="id" value="@app.Id" />
                                                 <input type="hidden" name="status" value="Canceled" />
@@ -379,6 +397,15 @@
                                             <button type="button" class="btn btn-sm btn-outline-warning fw-bold text-dark" data-bs-toggle="modal" data-bs-target="#rescheduleOther@(app.Id)" title="Reprogramează">
                                                 <i class="bi bi-calendar-event"></i>
                                             </button>
+
+                                            <button type="button" 
+                                                    class="btn btn-sm @(string.IsNullOrEmpty(app.AdminNotes) ? "btn-outline-secondary" : "btn-warning fw-bold text-dark")" 
+                                                    title="Notițe Private Admin" 
+                                                    data-notes="@app.AdminNotes" 
+                                                    onclick="openNotesModal(@app.Id, this.getAttribute('data-notes'))">
+                                                <i class="bi bi-journal-text"></i>
+                                            </button>
+
                                             <form asp-controller="Admin" asp-action="ChangeAppointmentStatus" method="post">
                                                 <input type="hidden" name="id" value="@app.Id" />
                                                 <input type="hidden" name="status" value="Canceled" />
@@ -479,33 +506,43 @@
                                     </td>
 
                                     <td class="text-center">
-                                        @if (!string.IsNullOrWhiteSpace(app.Notes))
-                                        {
-                                            <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#notesHistory-@app.Id" title="Vezi Notițele">
-                                                <i class="bi bi-journal-text"></i>
-                                            </button>
+                                        <div class="d-flex justify-content-center gap-2">
+                                            @if (!string.IsNullOrWhiteSpace(app.Notes))
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#notesHistory-@app.Id" title="Vezi Notițele">
+                                                    <i class="bi bi-chat-left-text"></i>
+                                                </button>
 
-                                            <div class="modal fade text-start" id="notesHistory-@app.Id" tabindex="-1">
-                                                <div class="modal-dialog modal-dialog-centered">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header bg-light">
-                                                            <h5 class="modal-title fw-bold text-navy"><i class="bi bi-info-circle me-2"></i>Notițe Programare</h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                        </div>
-                                                        <div class="modal-body text-wrap text-break">
-                                                            @app.Notes
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Închide</button>
+                                                <div class="modal fade text-start" id="notesHistory-@app.Id" tabindex="-1">
+                                                    <div class="modal-dialog modal-dialog-centered">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header bg-light">
+                                                                <h5 class="modal-title fw-bold text-navy"><i class="bi bi-info-circle me-2"></i>Notițe Programare (Client)</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                            </div>
+                                                            <div class="modal-body text-wrap text-break">
+                                                                @app.Notes
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Închide</button>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted small">N/A</span>
-                                        }
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted small mt-1">N/A</span>
+                                            }
+
+                                            <button type="button" 
+                                                    class="btn btn-sm @(string.IsNullOrEmpty(app.AdminNotes) ? "btn-outline-secondary" : "btn-warning fw-bold text-dark")" 
+                                                    title="Notițe Private Admin" 
+                                                    data-notes="@app.AdminNotes" 
+                                                    onclick="openNotesModal(@app.Id, this.getAttribute('data-notes'))">
+                                                <i class="bi bi-journal-text"></i>
+                                            </button>
+                                        </div>
                                     </td>
 
                                     <td class="text-center text-nowrap">
@@ -629,6 +666,43 @@
     </div>
 </div>
 
+<!--notite admin-->
+<div class="modal fade" id="adminNotesModal" tabindex="-1" aria-labelledby="adminNotesModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content border-warning border-2">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title text-warning-emphasis fw-bold" id="adminNotesModalLabel">
+                    <i class="bi bi-journal-text me-2"></i>Notițe Private
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <form asp-controller="Admin" asp-action="SaveAdminNotes" method="post" id="modalNotesForm">
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="modalNotesAppId" value="" />
+                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                    
+                    <label class="form-label text-muted small fw-bold">Observații ascunse (Programarea <span id="modalAppIdDisplay"></span>):</label>
+                    <textarea name="adminNotes" id="modalNotesText" class="form-control shadow-sm mb-2" rows="5" placeholder="Adaugă detalii, piese de comandat, comportament..."></textarea>
+                    
+                    <small class="text-muted"><i class="bi bi-lock-fill"></i> Clientul nu vede aceste date.</small>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-outline-danger me-auto" id="modalDeleteNotesBtn" style="display:none;" 
+                            onclick="if(confirm('Ștergi notițele?')) { document.getElementById('modalNotesText').value=''; document.getElementById('modalNotesForm').submit(); }">
+                        <i class="bi bi-trash3"></i> Șterge
+                    </button>
+                    
+                    <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Închide</button>
+                    <button type="submit" class="btn btn-warning fw-bold text-dark" id="modalSaveNotesBtn">
+                        <i class="bi bi-save me-1"></i> Salvează
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
@@ -719,5 +793,26 @@
                 maxTime: "17:00"
             });
         });
+
+        function openNotesModal(appId, existingNotes) {
+            document.getElementById('modalNotesAppId').value = appId;
+            document.getElementById('modalAppIdDisplay').innerText = '#' + appId;
+            
+            document.getElementById('modalNotesText').value = existingNotes || '';
+            
+            var deleteBtn = document.getElementById('modalDeleteNotesBtn');
+            var saveBtn = document.getElementById('modalSaveNotesBtn');
+
+            if (existingNotes && existingNotes.trim() !== '') {
+                deleteBtn.style.display = 'block';
+                saveBtn.innerHTML = '<i class="bi bi-save me-1"></i> Actualizează';
+            } else {
+                deleteBtn.style.display = 'none';
+                saveBtn.innerHTML = '<i class="bi bi-save me-1"></i> Salvează';
+            }
+
+            var modal = new bootstrap.Modal(document.getElementById('adminNotesModal'));
+            modal.show();
+        }
     </script>
 }

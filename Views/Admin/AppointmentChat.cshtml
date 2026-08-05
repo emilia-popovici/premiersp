@@ -64,6 +64,34 @@
                             </form>
                         </div>
                     </div>
+                    <div class="card shadow-sm border-0 mt-3 border-start border-4 border-warning">
+                        <div class="card-header bg-white fw-bold py-3 text-warning-emphasis d-flex align-items-center">
+                            <i class="bi bi-journal-text me-2"></i> Notițe Private (Doar Admin)
+                        </div>
+                        <div class="card-body bg-light rounded-bottom">
+                            <form asp-controller="Admin" asp-action="SaveAdminNotes" method="post" id="adminNotesForm">
+                                <input type="hidden" name="id" value="@Model.Id" />
+                                <textarea id="adminNotesText" name="adminNotes" class="form-control mb-3 shadow-sm border-0" rows="5" placeholder="Adaugă observații ascunse pentru client (ex: probleme la plată, detalii tehnice)...">@Model.AdminNotes</textarea>
+                                
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-warning flex-grow-1 fw-bold text-dark">
+                                        <i class="bi bi-save me-1"></i> @(string.IsNullOrEmpty(Model.AdminNotes) ? "Salvează" : "Actualizează")
+                                    </button>
+
+                                    @if (!string.IsNullOrEmpty(Model.AdminNotes))
+                                    {
+                                        <button type="button" class="btn btn-outline-danger fw-bold px-3" title="Șterge notițele"
+                                                onclick="if(confirm('Ești sigur că vrei să ștergi aceste notițe?')) { document.getElementById('adminNotesText').value = ''; document.getElementById('adminNotesForm').submit(); }">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </form>
+                            <small class="text-muted d-block mt-2 text-center" style="font-size: 0.75rem;">
+                                <i class="bi bi-lock-fill"></i> Clientul nu are acces la aceste date
+                            </small>
+                        </div>
+                    </div>
                 }
             </div>
         </div>

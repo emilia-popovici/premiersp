@@ -23,6 +23,7 @@ namespace PremierAuto.Models
 
         public DateTime AppointmentDate { get; set; }
         public string? Notes { get; set; }
+        public string? AdminNotes { get; set; }
 
         [Required(ErrorMessage = "Marca mașinii este obligatorie.")]
         [StringLength(50)]
