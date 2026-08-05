@@ -75,6 +75,11 @@
                         </a>
                     </li>
                     <li class="nav-item mb-2">
+                        <a asp-controller="Admin" asp-action="JobPositions" class="nav-link text-white @(ViewContext.RouteData.Values["Action"]?.ToString() == "JobPositions" ? "active bg-danger" : "")">
+                            <i class="bi bi-card-list me-2"></i> Gestionare Joburi
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
                         <a asp-controller="Admin" asp-action="JobApplications" class="nav-link text-white @(ViewContext.RouteData.Values["Action"]?.ToString() == "JobApplications" ? "active bg-danger" : "")">
                             <i class="bi bi-briefcase-fill me-2"></i> CV-uri & Angajări
                         </a>

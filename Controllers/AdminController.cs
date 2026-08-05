@@ -950,6 +950,76 @@ namespace PremierAuto.Controllers
             }
             return RedirectToAction(nameof(JobApplications));
         }
+        public async Task<IActionResult> JobPositions()
+        {
+            var jobs = await _context.JobPositions.ToListAsync();
+            return View(jobs);
+        }
+
+        [HttpGet]
+        public IActionResult CreateJobPosition()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateJobPosition(JobPosition model)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.JobPositions.Add(model);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Postul a fost adăugat cu succes!";
+                return RedirectToAction(nameof(JobPositions));
+            }
+            return View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditJobPosition(int id)
+        {
+            var job = await _context.JobPositions.FindAsync(id);
+            if (job == null) return NotFound();
+            return View(job);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditJobPosition(int id, JobPosition model)
+        {
+            if (id != model.Id) return NotFound();
+
+            if (ModelState.IsValid)
+            {
+                _context.JobPositions.Update(model);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Postul a fost actualizat!";
+                return RedirectToAction(nameof(JobPositions));
+            }
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteJobPosition(int id)
+        {
+            var job = await _context.JobPositions.FindAsync(id);
+            if (job != null)
+            {
+                var hasApplications = await _context.JobApplications.AnyAsync(a => a.JobPositionId == id);
+                if (hasApplications)
+                {
+                    TempData["ErrorMessage"] = "Nu poți șterge un post care are deja CV-uri primite. Îi poți debifa opțiunea 'Angajăm' pentru a-l ascunde.";
+                    return RedirectToAction(nameof(JobPositions));
+                }
+
+                _context.JobPositions.Remove(job);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Postul a fost șters!";
+            }
+            return RedirectToAction(nameof(JobPositions));
+        }
     }
 
     public class ClientUserViewModel
