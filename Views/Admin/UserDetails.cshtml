@@ -56,7 +56,7 @@
                 </div>
                 <div class="col-sm-6">
                     <div class="card border-0 shadow-sm p-3 bg-light border-start border-4 border-info h-100">
-                        <small class="text-muted fw-bold">ULTIMA FINALIZARE</small>
+                        <small class="text-muted fw-bold">ULTIMA VIZITĂ</small>
                         <h6 class="fw-bold text-dark mb-0 mt-2">
                             @(ViewBag.LastCompletedDate != null ? ((DateTime)ViewBag.LastCompletedDate).ToString("dd.MM.yyyy HH:mm") : "Niciuna")
                         </h6>
@@ -233,7 +233,7 @@
             try {
                 const result = await Tesseract.recognize(
                     fileInput.files[0],
-                    'eng+ron+ru',
+                    'eng+ron+rus',
                     { logger: m => console.log(m) } 
                 );
 

@@ -765,7 +765,7 @@ namespace PremierAuto.Controllers
             await _context.SaveChangesAsync();
             TempData["SuccessMessage"] = "Datele mașinii au fost salvate cu succes!";
             
-            return RedirectToAction(nameof(UserDetails), new { id = clientId });
+            return RedirectToAction(nameof(UserDetails), new { userId = clientId });
         }
 
         public async Task<IActionResult> ChatHistory(string searchString, int? serviceId, string mechanicId, DateTime? searchDate)
