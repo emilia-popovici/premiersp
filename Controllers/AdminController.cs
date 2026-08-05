@@ -39,22 +39,14 @@ namespace PremierAuto.Controllers
                 .CountAsync();
             ViewBag.UnreadMessagesCount = unreadMessagesCount;
             
-            var topServices = await _context.Appointments
-                .Include(a => a.Service)
-                .GroupBy(a => a.Service.Name)
-                .Select(g => new { ServiceName = g.Key, Count = g.Count() })
-                .OrderByDescending(x => x.Count)
-                .Take(5)
-                .ToListAsync();
-
-            ViewBag.TopServices = topServices;
-
             var appointments = await _context.Appointments
                 .Include(a => a.Service)
+                .Include(a => a.Mechanic)
                 .Where(a => a.Status == AppointmentStatus.Done)
                 .ToListAsync();
 
             var totalAppointments = appointments.Count;
+            ViewBag.TotalAppointments = totalAppointments;
 
             var completedServiceIds = appointments.Select(a => a.ServiceId).Distinct();
             var services = await _context.Services
@@ -62,27 +54,33 @@ namespace PremierAuto.Controllers
                 .ToListAsync();
 
             var distributionData = services.Select(s => {
-            int countForService = appointments.Count(a => a.ServiceId == s.Id);
-            
-            double percentage = 0;
-            if (totalAppointments > 0)
-            {
-                percentage = ((double)countForService / (double)totalAppointments) * 100;
-            }
-            
-            decimal totalRevenue = appointments.Where(a => a.ServiceId == s.Id).Sum(a => a.FinalPrice ?? 0);
+                int countForService = appointments.Count(a => a.ServiceId == s.Id);
+                double percentage = totalAppointments > 0 ? ((double)countForService / totalAppointments) * 100 : 0;
+                decimal totalRevenue = appointments.Where(a => a.ServiceId == s.Id).Sum(a => a.FinalPrice ?? 0);
 
-            return new {
-                ServiceName = s.Name,
-                Description = s.Description,
-                Count = countForService,
-                Percentage = Math.Round(percentage, 1),
-                TotalRevenue = totalRevenue
-            };
-        }).OrderByDescending(x => x.Count).ToList();
+                return new {
+                    ServiceName = s.Name,
+                    Count = countForService,
+                    Percentage = Math.Round(percentage, 1),
+                    TotalRevenue = totalRevenue
+                };
+            }).OrderByDescending(x => x.Count).ToList();
 
-            ViewBag.TotalAppointments = totalAppointments;
             ViewBag.DistributionData = distributionData;
+
+            var mechanicKPIs = appointments
+                .Where(a => a.Mechanic != null)
+                .GroupBy(a => new { a.Mechanic.Id, a.Mechanic.FirstName, a.Mechanic.LastName })
+                .Select(g => new {
+                    MechanicName = $"{g.Key.FirstName} {g.Key.LastName}",
+                    CompletedJobs = g.Count(),
+                    TotalGeneratedRevenue = g.Sum(a => a.FinalPrice ?? 0)
+                })
+                .OrderByDescending(x => x.TotalGeneratedRevenue)
+                .ToList();
+
+            ViewBag.MechanicKPIs = mechanicKPIs;
+
             return View();
         }
 
