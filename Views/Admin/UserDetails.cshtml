@@ -18,12 +18,12 @@
         <h2 class="fw-bold text-navy">Profil și Statistici: <br /> @Model.FirstName @Model.LastName</h2>
     </div>
 
-    <div class="position-relative me-4">
+    <div class="position-relative mb-4">
         <img src="@profilePicUrl" alt="Profil Client" class="rounded-circle shadow-sm" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid var(--navy);" />
     </div>
 
-    <!-- Informații Personale -->
     <div class="row g-4 mb-4">
+        <!-- informatii personale -->
         <div class="col-md-4">
             <div class="card border-0 shadow-sm p-4 bg-white h-100">
                 <h5 class="fw-bold text-navy mb-3"><i class="bi bi-person-badge me-2"></i> Date Personale</h5>
@@ -33,29 +33,29 @@
             </div>
         </div>
 
-        <!-- Carduri Statistice Principale -->
+        <!-- statistici principale -->
         <div class="col-md-8">
             <div class="row g-3">
                 <div class="col-sm-6">
-                    <div class="card border-0 shadow-sm p-3 bg-light border-start border-4 border-success">
+                    <div class="card border-0 shadow-sm p-3 bg-light border-start border-4 border-success h-100">
                         <small class="text-muted fw-bold">TOTAL ACHITAT</small>
                         <h3 class="fw-bold text-success mb-0">@ViewBag.TotalPaid RON</h3>
                     </div>
                 </div>
                 <div class="col-sm-6">
-                    <div class="card border-0 shadow-sm p-3 bg-light border-start border-4 border-primary">
+                    <div class="card border-0 shadow-sm p-3 bg-light border-start border-4 border-primary h-100">
                         <small class="text-muted fw-bold">PROGRAMĂRI FINALIZATE</small>
                         <h3 class="fw-bold text-navy mb-0">@ViewBag.CompletedCount</h3>
                     </div>
                 </div>
                 <div class="col-sm-6">
-                    <div class="card border-0 shadow-sm p-3 bg-light border-start border-4 border-warning">
+                    <div class="card border-0 shadow-sm p-3 bg-light border-start border-4 border-warning h-100">
                         <small class="text-muted fw-bold">RATING MEDIU OFERIT</small>
                         <h3 class="fw-bold text-dark mb-0">@(((double)ViewBag.AverageRating).ToString("0.0")) <i class="bi bi-star-fill text-warning fs-5"></i></h3>
                     </div>
                 </div>
                 <div class="col-sm-6">
-                    <div class="card border-0 shadow-sm p-3 bg-light border-start border-4 border-info">
+                    <div class="card border-0 shadow-sm p-3 bg-light border-start border-4 border-info h-100">
                         <small class="text-muted fw-bold">ULTIMA FINALIZARE</small>
                         <h6 class="fw-bold text-dark mb-0 mt-2">
                             @(ViewBag.LastCompletedDate != null ? ((DateTime)ViewBag.LastCompletedDate).ToString("dd.MM.yyyy HH:mm") : "Niciuna")
@@ -66,19 +66,204 @@
         </div>
     </div>
 
-    <!-- Informații Suplimentare (Mecanic & Serviciu favorit) -->
+    <!-- masinile clientului -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0 border-start border-4 border-info">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                    <h5 class="fw-bold text-info mb-0"><i class="bi bi-car-front me-2"></i> Garajul Clientului (Pașaport Tehnic)</h5>
+                    <button class="btn btn-sm btn-info text-white fw-bold" data-bs-toggle="modal" data-bs-target="#carModal" onclick="resetCarForm()">
+                        <i class="bi bi-plus-lg me-1"></i> Adaugă Mașină
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light text-navy">
+                                <tr>
+                                    <th class="py-3 px-4">Marcă & Model</th>
+                                    <th class="py-3">Nr. Înmatriculare</th>
+                                    <th class="py-3">Serie Șasiu (VIN)</th>
+                                    <th class="py-3 text-center">An</th>
+                                    <th class="py-3 text-center px-4">Acțiuni</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (ViewBag.ClientCars == null || !((IEnumerable<PremierAuto.Models.ClientCar>)ViewBag.ClientCars).Any())
+                                {
+                                    <tr><td colspan="5" class="text-center text-muted py-4">Acest client nu are nicio mașină înregistrată.</td></tr>
+                                }
+                                else
+                                {
+                                    foreach (var car in ViewBag.ClientCars)
+                                    {
+                                        <tr>
+                                            <td class="px-4 fw-bold">@car.CarMake @car.CarModel</td>
+                                            <td><span class="badge bg-light text-dark border border-secondary fs-6">@car.LicensePlate</span></td>
+                                            <td class="text-muted font-monospace">@car.VIN</td>
+                                            <td class="text-center">@car.Year</td>
+                                            <td class="text-center px-4">
+                                                <button class="btn btn-sm btn-outline-primary" onclick="editCar(@car.Id, '@car.CarMake', '@car.CarModel', '@car.LicensePlate', '@car.VIN', '@car.Year')">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- info extra mecanic + serviciu preferat -->
     <div class="row g-4 mb-5">
         <div class="col-md-6">
-            <div class="card border-0 shadow-sm p-4 bg-white">
+            <div class="card border-0 shadow-sm p-4 bg-white h-100">
                 <h6 class="text-muted fw-bold">Mecanicul preferat (frecventat cel mai des)</h6>
                 <h4 class="fw-bold text-navy mb-0"><i class="bi bi-wrench me-2"></i> @ViewBag.FavoriteMechanic</h4>
             </div>
         </div>
         <div class="col-md-6">
-            <div class="card border-0 shadow-sm p-4 bg-white">
+            <div class="card border-0 shadow-sm p-4 bg-white h-100">
                 <h6 class="text-muted fw-bold">Serviciul cel mai folosit</h6>
                 <h4 class="fw-bold text-navy mb-0"><i class="bi bi-gear-wide-connected me-2"></i> @ViewBag.MostUsedService</h4>
             </div>
         </div>
     </div>
 </div>
+
+<!--  pasaport tehnic / add masina -->
+<div class="modal fade" id="carModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold text-navy"><i class="bi bi-card-heading me-2"></i>Date Pașaport Tehnic</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                
+                <!-- scanare ocr -->
+                <div class="alert alert-info border-0 shadow-sm mb-4">
+                    <h6 class="fw-bold"><i class="bi bi-camera me-2"></i>Scanare Automată (Opțional)</h6>
+                    <p class="small mb-2">Încarcă sau fă o poză pașaportului tehnic (talonului) pentru a extrage automat datele.</p>
+                    <input type="file" id="passportImage" class="form-control form-control-sm mb-2" accept="image/*" capture="environment">
+                    <button type="button" id="scanBtn" class="btn btn-info btn-sm text-white fw-bold w-100" onclick="scanDocument()">
+                        <i class="bi bi-search me-1"></i> Scanează Documentul
+                    </button>
+                    <div id="scanStatus" class="text-center mt-2 small fw-bold text-primary" style="display:none;">
+                        <span class="spinner-border spinner-border-sm me-1"></span> Se procesează imaginea... te rog așteaptă.
+                    </div>
+                </div>
+
+                <!-- formular de date -->
+                <form asp-controller="Admin" asp-action="SaveClientCar" method="post" id="carForm">
+                    <input type="hidden" name="clientId" value="@Model.Id" />
+                    <input type="hidden" name="carId" id="carId" value="0" />
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-navy">Marca Auto *</label>
+                            <input type="text" name="make" id="carMake" class="form-control" required placeholder="ex: Volkswagen" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-navy">Model *</label>
+                            <input type="text" name="model" id="carModel" class="form-control" required placeholder="ex: Passat" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-navy">Număr Înmatriculare</label>
+                            <input type="text" name="licensePlate" id="carPlate" class="form-control text-uppercase" placeholder="ex: K AA 123" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-navy">Serie Șasiu (VIN)</label>
+                            <input type="text" name="vin" id="carVin" class="form-control font-monospace text-uppercase" maxlength="17" placeholder="17 caractere" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-navy">An Fabricație</label>
+                            <input type="number" name="year" id="carYear" class="form-control" placeholder="ex: 2018" />
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4 text-muted">
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anulează</button>
+                        <button type="submit" class="btn btn-primary-cta fw-bold"><i class="bi bi-save me-1"></i> Salvează Mașina</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+    <script>
+        function resetCarForm() {
+            document.getElementById('carId').value = "0";
+            document.getElementById('carForm').reset();
+            document.getElementById('scanStatus').style.display = 'none';
+        }
+        
+        function editCar(id, make, model, plate, vin, year) {
+            document.getElementById('carId').value = id;
+            document.getElementById('carMake').value = make;
+            document.getElementById('carModel').value = model;
+            document.getElementById('carPlate').value = plate;
+            document.getElementById('carVin').value = vin;
+            document.getElementById('carYear').value = year;
+                
+            var modal = new bootstrap.Modal(document.getElementById('carModal'));
+            modal.show();
+        }
+
+        async function scanDocument() {
+            const fileInput = document.getElementById('passportImage');
+            const statusDiv = document.getElementById('scanStatus');
+                
+            if (fileInput.files.length === 0) {
+                alert("Te rog să încarci sau să faci o poză documentului mai întâi!");
+                return;
+            }
+
+            statusDiv.style.display = 'block';
+                
+            try {
+                const result = await Tesseract.recognize(
+                    fileInput.files[0],
+                    'eng+ron+ru',
+                    { logger: m => console.log(m) } 
+                );
+
+                const text = result.data.text.toUpperCase();
+                console.log("Text extras:", text);
+
+                const vinMatch = text.match(/\b[A-HJ-NPR-Z0-9]{17}\b/);
+                if (vinMatch) {
+                    document.getElementById('carVin').value = vinMatch[0];
+                }
+
+                const yearMatch = text.match(/\b(19[9][0-9]|20[0-2][0-9])\b/);
+                if (yearMatch) {
+                    document.getElementById('carYear').value = yearMatch[0];
+                }
+
+                const popularMakes = ["DACIA", "VOLKSWAGEN", "VW", "BMW", "AUDI", "SKODA", "MERCEDES", "RENAULT", "FORD", "TOYOTA"];
+                for (let make of popularMakes) {
+                    if (text.includes(make)) {
+                        document.getElementById('carMake').value = make === "VW" ? "VOLKSWAGEN" : make;
+                         break;
+                    }
+                }
+                statusDiv.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> Scanare completă! Verifică și corectează datele.';
+                statusDiv.classList.replace('text-primary', 'text-success');
+            } catch (err) {
+                console.error(err);
+                statusDiv.innerHTML = '<i class="bi bi-exclamation-triangle-fill text-danger"></i> Eroare la citirea pozei. Te rog introdu datele manual.';
+                statusDiv.classList.replace('text-primary', 'text-danger');
+            }
+        }
+    </script>
+}

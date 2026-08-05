@@ -20,5 +20,7 @@ namespace PremierAuto.Models
 
         [StringLength(15, ErrorMessage = "Numărul de înmatriculare este prea lung.")]
         public string? LicensePlate { get; set; } 
+        public string? VIN { get; set; }
+        public int? Year { get; set; }
     }
 }

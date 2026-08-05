@@ -727,8 +727,45 @@ namespace PremierAuto.Controllers
             ViewBag.TotalPaid = totalPaid;
             ViewBag.LastCompletedDate = lastCompletedDate;
             ViewBag.Appointments = appointments;
+            ViewBag.ClientCars = await _context.ClientCars.Where(c => c.ClientId == user.Id).ToListAsync();
 
             return View(user);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveClientCar(int carId, string clientId, string make, string model, string licensePlate, string vin, int? year)
+        {
+            if (carId == 0)
+            {
+                var newCar = new ClientCar
+                {
+                    ClientId = clientId,
+                    CarMake = make,
+                    CarModel = model,
+                    LicensePlate = licensePlate?.ToUpper().Replace(" ", ""),
+                    VIN = vin?.ToUpper(),
+                    Year = year
+                };
+                _context.ClientCars.Add(newCar);
+            }
+            else
+            {
+                var existingCar = await _context.ClientCars.FindAsync(carId);
+                if (existingCar != null)
+                {
+                    existingCar.CarMake = make;
+                    existingCar.CarModel = model;
+                    existingCar.LicensePlate = licensePlate?.ToUpper().Replace(" ", "");
+                    existingCar.VIN = vin?.ToUpper();
+                    existingCar.Year = year;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Datele mașinii au fost salvate cu succes!";
+            
+            return RedirectToAction(nameof(UserDetails), new { id = clientId });
         }
 
         public async Task<IActionResult> ChatHistory(string searchString, int? serviceId, string mechanicId, DateTime? searchDate)
