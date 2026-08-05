@@ -415,13 +415,11 @@ namespace PremierAuto.Controllers
                 string senderName = isMe ? "Tu" : "Admin Premier SP Auto";
                 string ticks = "";
 
-                if (!isMe && msg.IsRead)
+                if (isMe)
                 {
-                    ticks = "<span class='ms-2'><i class='bi bi-check2-all text-info' title='Seen'></i></span>";
-                }
-                else if (!isMe)
-                {
-                    ticks = "<span class='ms-2'><i class='bi bi-check2 text-white-50' title='Delivered'></i></span>";
+                    ticks = msg.IsRead 
+                        ? "<span class='ms-2'><i class='bi bi-check2-all text-info' title='Seen'></i></span>" 
+                        : "<span class='ms-2'><i class='bi bi-check2 text-white-50' title='Delivered'></i></span>";
                 }
 
                 html += $"<div class='d-flex mb-3 {justify}'>" +
@@ -432,7 +430,6 @@ namespace PremierAuto.Controllers
                         $"<p class='mb-0'>{System.Net.WebUtility.HtmlEncode(msg.Text)}</p>" +
                         $"</div></div>";
             }
-
             return Content(html, "text/html");
         }
     }
