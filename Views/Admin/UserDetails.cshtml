@@ -246,9 +246,11 @@
                 
             try {
                 let scanTasks = [];
+
                 if (frontInput.files.length > 0) {
                     scanTasks.push(Tesseract.recognize(frontInput.files[0], 'eng+ron+rus'));
                 }
+
                 if (backInput.files.length > 0) {
                     scanTasks.push(Tesseract.recognize(backInput.files[0], 'eng+ron+rus'));
                 }
@@ -268,10 +270,23 @@
                     document.getElementById('carYear').value = yearMatch[0];
                 }
 
-                const popularMakes = ["DACIA", "VOLKSWAGEN", "VW", "BMW", "AUDI", "SKODA", "MERCEDES", "RENAULT", "FORD", "TOYOTA"];
+                const plateMatch = fullText.match(/\b([A-Z]{3}\s?\d{3}|[A-Z]{1}\s?[A-Z]{2}\s?\d{3})\b/);
+                if (plateMatch) {
+                    document.getElementById('carPlate').value = plateMatch[0].replace(/\s+/g, '');
+                }
+
+                const popularMakes = ["DACIA", "VOLKSWAGEN", "VW", "BMW", "AUDI", "SKODA", "MERCEDES-BENZ", "MERCEDES", "RENAULT", "FORD", "TOYOTA"];
                 for (let make of popularMakes) {
                     if (fullText.includes(make)) {
-                        document.getElementById('carMake').value = make === "VW" ? "VOLKSWAGEN" : make;
+                        let finalMake = make === "VW" ? "VOLKSWAGEN" : make;
+                        document.getElementById('carMake').value = finalMake;
+                        
+                        const modelRegex = new RegExp(make + "\\s*(?:D\.?2)?\\s*(?:MODELUL)?\\s*([A-Z0-9]{3,})", "i");
+                        const modelMatch = fullText.match(modelRegex);
+                        
+                        if (modelMatch && modelMatch[1]) {
+                            document.getElementById('carModel').value = modelMatch[1];
+                        }
                         break;
                     }
                 }
