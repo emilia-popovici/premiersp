@@ -1,0 +1,106 @@
+@using PremierAuto.Models
+@model IEnumerable<PremierAuto.Models.JobApplication>
+@{
+    ViewData["Title"] = "Candidaturi Cariere";
+    Layout = "_AdminLayout";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-navy fw-bold mb-0">Gestionare CV-uri</h2>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success fw-bold alert-dismissible fade show shadow-sm">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light text-navy">
+                        <tr>
+                            <th class="py-3 px-3">Dată / Post</th>
+                            <th class="py-3">Candidat</th>
+                            <th class="py-3 text-center">CV / Detalii</th>
+                            <th class="py-3 text-center">Status</th>
+                            <th class="py-3 text-center">Acțiuni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr><td colspan="5" class="text-center py-4 text-muted">Nicio aplicație momentan.</td></tr>
+                        }
+                        @foreach (var app in Model)
+                        {
+                            <tr>
+                                <td class="px-3 text-nowrap">
+                                    <span class="fw-bold">@app.SubmittedAt.ToString("dd/MM/yyyy HH:mm")</span><br />
+                                    <span class="badge bg-secondary">@app.JobPosition?.Title</span>
+                                </td>
+                                <td>
+                                    <span class="fw-bold">@app.FirstName @app.LastName</span><br />
+                                    <small class="text-muted"><i class="bi bi-envelope"></i> @app.Email</small><br />
+                                    <small class="text-muted"><i class="bi bi-telephone"></i> @app.Phone</small>
+                                </td>
+                                <td class="text-center">
+                                    @if (!string.IsNullOrEmpty(app.CvUrl))
+                                    {
+                                        <a href="@app.CvUrl" target="_blank" class="btn btn-sm btn-outline-primary fw-bold">
+                                            <i class="bi bi-file-earmark-pdf"></i> Vezi CV
+                                        </a>
+                                    }
+                                    @if (!string.IsNullOrEmpty(app.Education) || !string.IsNullOrEmpty(app.Experience))
+                                    {
+                                        <button class="btn btn-sm btn-outline-info fw-bold ms-1" data-bs-toggle="modal" data-bs-target="#details@(app.Id)">
+                                            <i class="bi bi-justify"></i> Text
+                                        </button>
+                                        <div class="modal fade text-start" id="details@(app.Id)" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title fw-bold text-navy">Detalii completate manual</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <h6 class="fw-bold">Educație:</h6>
+                                                        <p class="text-muted">@(app.Education ?? "-")</p>
+                                                        <h6 class="fw-bold mt-3">Experiență:</h6>
+                                                        <p class="text-muted">@(app.Experience ?? "-")</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <form asp-action="ChangeApplicationStatus" method="post">
+                                        <input type="hidden" name="id" value="@app.Id" />
+                                        <select name="status" class="form-select form-select-sm d-inline-block w-auto @(app.Status == ApplicationStatus.Nou ? "bg-warning" : app.Status == ApplicationStatus.Contactat ? "bg-success text-white" : "bg-danger text-white")" onchange="this.form.submit()">
+                                            <option value="Nou" selected="@(app.Status == ApplicationStatus.Nou)">Nou</option>
+                                            <option value="Contactat" selected="@(app.Status == ApplicationStatus.Contactat)">Contactat</option>
+                                            <option value="Respins" selected="@(app.Status == ApplicationStatus.Respins)">Respins</option>
+                                        </select>
+                                    </form>
+                                </td>
+                                <td class="text-center">
+                                    <form asp-action="DeleteApplication" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@app.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Sigur ștergi această aplicație?');">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

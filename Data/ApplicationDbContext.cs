@@ -20,6 +20,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<AppointmentMessage> AppointmentMessages { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<ClientCar> ClientCars { get; set; }
+    public DbSet<JobPosition> JobPositions { get; set; }
+    public DbSet<JobApplication> JobApplications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
 {

@@ -901,6 +901,55 @@ namespace PremierAuto.Controllers
             }
             return RedirectToAction(nameof(Appointments));
         }
+
+        // Adaugă asta în AdminController.cs
+        public async Task<IActionResult> JobApplications()
+        {
+            var applications = await _context.JobApplications
+                .Include(a => a.JobPosition)
+                .OrderByDescending(a => a.SubmittedAt)
+                .ToListAsync();
+                
+            return View(applications);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangeApplicationStatus(int id, ApplicationStatus status)
+        {
+            var app = await _context.JobApplications.FindAsync(id);
+            if (app != null)
+            {
+                app.Status = status;
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Status actualizat!";
+            }
+            return RedirectToAction(nameof(JobApplications));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteApplication(int id)
+        {
+            var app = await _context.JobApplications.FindAsync(id);
+            if (app != null)
+            {
+                if (!string.IsNullOrEmpty(app.CvUrl))
+                {
+                    string webRootPath = _userManager.Users.First().Id != null ? Directory.GetCurrentDirectory() + "/wwwroot" : ""; // adaptare rapidă
+                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", app.CvUrl.TrimStart('/'));
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        System.IO.File.Delete(filePath);
+                    }
+                }
+                
+                _context.JobApplications.Remove(app);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Aplicația a fost ștearsă.";
+            }
+            return RedirectToAction(nameof(JobApplications));
+        }
     }
 
     public class ClientUserViewModel

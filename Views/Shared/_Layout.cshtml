@@ -45,6 +45,11 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Services">Servicii</a>
                         </li>
+                        <!-- Link-ul nou adăugat pentru Cariere -->
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Careers" asp-action="Index">Cariere</a>
+                        </li>
+                        
                         @if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Admin"))
                         {
                             <li class="nav-item">
@@ -92,6 +97,7 @@
                     <ul class="footer-links">
                         <li><a asp-controller="Home" asp-action="Index">Acasă</a></li>
                         <li><a asp-controller="Appointment" asp-action="Create">Programează-te</a></li>
+                        <li><a asp-controller="Careers" asp-action="Index">Cariere</a></li>
                     </ul>
                 </div>
                 <div class="col-6 col-lg-2">
