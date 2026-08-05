@@ -736,13 +736,10 @@ namespace PremierAuto.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SaveClientCar(
             int carId, string clientId, string licensePlate, int? year, 
-            string ownerName, string ownerId, string ownerAddress, string vehicleRights,
-            string make, string vehicleType, string model, 
-            string vin, string bodyNumber, string chassisNumber, 
-            int? maxMass, int? ownMass, string validityPeriod, string registrationDate,
-            string category, string bodyStyle, int? engineCapacity, string fuelType, 
-            string powerWeightRatio, string color, int? seats, 
-            string specialMentions, string issuingAuthority, string idnv)
+            string make, string? vehicleType, string model, 
+            string vin, string bodyNumber, string? chassisNumber, 
+            int? maxMass, int? ownMass, string? category, string? bodyStyle, int? engineCapacity, string? fuelType, 
+            string? powerWeightRatio, string? color, int? seats, string? idnv)
         {
             if (carId == 0)
             {

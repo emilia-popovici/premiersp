@@ -113,7 +113,7 @@ namespace PremierAuto.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddCar(string carMake, string carModel, string licensePlate, string vin, int year, string fuelType)
+        public async Task<IActionResult> AddCar(string carMake, string carModel, string licensePlate, string vin, int? year, string? fuelType)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Challenge();
