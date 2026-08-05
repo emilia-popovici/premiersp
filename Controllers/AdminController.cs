@@ -1118,7 +1118,9 @@ namespace PremierAuto.Controllers
         {
             var query = _context.Appointments
                 .Include(a => a.Client)
-                .Where(a => a.Status == AppointmentStatus.Done || a.FinalPrice != null)
+                .Where(a => a.Status == AppointmentStatus.Accepted || 
+                            a.Status == AppointmentStatus.Rescheduled || 
+                            a.Status == AppointmentStatus.Done)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(searchString))
@@ -1134,16 +1136,21 @@ namespace PremierAuto.Controllers
             {
                 if (statusFilter == "Achitat")
                 {
-                    query = query.Where(a => a.AmountPaid >= a.FinalPrice && a.FinalPrice > 0);
+                    query = query.Where(a => a.FinalPrice > 0 && a.AmountPaid >= a.FinalPrice);
                 }
                 else if (statusFilter == "Restant")
                 {
-                    query = query.Where(a => a.AmountPaid < a.FinalPrice || a.FinalPrice == null);
+                    query = query.Where(a => a.FinalPrice == null || a.AmountPaid < a.FinalPrice);
                 }
             }
 
-            var appointments = await query.OrderByDescending(a => a.AppointmentDate).ToListAsync();
+            var appointmentsList = await query.ToListAsync();
             
+            var appointments = appointmentsList
+                .OrderBy(a => (a.FinalPrice.HasValue && a.FinalPrice.Value > 0 && a.AmountPaid >= a.FinalPrice.Value) ? 1 : 0)
+                .ThenByDescending(a => a.AppointmentDate)
+                .ToList();
+
             ViewBag.CurrentSearch = searchString;
             ViewBag.CurrentStatus = statusFilter;
 
@@ -1152,16 +1159,17 @@ namespace PremierAuto.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdatePayment(int id, decimal amountPaid, PaymentMethod paymentMethod)
+        public async Task<IActionResult> UpdatePayment(int id, decimal? finalPrice, decimal amountPaid, PaymentMethod paymentMethod)
         {
             var appointment = await _context.Appointments.FindAsync(id);
             if (appointment != null)
             {
+                appointment.FinalPrice = finalPrice;
                 appointment.AmountPaid = amountPaid;
                 appointment.PaymentMethod = paymentMethod;
                 await _context.SaveChangesAsync();
                 
-                TempData["SuccessMessage"] = $"Plata pentru programarea #{id} a fost actualizată!";
+                TempData["SuccessMessage"] = $"Datele financiare pentru programarea #{id} au fost actualizate!";
             }
             return RedirectToAction(nameof(Payments));
         }

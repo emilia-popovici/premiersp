@@ -39,7 +39,7 @@
                         <tr>
                             <th class="py-3 px-3">#ID / Dată</th>
                             <th class="py-3">Client & Mașină</th>
-                            <th class="py-3 text-center bg-secondary bg-opacity-25">Total Finalizat</th>
+                            <th class="py-3 text-center">Total Finalizat</th>
                             <th class="py-3 text-center">Suma Achitată</th>
                             <th class="py-3 text-center">Metoda Plată</th>
                             <th class="py-3 text-center">Rest de Plată</th>
@@ -59,14 +59,14 @@
                             decimal remaining = total - paid;
                             
                             string remainingClass = remaining > 0 ? "text-danger fw-bold" : (remaining < 0 ? "text-warning fw-bold" : "text-success fw-bold");
-
                             <tr>
                                 <form id="payForm_@app.Id" asp-controller="Admin" asp-action="UpdatePayment" method="post"></form>
                                 <input type="hidden" name="id" value="@app.Id" form="payForm_@app.Id" />
 
                                 <td class="px-3 text-nowrap">
                                     <span class="text-muted fw-bold">#@app.Id</span><br/>
-                                    <small class="text-muted">@app.AppointmentDate.ToString("dd/MM/yyyy")</small>
+                                    <small class="text-muted">@app.AppointmentDate.ToString("dd/MM/yyyy")</small><br/>
+                                    <span class="badge @(app.Status == AppointmentStatus.Done ? "bg-success" : "bg-warning text-dark")" style="font-size: 0.65rem;">@app.Status</span>
                                 </td>
                                 
                                 <td class="text-nowrap">
@@ -74,8 +74,11 @@
                                     <small class="text-muted">@app.CarMake @app.CarModel</small>
                                 </td>
                                 
-                                <td class="text-center bg-light fw-bold text-navy fs-5">
-                                    @total MDL
+                                <td class="text-center bg-light">
+                                    <div class="input-group input-group-sm mx-auto" style="width: 140px;">
+                                        <input type="number" step="0.01" name="finalPrice" class="form-control fw-bold text-navy" value="@(app.FinalPrice?.ToString("0.##") ?? "")" placeholder="ex: 500" form="payForm_@app.Id" />
+                                        <span class="input-group-text bg-white">MDL</span>
+                                    </div>
                                 </td>
 
                                 <td class="text-center">
