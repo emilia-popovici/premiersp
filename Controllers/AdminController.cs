@@ -919,7 +919,7 @@ namespace PremierAuto.Controllers
             if (app == null || string.IsNullOrEmpty(app.CvUrl)) return NotFound();
 
             var signedUrl = await _supabase.Storage
-                .From("premier-cvs")
+                .From("premier-sp-auto-cvs")
                 .CreateSignedUrl(app.CvUrl, 60);
 
             return Redirect(signedUrl);
@@ -949,7 +949,7 @@ namespace PremierAuto.Controllers
                 if (!string.IsNullOrEmpty(app.CvUrl))
                 {
                     await _supabase.Storage
-                        .From("premier-cvs")
+                        .From("premier-sp-auto-cvs")
                         .Remove(new List<string> { app.CvUrl });
                 }
                 
