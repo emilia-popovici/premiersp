@@ -37,21 +37,6 @@
         </button>
     </div>
 
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert alert-success fw-bold alert-dismissible fade show shadow-sm" role="alert">
-            @TempData["SuccessMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-    @if (TempData["ErrorMessage"] != null)
-    {
-        <div class="alert alert-danger fw-bold alert-dismissible fade show shadow-sm" role="alert">
-            @TempData["ErrorMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-
     <!-- search bar -->
     <div class="card shadow-sm border-0 bg-white p-3 mb-4">
         <form method="get" asp-action="Appointments" class="row g-3 align-items-end">

@@ -43,15 +43,6 @@
         }
     </div>
 
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert alert-success fw-bold">@TempData["SuccessMessage"]</div>
-    }
-    @if (TempData["ErrorMessage"] != null)
-    {
-        <div class="alert alert-danger fw-bold">@TempData["ErrorMessage"]</div>
-    }
-
     @if (User.IsInRole("Mecanic") && ViewBag.NotLinked == true)
     {
         <div class="alert alert-warning fw-bold">

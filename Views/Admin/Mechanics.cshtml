@@ -10,15 +10,6 @@
     <a asp-action="CreateMechanic" class="btn btn-primary-cta fw-bold">+ Adaugă Mecanic Nou</a>
 </div>
 
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger fw-bold">@TempData["ErrorMessage"]</div>
-}
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success fw-bold">@TempData["SuccessMessage"]</div>
-}
-
 <div class="card shadow-sm border-0">
     <div class="card-body p-0 table-responsive">
         <table class="table table-hover bg-white mb-0 align-middle" style="min-width: 800px;">

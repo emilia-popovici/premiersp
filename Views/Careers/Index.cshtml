@@ -9,13 +9,6 @@
         <p class="text-muted">Căutăm pasionați de auto care vor să facă performanță într-un mediu profesionist.</p>
     </div>
 
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert alert-success fw-bold text-center shadow-sm">
-            <i class="bi bi-check-circle me-2"></i> @TempData["SuccessMessage"]
-        </div>
-    }
-
     <div class="row g-4">
         @foreach (var job in Model)
         {

@@ -45,7 +45,6 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Services">Servicii</a>
                         </li>
-                        <!-- Link-ul nou adăugat pentru Cariere -->
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Careers" asp-action="Index">Cariere</a>
                         </li>
@@ -78,6 +77,22 @@
     
     <div class="page-shell">
         <main role="main" class="pb-3">
+            <div class="container mt-4">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success fw-bold alert-dismissible fade show shadow-sm" role="alert">
+                        <i class="bi bi-check-circle me-2"></i> @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger fw-bold alert-dismissible fade show shadow-sm" role="alert">
+                        <i class="bi bi-exclamation-triangle me-2"></i> @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+            </div>
             @RenderBody()
         </main>
     </div>
