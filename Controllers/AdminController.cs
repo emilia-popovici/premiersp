@@ -1048,14 +1048,29 @@ namespace PremierAuto.Controllers
             string html = "";
             foreach (var msg in messages)
             {
-                bool isMe = msg.SenderId == user.Id;
-                string bgClass = isMe ? "bg-primary text-white" : "bg-light text-dark";
-                string alignClass = isMe ? "ms-auto" : "me-auto";
+                bool isMe = msg.IsAdmin;
+                string justify = isMe ? "justify-content-end" : "justify-content-start";
+                string style = isMe 
+                    ? "max-width: 75%; background-color: var(--navy); color: white; border-bottom-right-radius: 0 !important;" 
+                    : "max-width: 75%; background-color: var(--paper); border: 1px solid var(--steel); border-bottom-left-radius: 0 !important;";
 
-                html += $"<div class='p-3 rounded mb-2 {bgClass} {alignClass}' style='max-width: 75%;'>" +
-                        $"<small class='d-block text-muted mb-1'>{(isMe ? "Tu" : "Celălalt")} • {msg.CreatedAt:HH:mm, dd/MM}</small>" +
-                        $"<span>{System.Net.WebUtility.HtmlEncode(msg.Text)}</span>" +
-                        $"</div>";
+                string senderName = isMe ? "Tu (Admin)" : (msg.Sender?.FirstName ?? "Client");
+                string ticks = "";
+
+                if (isMe)
+                {
+                    ticks = msg.IsRead 
+                        ? "<span class='ms-2'><i class='bi bi-check2-all text-info' title='Seen'></i></span>"
+                        : "<span class='ms-2'><i class='bi bi-check2 text-white-50' title='Delivered'></i></span>";
+                }
+
+                html += $"<div class='d-flex mb-3 {justify}'>" +
+                        $"<div class='p-3 rounded shadow-sm' style='{style}'>" +
+                        $"<div class='small fw-bold mb-1 opacity-75 d-flex justify-content-between align-items-center'>" +
+                        $"<span>{senderName} &bull; {msg.CreatedAt:HH:mm, dd/MM}</span>{ticks}" +
+                        $"</div>" +
+                        $"<p class='mb-0'>{System.Net.WebUtility.HtmlEncode(msg.Text)}</p>" +
+                        $"</div></div>";
             }
 
             return Content(html, "text/html");
