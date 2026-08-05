@@ -152,7 +152,7 @@
                     
                     <div class="row g-2 mb-3">
                         <div class="col-6">
-                            <label class="form-label small fw-bold text-muted mb-1">Poză Față</label>
+                            <label class="form-label small fw-bold text-muted mb-3">Poză Față</label>
                             <input type="file" id="passportFront" class="form-control form-control-sm" accept="image/*" capture="environment">
                         </div>
                     </div>
@@ -246,7 +246,6 @@
             try {
                 let scanTasks = [];
                 if (frontInput.files.length > 0) scanTasks.push(Tesseract.recognize(frontInput.files[0], 'eng+ron+rus'));
-                if (backInput.files.length > 0) scanTasks.push(Tesseract.recognize(backInput.files[0], 'eng+ron+rus'));
 
                 const results = await Promise.all(scanTasks);
                 const fullText = results.map(r => r.data.text.toUpperCase()).join(" \n ");
