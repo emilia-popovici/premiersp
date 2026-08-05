@@ -154,6 +154,7 @@
 
         setInterval(async () => {
             try {
+                await fetch(`/Admin/MarkAsRead?appointmentId=${appointmentId}`);
                 let response = await fetch(`/Admin/GetMessagesJson?appointmentId=${appointmentId}`);
                 if (response.ok) {
                     let htmlMessages = await response.text();

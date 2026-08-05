@@ -1072,8 +1072,26 @@ namespace PremierAuto.Controllers
                         $"<p class='mb-0'>{System.Net.WebUtility.HtmlEncode(msg.Text)}</p>" +
                         $"</div></div>";
             }
-
             return Content(html, "text/html");
+        }
+        
+        [HttpGet]
+        public async Task<IActionResult> MarkAsRead(int appointmentId)
+        {
+            var unreadMessages = await _context.AppointmentMessages
+                .Where(m => m.AppointmentId == appointmentId && !m.IsAdmin && !m.IsRead)
+                .ToListAsync();
+
+            if (unreadMessages.Any())
+            {
+                foreach (var msg in unreadMessages)
+                {
+                    msg.IsRead = true;
+                }
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok();
         }
     }
 

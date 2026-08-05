@@ -412,7 +412,7 @@ namespace PremierAuto.Controllers
                     ? "max-width: 75%; background-color: var(--circuit); color: white; border-bottom-right-radius: 0 !important;" 
                     : "max-width: 75%; background-color: white; border: 1px solid var(--steel); border-bottom-left-radius: 0 !important;";
 
-                string senderName = isMe ? "Tu" : "Admin Premier SP Auto";
+                string senderName = isMe ? "Tu" : "Premier SP Auto";
                 string ticks = "";
 
                 if (isMe)
@@ -431,6 +431,28 @@ namespace PremierAuto.Controllers
                         $"</div></div>";
             }
             return Content(html, "text/html");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> MarkAsRead(int appointmentId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+
+            var unreadMessages = await _context.AppointmentMessages
+                .Where(m => m.AppointmentId == appointmentId && m.IsAdmin && !m.IsRead)
+                .ToListAsync();
+
+            if (unreadMessages.Any())
+            {
+                foreach (var msg in unreadMessages)
+                {
+                    msg.IsRead = true;
+                }
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok();
         }
     }
 }
