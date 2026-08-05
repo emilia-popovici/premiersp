@@ -201,8 +201,17 @@ namespace PremierAuto.Controllers
 
             var availableHours = new List<string>();
 
+            var bucharestTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Bucharest");
+            var nowInBucharest = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, bucharestTimeZone);
+            bool isToday = utcDate.Date == nowInBucharest.Date;
+
             foreach (var slot in workingHours)
             {
+                if (isToday && slot <= nowInBucharest.TimeOfDay)
+                {
+                    continue;
+                }
+
                 var slotStart = utcDate.Date + slot;
                 var slotEnd = slotStart.AddMinutes(durationMinutes);
 
@@ -217,10 +226,7 @@ namespace PremierAuto.Controllers
 
                 if (!isOverlap)
                 {
-                    if (utcDate.Date != DateTime.Today || slotStart.TimeOfDay > DateTime.UtcNow.TimeOfDay)
-                    {
-                        availableHours.Add(slot.ToString(@"hh\:mm"));
-                    }
+                    availableHours.Add(slot.ToString(@"hh\:mm"));
                 }
             }
 
