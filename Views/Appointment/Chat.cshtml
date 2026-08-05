@@ -13,7 +13,6 @@
         </div>
 
         <div class="row g-4">
-            <!-- Detalii Programare -->
             <div class="col-lg-4">
                 <div class="card shadow-sm border-0 bg-white">
                     <div class="card-body p-4">
@@ -31,7 +30,7 @@
                 </div>
             </div>
 
-            <!-- Fereastra de Chat -->
+            <!-- fereastra de chat -->
             <div class="col-lg-8">
                 <div class="card shadow-sm border-0 d-flex flex-column bg-white" style="height: 600px;">
                     <div class="card-header bg-white fw-bold py-3 border-bottom d-flex align-items-center">
@@ -39,8 +38,8 @@
                         <span>Discuție cu Premier SP Auto</span>
                     </div>
                     
-                    <!-- Istoric Mesaje -->
-                    <div class="card-body overflow-auto p-4" style="flex-grow: 1; background-color: var(--paper);">
+                    <!-- istoric mesaje -->
+                    <div id="chatMessages" class="card-body overflow-auto p-4" style="flex-grow: 1; background-color: var(--paper);">
                         @if (messages != null && messages.Any())
                         {
                             foreach (var msg in messages)
@@ -107,3 +106,34 @@
         </div>
     </div>
 </section>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const appointmentId = @Model.Id;
+            const container = document.getElementById("chatMessages");
+
+            function scrollToBottom() {
+                if (container) {
+                    container.scrollTop = container.scrollHeight;
+                }
+            }
+            scrollToBottom();
+
+            setInterval(async () => {
+                try {
+                    let response = await fetch(`/Appointment/GetMessagesJson?appointmentId=${appointmentId}`);
+                    if (response.ok) {
+                        let htmlMessages = await response.text();
+                        if (container.innerHTML !== htmlMessages) {
+                            container.innerHTML = htmlMessages;
+                            scrollToBottom();
+                        }
+                    }
+                } catch (error) {
+                    console.error("Eroare la preluarea mesajelor:", error);
+                }
+            }, 3000);
+        });
+    </script>
+}

@@ -1029,6 +1029,37 @@ namespace PremierAuto.Controllers
             }
             return RedirectToAction(nameof(JobPositions));
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetMessagesJson(int appointmentId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var appointment = await _context.Appointments
+                .FirstOrDefaultAsync(a => a.Id == appointmentId && (a.ClientId == user.Id || User.IsInRole("Admin")));
+
+            if (appointment == null) return Unauthorized();
+
+            var messages = await _context.AppointmentMessages
+                .Include(m => m.Sender)
+                .Where(m => m.AppointmentId == appointmentId)
+                .OrderBy(m => m.CreatedAt)
+                .ToListAsync();
+
+            string html = "";
+            foreach (var msg in messages)
+            {
+                bool isMe = msg.SenderId == user.Id;
+                string bgClass = isMe ? "bg-primary text-white" : "bg-light text-dark";
+                string alignClass = isMe ? "ms-auto" : "me-auto";
+
+                html += $"<div class='p-3 rounded mb-2 {bgClass} {alignClass}' style='max-width: 75%;'>" +
+                        $"<small class='d-block text-muted mb-1'>{(isMe ? "Tu" : "Celălalt")} • {msg.CreatedAt:HH:mm, dd/MM}</small>" +
+                        $"<span>{System.Net.WebUtility.HtmlEncode(msg.Text)}</span>" +
+                        $"</div>";
+            }
+
+            return Content(html, "text/html");
+        }
     }
 
     public class ClientUserViewModel
