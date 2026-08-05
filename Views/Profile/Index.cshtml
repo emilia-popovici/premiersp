@@ -156,8 +156,8 @@
             </div>
             <div class="modal-body p-4">
                 <div class="mb-3">
-                    <label class="form-label fw-bold text-navy">Marca</label>
-                    <input type="text" name="carMake" id="profileCarMakeInput" list="profileCarMakes" class="form-control" placeholder="ex: Dacia" required autocomplete="off" />
+                    <label class="form-label fw-bold text-navy">Marca *</label>
+                    <input type="text" name="carMake" id="profileCarMakeInput" list="profileCarMakes" class="form-control" placeholder="ex: Renault" required autocomplete="off" />
                     <datalist id="profileCarMakes">
                         <option value="Dacia"></option>
                         <option value="Volkswagen"></option>
@@ -172,13 +172,25 @@
                     </datalist>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-bold text-navy">Model</label>
+                    <label class="form-label fw-bold text-navy">Model *</label>
                     <input type="text" name="carModel" id="profileCarModelInput" list="profileCarModels" class="form-control" placeholder="ex: Logan" required autocomplete="off" />
                     <datalist id="profileCarModels"></datalist>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-bold text-navy">Număr înmatriculare <span class="text-muted fw-normal">(Opțional)</span></label>
+                    <label class="form-label fw-bold text-navy">Număr înmatriculare *</label>
                     <input type="text" name="licensePlate" class="form-control text-uppercase" placeholder="ex: B 123 ABC" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-navy">VIN *</label>
+                    <input type="text" name="vin" class="form-control text-uppercase" placeholder="ex: 1FA6P8CF0H5123456" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-navy">An </label>
+                    <input type="text" name="year" class="form-control text-uppercase" placeholder="ex: 2012" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-navy">Tip combustibil sau Sursă de putere </label>
+                    <input type="text" name="fuelType" class="form-control text-uppercase" placeholder="ex: 1FA6P8CF0H5123456" />
                 </div>
             </div>
             <div class="modal-footer bg-light">

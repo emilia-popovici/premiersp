@@ -113,7 +113,7 @@ namespace PremierAuto.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddCar(string carMake, string carModel, string? licensePlate)
+        public async Task<IActionResult> AddCar(string carMake, string carModel, string licensePlate, string vin, int year, string fuelType)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Challenge();
@@ -136,7 +136,10 @@ namespace PremierAuto.Controllers
                 ClientId = user.Id,
                 CarMake = carMake.Trim(),
                 CarModel = carModel.Trim(),
-                LicensePlate = string.IsNullOrWhiteSpace(licensePlate) ? null : licensePlate.Trim().ToUpper()
+                LicensePlate = string.IsNullOrWhiteSpace(licensePlate) ? null : licensePlate.Trim().ToUpper(),
+                VIN = vin.Trim(),
+                Year = year,
+                FuelType = fuelType.Trim()
             };
 
             _context.ClientCars.Add(car);
@@ -148,7 +151,7 @@ namespace PremierAuto.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditCar(int id, string carMake, string carModel, string? licensePlate)
+        public async Task<IActionResult> EditCar(int id, string carMake, string carModel, string licensePlate, string vin, int? year, string fuelType)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Challenge();
@@ -158,13 +161,16 @@ namespace PremierAuto.Controllers
 
             if (string.IsNullOrWhiteSpace(carMake) || string.IsNullOrWhiteSpace(carModel))
             {
-                TempData["ErrorMessage"] = "Marca și modelul sunt obligatorii.";
+                TempData["ErrorMessage"] = "Marca, modelul, Nr. înmatriculare și VIN sunt obligatorii.";
                 return RedirectToAction(nameof(Index));
             }
 
             car.CarMake = carMake.Trim();
             car.CarModel = carModel.Trim();
             car.LicensePlate = string.IsNullOrWhiteSpace(licensePlate) ? null : licensePlate.Trim().ToUpper();
+            car.VIN = vin.Trim();
+            car.Year = year;
+            car.FuelType = fuelType.Trim();
 
             _context.ClientCars.Update(car);
             await _context.SaveChangesAsync();
