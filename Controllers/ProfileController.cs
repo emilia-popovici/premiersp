@@ -20,18 +20,18 @@ namespace PremierAuto.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly Supabase.Client _supabase;
 
         public ProfileController(
             ApplicationDbContext context, 
             UserManager<ApplicationUser> userManager, 
             SignInManager<ApplicationUser> signInManager,
-            IWebHostEnvironment webHostEnvironment)
+            Supabase.Client supabase)
         {
             _context = context;
             _userManager = userManager;
             _signInManager = signInManager;
-            _webHostEnvironment = webHostEnvironment;
+            _supabase = supabase;
         }
 
         public async Task<IActionResult> Index()
@@ -197,22 +197,19 @@ namespace PremierAuto.Controllers
             {
                 var fileName = Guid.NewGuid().ToString() + Path.GetExtension(profilePicture.FileName);
                 
-                string webRootPath = _webHostEnvironment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-                var uploadsFolder = Path.Combine(webRootPath, "uploads");
-                
-                if (!Directory.Exists(uploadsFolder))
-                {
-                    Directory.CreateDirectory(uploadsFolder);
-                }
+                using var memoryStream = new MemoryStream();
+                await profilePicture.CopyToAsync(memoryStream);
+                var fileBytes = memoryStream.ToArray();
 
-                var filePath = Path.Combine(uploadsFolder, fileName);
+                await _supabase.Storage
+                    .From("premier-sp-auto-public")
+                    .Upload(fileBytes, fileName);
 
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await profilePicture.CopyToAsync(stream);
-                }
+                var publicUrl = _supabase.Storage
+                    .From("premier-sp-auto-public")
+                    .GetPublicUrl(fileName);
 
-                profile.ProfilePictureUrl = "/uploads/" + fileName;
+                profile.ProfilePictureUrl = publicUrl;
             }
         }
 

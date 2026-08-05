@@ -7,19 +7,10 @@
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            
-            @if (TempData["SuccessMessage"] != null)
-            {
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            }
 
             <div class="card shadow-sm border-0 p-4 bg-white">
                 <h2 class="fw-bold text-navy mb-4"><i class="bi bi-person-badge me-2"></i> Profilul Meu</h2>
                 
-                <!-- Afișarea sumară a profilului -->
                 <div class="d-flex align-items-center mb-4 p-3 bg-light rounded">
                     <div class="position-relative me-4">
                         @if (!string.IsNullOrEmpty(Model.PhotoUrl))
@@ -35,7 +26,6 @@
                             <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 100px; height: 100px; font-size: 2.5rem;">🔧</div>
                         }
                         
-                        <!-- Indicator status poză -->
                         @if (!string.IsNullOrEmpty(Model.PhotoUrl) && !Model.IsPictureApproved)
                         {
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark border border-light" title="Poza așteaptă aprobarea administratorului">
@@ -53,7 +43,6 @@
                     </div>
                 </div>
 
-                <!-- Formularul de editare -->
                 <h5 class="fw-bold text-navy mb-3">Actualizare Date</h5>
                 <form asp-controller="Mechanic" asp-action="UpdateProfile" method="post" enctype="multipart/form-data">
                     <div class="row g-3 mb-3">

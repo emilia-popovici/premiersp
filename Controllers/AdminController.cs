@@ -18,11 +18,13 @@ namespace PremierAuto.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly Supabase.Client _supabase;
 
-        public AdminController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public AdminController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, Supabase.Client supabase)
         {
             _context = context;
             _userManager = userManager;
+            _supabase = supabase;
         }
 
         public async Task<IActionResult> Index()
@@ -125,7 +127,6 @@ namespace PremierAuto.Controllers
             var startOfWeek = targetDate.AddDays(-diff).Date;
             var endOfWeek = startOfWeek.AddDays(7).Date;
 
-            // Extragem clienții și profilurile pentru modalul de creare manuală
             var clientRoles = await _userManager.GetUsersInRoleAsync("Client");
             var clientProfiles = await _context.ClientProfiles.ToListAsync();
 
@@ -901,8 +902,6 @@ namespace PremierAuto.Controllers
             }
             return RedirectToAction(nameof(Appointments));
         }
-
-        // Adaugă asta în AdminController.cs
         public async Task<IActionResult> JobApplications()
         {
             var applications = await _context.JobApplications
@@ -911,6 +910,19 @@ namespace PremierAuto.Controllers
                 .ToListAsync();
                 
             return View(applications);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ViewCv(int id)
+        {
+            var app = await _context.JobApplications.FindAsync(id);
+            if (app == null || string.IsNullOrEmpty(app.CvUrl)) return NotFound();
+
+            var signedUrl = await _supabase.Storage
+                .From("premier-cvs")
+                .CreateSignedUrl(app.CvUrl, 60);
+
+            return Redirect(signedUrl);
         }
 
         [HttpPost]
@@ -936,12 +948,9 @@ namespace PremierAuto.Controllers
             {
                 if (!string.IsNullOrEmpty(app.CvUrl))
                 {
-                    string webRootPath = _userManager.Users.First().Id != null ? Directory.GetCurrentDirectory() + "/wwwroot" : ""; // adaptare rapidă
-                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", app.CvUrl.TrimStart('/'));
-                    if (System.IO.File.Exists(filePath))
-                    {
-                        System.IO.File.Delete(filePath);
-                    }
+                    await _supabase.Storage
+                        .From("premier-cvs")
+                        .Remove(new List<string> { app.CvUrl });
                 }
                 
                 _context.JobApplications.Remove(app);

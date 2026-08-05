@@ -55,6 +55,12 @@ builder.Services.AddAuthentication()
         options.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"]!;
     });
 
+var supabaseUrl = builder.Configuration["Supabase:Url"];
+var supabaseKey = builder.Configuration["Supabase:Key"];
+var options = new Supabase.SupabaseOptions { AutoConnectRealtime = false };
+var supabaseClient = new Supabase.Client(supabaseUrl, supabaseKey, options);
+builder.Services.AddSingleton(supabaseClient);
+
 var app = builder.Build();
 
 app.UseForwardedHeaders();

@@ -4,18 +4,13 @@
     ViewData["Title"] = "Agenda de Lucru";
     
     var today = DateTime.Today;
-
-    // Definim statusurile care înseamnă că programarea s-a încheiat
     var finishedStatuses = new[] { "Done", "Canceled", "Rejected" };
-
-    // 1. AGENDA CURENTĂ: Programări de azi înainte, DAR care NU sunt finalizate/anulate/respinse
     var upcomingAppointments = Model?
         .Where(a => a.AppointmentDate.Date >= today && !finishedStatuses.Contains(a.Status.ToString()))
         .GroupBy(a => a.AppointmentDate.Date)
         .OrderBy(g => g.Key)
         .ToList();
 
-    // 2. ISTORIC: Programări din trecut SAU cele finalizate/anulate (chiar dacă erau programate azi/mâine)
     var pastAppointments = Model?
         .Where(a => a.AppointmentDate.Date < today || finishedStatuses.Contains(a.Status.ToString()))
         .GroupBy(a => a.AppointmentDate.Date)
@@ -25,7 +20,6 @@
 
 <div class="container py-5">
     
-    <!-- SECȚIUNEA 1: AGENDA CURENTĂ -->
     <div class="mb-4">
         <h2 class="fw-bold text-navy mb-2"><i class="bi bi-calendar-range me-2 text-accent"></i> Agenda Curentă</h2>
         <p class="text-muted">Programările tale active de astăzi și din zilele următoare.</p>
@@ -101,12 +95,10 @@
         </div>
     }
 
-    <!-- SECȚIUNEA 2: ISTORIC PROGRAMĂRI (Colapsabil) -->
     @if (pastAppointments != null && pastAppointments.Any())
     {
         <hr class="my-5 border-2 text-muted" style="opacity: 0.1;">
         
-        <!-- Butonul de Toggle (Titlul secțiunii pe care dai click) -->
         <div class="mb-4 d-flex justify-content-between align-items-center p-3 bg-light rounded shadow-sm" 
              data-bs-toggle="collapse" 
              data-bs-target="#historyCollapse" 
@@ -119,8 +111,6 @@
             </div>
             <i class="bi bi-chevron-down fs-3 text-secondary transition-icon"></i>
         </div>
-
-        <!-- Conținutul ascuns (Istoricul efectiv) -->
         <div class="collapse" id="historyCollapse">
             <div class="row g-5 opacity-75 mt-2"> 
                 @foreach (var group in pastAppointments)
@@ -220,7 +210,6 @@
         --accent-color: #fd7e14; 
     }
 
-    /* Animație pentru săgeata de istoric */
     .transition-icon {
         transition: transform 0.3s ease;
     }

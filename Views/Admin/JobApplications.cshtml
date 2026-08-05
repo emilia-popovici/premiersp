@@ -43,7 +43,7 @@
                                 <td class="text-center">
                                     @if (!string.IsNullOrEmpty(app.CvUrl))
                                     {
-                                        <a href="@app.CvUrl" target="_blank" class="btn btn-sm btn-outline-primary fw-bold">
+                                        <a asp-action="ViewCv" asp-route-id="@app.Id" target="_blank" class="btn btn-sm btn-outline-primary fw-bold">
                                             <i class="bi bi-file-earmark-pdf"></i> Vezi CV
                                         </a>
                                     }

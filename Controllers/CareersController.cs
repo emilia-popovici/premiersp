@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -6,7 +5,6 @@ using PremierAuto.Data;
 using PremierAuto.Models;
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace PremierAuto.Controllers
@@ -14,12 +12,11 @@ namespace PremierAuto.Controllers
     public class CareersController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly IWebHostEnvironment _webHostEnvironment;
-
-        public CareersController(ApplicationDbContext context, IWebHostEnvironment webHostEnvironment)
+        private readonly Supabase.Client _supabase;
+        public CareersController(ApplicationDbContext context, Supabase.Client supabase)
         {
             _context = context;
-            _webHostEnvironment = webHostEnvironment;
+            _supabase = supabase;
         }
 
         public async Task<IActionResult> Index()
@@ -51,18 +48,16 @@ namespace PremierAuto.Controllers
                 if (cvFile != null && cvFile.Length > 0)
                 {
                     var fileName = Guid.NewGuid().ToString() + Path.GetExtension(cvFile.FileName);
-                    string webRootPath = _webHostEnvironment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-                    var uploadsFolder = Path.Combine(webRootPath, "cv_uploads");
-                    
-                    if (!Directory.Exists(uploadsFolder))
-                        Directory.CreateDirectory(uploadsFolder);
 
-                    var filePath = Path.Combine(uploadsFolder, fileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await cvFile.CopyToAsync(stream);
-                    }
-                    model.CvUrl = "/cv_uploads/" + fileName;
+                    using var memoryStream = new MemoryStream();
+                    await cvFile.CopyToAsync(memoryStream);
+                    var fileBytes = memoryStream.ToArray();
+
+                    await _supabase.Storage
+                        .From("premier-sp-auto-cvs")
+                        .Upload(fileBytes, fileName);
+
+                    model.CvUrl = fileName; 
                 }
 
                 var bucharestTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Europe/Bucharest"));

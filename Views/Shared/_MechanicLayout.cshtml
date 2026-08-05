@@ -7,15 +7,10 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <!-- Standard Favicon -->
     <link rel="icon" type="image/png" sizes="32x32" href="~/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="~/favicon-16x16.png">
     <link rel="shortcut icon" href="~/favicon.ico">
-
-    <!-- Apple Touch Icon (pentru iPhone/iPad) -->
     <link rel="apple-touch-icon" sizes="180x180" href="~/apple-touch-icon.png">
-
-    <!-- Android / PWA Manifest -->
     <link rel="manifest" href="~/site.webmanifest">
 </head>
 <body class="bg-light">
@@ -42,7 +37,6 @@
                             <a class="nav-link" asp-controller="Mechanic" asp-action="Profile">Profilul Meu</a>
                         </li>
                     </ul>
-                    <!-- Include partialul de login pentru butonul de Logout -->
                     <partial name="_LoginPartial" />
                 </div>
             </div>
@@ -51,6 +45,22 @@
 
     <div class="container mt-4">
         <main role="main" class="pb-3">
+            <div class="container mt-4">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success fw-bold alert-dismissible fade show shadow-sm" role="alert">
+                        <i class="bi bi-check-circle me-2"></i> @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger fw-bold alert-dismissible fade show shadow-sm" role="alert">
+                        <i class="bi bi-exclamation-triangle me-2"></i> @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+            </div>
             @RenderBody()
         </main>
     </div>
