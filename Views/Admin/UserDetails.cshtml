@@ -147,14 +147,25 @@
                 
                 <!-- scanare ocr -->
                 <div class="alert alert-info border-0 shadow-sm mb-4">
-                    <h6 class="fw-bold"><i class="bi bi-camera me-2"></i>Scanare Automată (Opțional)</h6>
-                    <p class="small mb-2">Încarcă sau fă o poză pașaportului tehnic (talonului) pentru a extrage automat datele.</p>
-                    <input type="file" id="passportImage" class="form-control form-control-sm mb-2" accept="image/*" capture="environment">
+                    <h6 class="fw-bold"><i class="bi bi-camera me-2"></i>Scanare Automată (Față + Verso)</h6>
+                    <p class="small mb-3">Încarcă pozele pașaportului tehnic pentru a extrage automat datele.</p>
+                    
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-muted mb-1">Poză Față</label>
+                            <input type="file" id="passportFront" class="form-control form-control-sm" accept="image/*" capture="environment">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-muted mb-1">Poză Verso</label>
+                            <input type="file" id="passportBack" class="form-control form-control-sm" accept="image/*" capture="environment">
+                        </div>
+                    </div>
+
                     <button type="button" id="scanBtn" class="btn btn-info btn-sm text-white fw-bold w-100" onclick="scanDocument()">
-                        <i class="bi bi-search me-1"></i> Scanează Documentul
+                        <i class="bi bi-search me-1"></i> Scanează Documentele
                     </button>
                     <div id="scanStatus" class="text-center mt-2 small fw-bold text-primary" style="display:none;">
-                        <span class="spinner-border spinner-border-sm me-1"></span> Se procesează imaginea... te rog așteaptă.
+                        <span class="spinner-border spinner-border-sm me-1"></span> Se procesează imaginile... te rog așteaptă.
                     </div>
                 </div>
 
@@ -220,48 +231,57 @@
         }
 
         async function scanDocument() {
-            const fileInput = document.getElementById('passportImage');
+            const frontInput = document.getElementById('passportFront');
+            const backInput = document.getElementById('passportBack');
             const statusDiv = document.getElementById('scanStatus');
                 
-            if (fileInput.files.length === 0) {
-                alert("Te rog să încarci sau să faci o poză documentului mai întâi!");
+            if (frontInput.files.length === 0 && backInput.files.length === 0) {
+                alert("Te rog să încarci cel puțin o poză (față sau verso)!");
                 return;
             }
 
             statusDiv.style.display = 'block';
+            statusDiv.className = 'text-center mt-2 small fw-bold text-primary';
+            statusDiv.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Se procesează imaginile... te rog așteaptă.';
                 
             try {
-                const result = await Tesseract.recognize(
-                    fileInput.files[0],
-                    'eng+ron+rus',
-                    { logger: m => console.log(m) } 
-                );
+                let scanTasks = [];
+                if (frontInput.files.length > 0) {
+                    scanTasks.push(Tesseract.recognize(frontInput.files[0], 'eng+ron+rus'));
+                }
+                if (backInput.files.length > 0) {
+                    scanTasks.push(Tesseract.recognize(backInput.files[0], 'eng+ron+rus'));
+                }
 
-                const text = result.data.text.toUpperCase();
-                console.log("Text extras:", text);
+                const results = await Promise.all(scanTasks);
 
-                const vinMatch = text.match(/\b[A-HJ-NPR-Z0-9]{17}\b/);
+                const fullText = results.map(r => r.data.text.toUpperCase()).join(" \n ");
+                console.log("Text extras combinat:", fullText);
+
+                const vinMatch = fullText.match(/\b[A-HJ-NPR-Z0-9]{17}\b/);
                 if (vinMatch) {
                     document.getElementById('carVin').value = vinMatch[0];
                 }
 
-                const yearMatch = text.match(/\b(19[9][0-9]|20[0-2][0-9])\b/);
+                const yearMatch = fullText.match(/\b(19[9][0-9]|20[0-2][0-9])\b/);
                 if (yearMatch) {
                     document.getElementById('carYear').value = yearMatch[0];
                 }
 
                 const popularMakes = ["DACIA", "VOLKSWAGEN", "VW", "BMW", "AUDI", "SKODA", "MERCEDES", "RENAULT", "FORD", "TOYOTA"];
                 for (let make of popularMakes) {
-                    if (text.includes(make)) {
+                    if (fullText.includes(make)) {
                         document.getElementById('carMake').value = make === "VW" ? "VOLKSWAGEN" : make;
-                         break;
+                        break;
                     }
                 }
+
                 statusDiv.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> Scanare completă! Verifică și corectează datele.';
                 statusDiv.classList.replace('text-primary', 'text-success');
+                
             } catch (err) {
                 console.error(err);
-                statusDiv.innerHTML = '<i class="bi bi-exclamation-triangle-fill text-danger"></i> Eroare la citirea pozei. Te rog introdu datele manual.';
+                statusDiv.innerHTML = '<i class="bi bi-exclamation-triangle-fill text-danger"></i> Eroare la citirea pozelor. Te rog introdu datele manual.';
                 statusDiv.classList.replace('text-primary', 'text-danger');
             }
         }
