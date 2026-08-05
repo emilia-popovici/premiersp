@@ -734,18 +734,28 @@ namespace PremierAuto.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SaveClientCar(int carId, string clientId, string make, string model, string licensePlate, string vin, int? year)
+        public async Task<IActionResult> SaveClientCar(
+            int carId, string clientId, string licensePlate, int? year, 
+            string ownerName, string ownerId, string ownerAddress, string vehicleRights,
+            string make, string vehicleType, string model, 
+            string vin, string bodyNumber, string chassisNumber, 
+            int? maxMass, int? ownMass, string validityPeriod, string registrationDate,
+            string category, string bodyStyle, int? engineCapacity, string fuelType, 
+            string powerWeightRatio, string color, int? seats, 
+            string specialMentions, string issuingAuthority, string idnv)
         {
             if (carId == 0)
             {
                 var newCar = new ClientCar
                 {
-                    ClientId = clientId,
-                    CarMake = make,
-                    CarModel = model,
-                    LicensePlate = licensePlate?.ToUpper().Replace(" ", ""),
-                    VIN = vin?.ToUpper(),
-                    Year = year
+                    ClientId = clientId, LicensePlate = licensePlate?.ToUpper(), Year = year,
+                    OwnerName = ownerName?.ToUpper(), OwnerId = ownerId?.ToUpper(), OwnerAddress = ownerAddress?.ToUpper(), VehicleRights = vehicleRights?.ToUpper(),
+                    CarMake = make?.ToUpper(), VehicleType = vehicleType?.ToUpper(), CarModel = model?.ToUpper(),
+                    VIN = vin?.ToUpper(), BodyNumber = bodyNumber?.ToUpper(), ChassisNumber = chassisNumber?.ToUpper(),
+                    MaxMass = maxMass, OwnMass = ownMass, ValidityPeriod = validityPeriod, RegistrationDate = registrationDate,
+                    Category = category?.ToUpper(), BodyStyle = bodyStyle?.ToUpper(), EngineCapacity = engineCapacity, FuelType = fuelType?.ToUpper(),
+                    PowerWeightRatio = powerWeightRatio, Color = color?.ToUpper(), Seats = seats,
+                    SpecialMentions = specialMentions?.ToUpper(), IssuingAuthority = issuingAuthority?.ToUpper(), IDNV = idnv
                 };
                 _context.ClientCars.Add(newCar);
             }
@@ -754,17 +764,18 @@ namespace PremierAuto.Controllers
                 var existingCar = await _context.ClientCars.FindAsync(carId);
                 if (existingCar != null)
                 {
-                    existingCar.CarMake = make;
-                    existingCar.CarModel = model;
-                    existingCar.LicensePlate = licensePlate?.ToUpper().Replace(" ", "");
-                    existingCar.VIN = vin?.ToUpper();
-                    existingCar.Year = year;
+                    existingCar.LicensePlate = licensePlate?.ToUpper(); existingCar.Year = year;
+                    existingCar.OwnerName = ownerName?.ToUpper(); existingCar.OwnerId = ownerId?.ToUpper(); existingCar.OwnerAddress = ownerAddress?.ToUpper(); existingCar.VehicleRights = vehicleRights?.ToUpper();
+                    existingCar.CarMake = make?.ToUpper(); existingCar.VehicleType = vehicleType?.ToUpper(); existingCar.CarModel = model?.ToUpper();
+                    existingCar.VIN = vin?.ToUpper(); existingCar.BodyNumber = bodyNumber?.ToUpper(); existingCar.ChassisNumber = chassisNumber?.ToUpper();
+                    existingCar.MaxMass = maxMass; existingCar.OwnMass = ownMass; existingCar.ValidityPeriod = validityPeriod; existingCar.RegistrationDate = registrationDate;
+                    existingCar.Category = category?.ToUpper(); existingCar.BodyStyle = bodyStyle?.ToUpper(); existingCar.EngineCapacity = engineCapacity; existingCar.FuelType = fuelType?.ToUpper();
+                    existingCar.PowerWeightRatio = powerWeightRatio; existingCar.Color = color?.ToUpper(); existingCar.Seats = seats;
+                    existingCar.SpecialMentions = specialMentions?.ToUpper(); existingCar.IssuingAuthority = issuingAuthority?.ToUpper(); existingCar.IDNV = idnv;
                 }
             }
 
             await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = "Datele mașinii au fost salvate cu succes!";
-            
             return RedirectToAction(nameof(UserDetails), new { userId = clientId });
         }
 

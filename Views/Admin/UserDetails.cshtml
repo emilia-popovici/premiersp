@@ -174,36 +174,56 @@
                     <input type="hidden" name="clientId" value="@Model.Id" />
                     <input type="hidden" name="carId" id="carId" value="0" />
 
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold text-navy">Marca Auto *</label>
-                            <input type="text" name="make" id="carMake" class="form-control" required placeholder="ex: Volkswagen" />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold text-navy">Model *</label>
-                            <input type="text" name="model" id="carModel" class="form-control" required placeholder="ex: Passat" />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold text-navy">Număr Înmatriculare</label>
-                            <input type="text" name="licensePlate" id="carPlate" class="form-control text-uppercase" placeholder="ex: K AA 123" />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold text-navy">Serie Șasiu (VIN)</label>
-                            <input type="text" name="vin" id="carVin" class="form-control font-monospace text-uppercase" maxlength="17" placeholder="17 caractere" />
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold text-navy">An Fabricație</label>
-                            <input type="number" name="year" id="carYear" class="form-control" placeholder="ex: 2018" />
-                        </div>
+                    <div class="row g-2">
+                        <!-- vehicul si model -->
+                        <h6 class="fw-bold text-navy w-100 mt-3 border-bottom pb-1">Vehicul</h6>
+                        <div class="col-md-3"><label class="small text-muted mb-0">A: Nr. Înmatriculare</label><input type="text" name="licensePlate" id="fA" class="form-control form-control-sm" /></div>
+                        <div class="col-md-3"><label class="small text-muted mb-0">B: Anul</label><input type="number" name="year" id="fB" class="form-control form-control-sm" /></div>
+                        <div class="col-md-3"><label class="small text-muted mb-0">D1: Marca *</label><input type="text" name="make" id="fD1" class="form-control form-control-sm fw-bold" required /></div>
+                        <div class="col-md-3"><label class="small text-muted mb-0">D3: Model *</label><input type="text" name="model" id="fD3" class="form-control form-control-sm fw-bold" required /></div>
+                        <div class="col-md-12"><label class="small text-muted mb-0">D2: Tipul vehiculului</label><input type="text" name="vehicleType" id="fD2" class="form-control form-control-sm" /></div>
+
+                        <!-- titular -->
+                        <h6 class="fw-bold text-navy w-100 mt-3 border-bottom pb-1">Titular (Proprietar)</h6>
+                        <div class="col-md-6"><label class="small text-muted mb-0">C1.1: Titularul</label><input type="text" name="ownerName" id="fC1_1" class="form-control form-control-sm" /></div>
+                        <div class="col-md-6"><label class="small text-muted mb-0">C1.2: ID Titular</label><input type="text" name="ownerId" id="fC1_2" class="form-control form-control-sm" /></div>
+                        <div class="col-md-8"><label class="small text-muted mb-0">C1.3: Adresa</label><input type="text" name="ownerAddress" id="fC1_3" class="form-control form-control-sm" /></div>
+                        <div class="col-md-4"><label class="small text-muted mb-0">C4: Drepturi</label><input type="text" name="vehicleRights" id="fC4" class="form-control form-control-sm" /></div>
+
+                        <!-- id -->
+                        <h6 class="fw-bold text-navy w-100 mt-3 border-bottom pb-1">Identificare șasiu / RST</h6>
+                        <div class="col-md-6"><label class="small text-muted mb-0">E: VIN (Serie Șasiu)</label><input type="text" name="vin" id="fE" class="form-control form-control-sm font-monospace fw-bold" maxlength="17" /></div>
+                        <div class="col-md-6"><label class="small text-muted mb-0">IDNV (Cod RST)</label><input type="text" name="idnv" id="fIDNV" class="form-control form-control-sm" /></div>
+                        <div class="col-md-6"><label class="small text-muted mb-0">E1: Nr. Caroserie</label><input type="text" name="bodyNumber" id="fE1" class="form-control form-control-sm" /></div>
+                        <div class="col-md-6"><label class="small text-muted mb-0">E2: Nr. Șasiu</label><input type="text" name="chassisNumber" id="fE2" class="form-control form-control-sm" /></div>
+
+                        <!-- date tehnice -->
+                        <h6 class="fw-bold text-navy w-100 mt-3 border-bottom pb-1">Date Tehnice & Mase</h6>
+                        <div class="col-md-4"><label class="small text-muted mb-0">J1: Categorie</label><input type="text" name="category" id="fJ1" class="form-control form-control-sm" /></div>
+                        <div class="col-md-4"><label class="small text-muted mb-0">J2: Tip Caroserie</label><input type="text" name="bodyStyle" id="fJ2" class="form-control form-control-sm" /></div>
+                        <div class="col-md-4"><label class="small text-muted mb-0">R: Culoare</label><input type="text" name="color" id="fR" class="form-control form-control-sm" /></div>
+                        
+                        <div class="col-md-3"><label class="small text-muted mb-0">P1: Cap. (cm3)</label><input type="number" name="engineCapacity" id="fP1" class="form-control form-control-sm" /></div>
+                        <div class="col-md-3"><label class="small text-muted mb-0">P3: Combustibil</label><input type="text" name="fuelType" id="fP3" class="form-control form-control-sm" /></div>
+                        <div class="col-md-3"><label class="small text-muted mb-0">Q: kW/kg</label><input type="text" name="powerWeightRatio" id="fQ" class="form-control form-control-sm" /></div>
+                        <div class="col-md-3"><label class="small text-muted mb-0">S1: Locuri</label><input type="number" name="seats" id="fS1" class="form-control form-control-sm" /></div>
+                        
+                        <div class="col-md-6"><label class="small text-muted mb-0">F1: Masă Max (kg)</label><input type="number" name="maxMass" id="fF1" class="form-control form-control-sm" /></div>
+                        <div class="col-md-6"><label class="small text-muted mb-0">G: Masă Proprie (kg)</label><input type="number" name="ownMass" id="fG" class="form-control form-control-sm" /></div>
+
+                        <!-- extra -->
+                        <div class="col-md-4 mt-2"><label class="small text-muted mb-0">H: Valabilitate</label><input type="text" name="validityPeriod" id="fH" class="form-control form-control-sm" /></div>
+                        <div class="col-md-4 mt-2"><label class="small text-muted mb-0">I: Data Înmatr.</label><input type="text" name="registrationDate" id="fI" class="form-control form-control-sm" /></div>
+                        <div class="col-md-4 mt-2"><label class="small text-muted mb-0">Z: Autoritate Emitentă</label><input type="text" name="issuingAuthority" id="fZ" class="form-control form-control-sm" /></div>
+                        <div class="col-12 mt-2"><label class="small text-muted mb-0">X1: Mențiuni Speciale</label><input type="text" name="specialMentions" id="fX1" class="form-control form-control-sm" /></div>
                     </div>
                     
                     <hr class="my-4 text-muted">
                     <div class="d-flex justify-content-end gap-2">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anulează</button>
-                        <button type="submit" class="btn btn-primary-cta fw-bold"><i class="bi bi-save me-1"></i> Salvează Mașina</button>
+                        <button type="submit" class="btn btn-primary-cta fw-bold"><i class="bi bi-save me-1"></i> Salvează</button>
                     </div>
                 </form>
-
             </div>
         </div>
     </div>
@@ -220,12 +240,11 @@
         
         function editCar(id, make, model, plate, vin, year) {
             document.getElementById('carId').value = id;
-            document.getElementById('carMake').value = make;
-            document.getElementById('carModel').value = model;
-            document.getElementById('carPlate').value = plate;
-            document.getElementById('carVin').value = vin;
-            document.getElementById('carYear').value = year;
-                
+            document.getElementById('fD1').value = make;
+            document.getElementById('fD3').value = model;
+            document.getElementById('fA').value = plate;
+            document.getElementById('fE').value = vin;
+            document.getElementById('fB').value = year;
             var modal = new bootstrap.Modal(document.getElementById('carModal'));
             modal.show();
         }
@@ -236,67 +255,67 @@
             const statusDiv = document.getElementById('scanStatus');
                 
             if (frontInput.files.length === 0 && backInput.files.length === 0) {
-                alert("Te rog să încarci cel puțin o poză (față sau verso)!");
-                return;
+                alert("Te rog să încarci cel puțin o poză!"); return;
             }
 
             statusDiv.style.display = 'block';
             statusDiv.className = 'text-center mt-2 small fw-bold text-primary';
-            statusDiv.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Se procesează imaginile... te rog așteaptă.';
+            statusDiv.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Analizez toate câmpurile...';
                 
             try {
                 let scanTasks = [];
-
-                if (frontInput.files.length > 0) {
-                    scanTasks.push(Tesseract.recognize(frontInput.files[0], 'eng+ron+rus'));
-                }
-
-                if (backInput.files.length > 0) {
-                    scanTasks.push(Tesseract.recognize(backInput.files[0], 'eng+ron+rus'));
-                }
+                if (frontInput.files.length > 0) scanTasks.push(Tesseract.recognize(frontInput.files[0], 'eng+ron+rus'));
+                if (backInput.files.length > 0) scanTasks.push(Tesseract.recognize(backInput.files[0], 'eng+ron+rus'));
 
                 const results = await Promise.all(scanTasks);
-
                 const fullText = results.map(r => r.data.text.toUpperCase()).join(" \n ");
-                console.log("Text extras combinat:", fullText);
+                console.log("Text brut extras:", fullText);
 
-                const vinMatch = fullText.match(/\b[A-HJ-NPR-Z0-9]{17}\b/);
-                if (vinMatch) {
-                    document.getElementById('carVin').value = vinMatch[0];
+                const lines = fullText.split('\n');
+                let d = {};
+
+                for (let line of lines) {
+                    line = line.trim();
+                    if (!line) continue;
+
+                    if (line.match(/^A[\s\:\.]+(.+)/)) d.fA = RegExp.$1.replace(/[\s\-]/g, '');
+                    if (line.match(/^B[\s\:\.]+(\d{4})/)) d.fB = RegExp.$1;
+                    if (line.match(/^C\.?1\.?1[\s\:\.]+(.+)/)) d.fC1_1 = RegExp.$1.trim();
+                    if (line.match(/^C\.?1\.?2[\s\:\.]+(.+)/)) d.fC1_2 = RegExp.$1.trim();
+                    if (line.match(/^C\.?1\.?3[\s\:\.]+(.+)/)) d.fC1_3 = RegExp.$1.trim();
+                    if (line.match(/^C\.?4[\s\:\.]+(.+)/)) d.fC4 = RegExp.$1.trim();
+                    if (line.match(/^D\.?1[\s\:\.]+(.+)/)) d.fD1 = RegExp.$1.trim();
+                    if (line.match(/^D\.?2[\s\:\.]+(.+)/)) d.fD2 = RegExp.$1.trim();
+                    if (line.match(/^D\.?3[\s\:\.]+(.+)/)) d.fD3 = RegExp.$1.trim();
+                    if (line.match(/^E[\s\:\.]+(.+)/)) d.fE = RegExp.$1.trim();
+                    if (line.match(/^E\.?1[\s\:\.]+(.+)/)) d.fE1 = RegExp.$1.trim();
+                    if (line.match(/^E\.?2[\s\:\.]+(.+)/)) d.fE2 = RegExp.$1.trim();
+                    if (line.match(/^F\.?1[\s\:\.]+(\d+)/)) d.fF1 = RegExp.$1;
+                    if (line.match(/^G[\s\:\.]+(\d+)/)) d.fG = RegExp.$1;
+                    if (line.match(/^H[\s\:\.]+(.+)/)) d.fH = RegExp.$1.trim();
+                    if (line.match(/^I[\s\:\.]+(.+)/)) d.fI = RegExp.$1.trim();
+                    if (line.match(/^J\.?1[\s\:\.]+(.+)/)) d.fJ1 = RegExp.$1.trim();
+                    if (line.match(/^J\.?2[\s\:\.]+(.+)/)) d.fJ2 = RegExp.$1.trim();
+                    if (line.match(/^P\.?1[\s\:\.]+(\d+)/)) d.fP1 = RegExp.$1;
+                    if (line.match(/^P\.?3[\s\:\.]+(.+)/)) d.fP3 = RegExp.$1.trim();
+                    if (line.match(/^Q[\s\:\.]+(.+)/)) d.fQ = RegExp.$1.trim();
+                    if (line.match(/^R[\s\:\.]+(.+)/)) d.fR = RegExp.$1.trim();
+                    if (line.match(/^S\.?1[\s\:\.]+(\d+)/)) d.fS1 = RegExp.$1;
+                    if (line.match(/^X\.?1[\s\:\.]+(.+)/)) d.fX1 = RegExp.$1.trim();
+                    if (line.match(/^Z[\s\:\.]+(.+)/)) d.fZ = RegExp.$1.trim();
+                    if (line.match(/IDNV(?:[\s\:\.]+RST)?[\s\:\.]+(\d+)/)) d.fIDNV = RegExp.$1;
                 }
 
-                const yearMatch = fullText.match(/\b(19[9][0-9]|20[0-2][0-9])\b/);
-                if (yearMatch) {
-                    document.getElementById('carYear').value = yearMatch[0];
+                for (let key in d) {
+                    if(document.getElementById(key)) document.getElementById(key).value = d[key];
                 }
 
-                const plateMatch = fullText.match(/\b([A-Z]{3}\s?\d{3}|[A-Z]{1}\s?[A-Z]{2}\s?\d{3})\b/);
-                if (plateMatch) {
-                    document.getElementById('carPlate').value = plateMatch[0].replace(/\s+/g, '');
-                }
-
-                const popularMakes = ["DACIA", "VOLKSWAGEN", "VW", "BMW", "AUDI", "SKODA", "MERCEDES-BENZ", "MERCEDES", "RENAULT", "FORD", "TOYOTA"];
-                for (let make of popularMakes) {
-                    if (fullText.includes(make)) {
-                        let finalMake = make === "VW" ? "VOLKSWAGEN" : make;
-                        document.getElementById('carMake').value = finalMake;
-                        
-                        const modelRegex = new RegExp(make + "\\s*(?:D\.?2)?\\s*(?:MODELUL)?\\s*([A-Z0-9]{3,})", "i");
-                        const modelMatch = fullText.match(modelRegex);
-                        
-                        if (modelMatch && modelMatch[1]) {
-                            document.getElementById('carModel').value = modelMatch[1];
-                        }
-                        break;
-                    }
-                }
-
-                statusDiv.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> Scanare completă! Verifică și corectează datele.';
+                statusDiv.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> Scanare complexă completă!';
                 statusDiv.classList.replace('text-primary', 'text-success');
                 
             } catch (err) {
                 console.error(err);
-                statusDiv.innerHTML = '<i class="bi bi-exclamation-triangle-fill text-danger"></i> Eroare la citirea pozelor. Te rog introdu datele manual.';
+                statusDiv.innerHTML = '<i class="bi bi-exclamation-triangle-fill text-danger"></i> Eroare OCR. Introdu manual datele.';
                 statusDiv.classList.replace('text-primary', 'text-danger');
             }
         }

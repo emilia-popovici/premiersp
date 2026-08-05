@@ -19,8 +19,29 @@ namespace PremierAuto.Models
         public string CarModel { get; set; } = string.Empty;
 
         [StringLength(15, ErrorMessage = "Numărul de înmatriculare este prea lung.")]
-        public string? LicensePlate { get; set; } 
-        public string? VIN { get; set; }
+        public string? LicensePlate { get; set; }
         public int? Year { get; set; }
+        public string? OwnerName { get; set; }
+        public string? OwnerId { get; set; }
+        public string? OwnerAddress { get; set; }
+        public string? VehicleRights { get; set; }
+        public string? VehicleType { get; set; }
+        public string? VIN { get; set; }
+        public string? BodyNumber { get; set; }
+        public string? ChassisNumber { get; set; }
+        public int? MaxMass { get; set; }
+        public int? OwnMass { get; set; }
+        public string? ValidityPeriod { get; set; }
+        public string? RegistrationDate { get; set; }
+        public string? Category { get; set; }
+        public string? BodyStyle { get; set; }
+        public int? EngineCapacity { get; set; }
+        public string? FuelType { get; set; }
+        public string? PowerWeightRatio { get; set; }
+        public string? Color { get; set; }
+        public int? Seats { get; set; }
+        public string? SpecialMentions { get; set; }
+        public string? IssuingAuthority { get; set; }
+        public string? IDNV { get; set; }
     }
 }
