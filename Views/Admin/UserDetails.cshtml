@@ -284,7 +284,7 @@
                 
             try {
                 let scanTasks = [];
-                if (frontInput.files.length > 0) scanTasks.push(Tesseract.recognize(frontInput.files[0], 'eng+ron+rus'));
+                if (frontInput.files.length > 0) scanTasks.push(Tesseract.recognize(frontInput.files[0], 'eng'));
 
                 const results = await Promise.all(scanTasks);
                 const fullText = results.map(r => r.data.text.toUpperCase()).join(" \n ");
