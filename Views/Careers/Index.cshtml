@@ -21,8 +21,9 @@
         {
             <div class="col-md-6">
                 <div class="card border-0 shadow-sm h-100 @(job.IsHiring ? "border-start border-4 border-primary" : "")">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="card-body p-4 d-flex flex-column">
+                        
+                        <div class="d-flex justify-content-between align-items-start mb-3">
                             <h4 class="fw-bold text-navy mb-0">@job.Title</h4>
                             @if (job.IsHiring)
                             {
@@ -33,16 +34,38 @@
                                 <span class="badge bg-secondary px-3 py-2 rounded-pill">Poziție Închisă</span>
                             }
                         </div>
-                        <p class="text-muted mb-4">@job.Description</p>
                         
-                        @if (job.IsHiring)
-                        {
-                            <a asp-action="Apply" asp-route-id="@job.Id" class="btn btn-primary-cta fw-bold w-100">Aplică Acum <i class="bi bi-arrow-right ms-2"></i></a>
-                        }
-                        else
-                        {
-                            <button class="btn btn-light w-100 fw-bold" disabled>Momentan nu primim CV-uri</button>
-                        }
+                        <div class="job-description flex-grow-1 mb-4">
+                            @{
+                                bool isLong = job.Description.Length > 140;
+                                string shortDesc = isLong ? job.Description.Substring(0, 140).Replace("\n", " ").Replace("\r", "") + "..." : job.Description;
+                            }
+                            
+                            <div class="desc-preview text-muted">@shortDesc</div>
+                            
+                            @if (isLong)
+                            {
+                                <div class="collapse" id="descCollapse_@job.Id">
+                                    <div class="text-muted" style="white-space: pre-wrap;">@job.Description</div>
+                                </div>
+                                
+                                <a data-bs-toggle="collapse" href="#descCollapse_@job.Id" role="button" aria-expanded="false" class="text-decoration-none fw-bold mt-2 d-inline-block toggle-more-btn" style="color: var(--bs-primary);">
+                                    <span class="show-more">Vezi toate detaliile <i class="bi bi-chevron-down"></i></span>
+                                    <span class="show-less d-none">Ascunde detaliile <i class="bi bi-chevron-up"></i></span>
+                                </a>
+                            }
+                        </div>
+                        
+                        <div class="mt-auto pt-2 border-top">
+                            @if (job.IsHiring)
+                            {
+                                <a asp-action="Apply" asp-route-id="@job.Id" class="btn btn-primary-cta fw-bold w-100 mt-2">Aplică Acum <i class="bi bi-arrow-right ms-2"></i></a>
+                            }
+                            else
+                            {
+                                <button class="btn btn-light w-100 fw-bold mt-2" disabled>Momentan nu primim CV-uri</button>
+                            }
+                        </div>
                     </div>
                 </div>
             </div>
@@ -55,3 +78,32 @@
         }
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var collapseElements = document.querySelectorAll('.collapse');
+            collapseElements.forEach(function (collapseEl) {
+                
+                collapseEl.addEventListener('show.bs.collapse', function () {
+                    var container = this.closest('.job-description');
+                    if (container) {
+                        container.querySelector('.desc-preview').classList.add('d-none');
+                        container.querySelector('.show-more').classList.add('d-none');
+                        container.querySelector('.show-less').classList.remove('d-none');
+                    }
+                });
+                
+                collapseEl.addEventListener('hide.bs.collapse', function () {
+                    var container = this.closest('.job-description');
+                    if (container) {
+                        container.querySelector('.desc-preview').classList.remove('d-none');
+                        container.querySelector('.show-more').classList.remove('d-none');
+                        container.querySelector('.show-less').classList.add('d-none');
+                    }
+                });
+                
+            });
+        });
+    </script>
+}
