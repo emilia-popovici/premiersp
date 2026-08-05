@@ -1112,6 +1112,59 @@ namespace PremierAuto.Controllers
             
             return RedirectToAction(nameof(AppointmentChat), new { id = id });
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Payments(string searchString, string statusFilter)
+        {
+            var query = _context.Appointments
+                .Include(a => a.Client)
+                .Where(a => a.Status == AppointmentStatus.Done || a.FinalPrice != null)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                var searchLower = searchString.ToLower();
+                query = query.Where(a => 
+                    (a.Client != null && (a.Client.FirstName.ToLower().Contains(searchLower) || a.Client.LastName.ToLower().Contains(searchLower))) ||
+                    a.CarMake.ToLower().Contains(searchLower) || a.CarModel.ToLower().Contains(searchLower)
+                );
+            }
+
+            if (!string.IsNullOrEmpty(statusFilter))
+            {
+                if (statusFilter == "Achitat")
+                {
+                    query = query.Where(a => a.AmountPaid >= a.FinalPrice && a.FinalPrice > 0);
+                }
+                else if (statusFilter == "Restant")
+                {
+                    query = query.Where(a => a.AmountPaid < a.FinalPrice || a.FinalPrice == null);
+                }
+            }
+
+            var appointments = await query.OrderByDescending(a => a.AppointmentDate).ToListAsync();
+            
+            ViewBag.CurrentSearch = searchString;
+            ViewBag.CurrentStatus = statusFilter;
+
+            return View(appointments);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdatePayment(int id, decimal amountPaid, PaymentMethod paymentMethod)
+        {
+            var appointment = await _context.Appointments.FindAsync(id);
+            if (appointment != null)
+            {
+                appointment.AmountPaid = amountPaid;
+                appointment.PaymentMethod = paymentMethod;
+                await _context.SaveChangesAsync();
+                
+                TempData["SuccessMessage"] = $"Plata pentru programarea #{id} a fost actualizată!";
+            }
+            return RedirectToAction(nameof(Payments));
+        }
     }
 
     public class ClientUserViewModel

@@ -1,0 +1,114 @@
+@using PremierAuto.Models
+@model IEnumerable<PremierAuto.Models.Appointment>
+@{
+    ViewData["Title"] = "Gestiune Plăți";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-navy fw-bold mb-0"><i class="bi bi-wallet2 me-2"></i> Gestiune Plăți</h2>
+    </div>
+
+    <div class="card shadow-sm border-0 bg-white p-3 mb-4">
+        <form method="get" asp-action="Payments" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">Caută Client / Mașină</label>
+                <input type="text" name="searchString" value="@ViewBag.CurrentSearch" class="form-control" placeholder="Caută..." />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold small text-muted">Status Plată</label>
+                <select name="statusFilter" class="form-select">
+                    <option value="">Toate</option>
+                    <option value="Restant" selected="@(ViewBag.CurrentStatus == "Restant")">Cu restanță</option>
+                    <option value="Achitat" selected="@(ViewBag.CurrentStatus == "Achitat")">Achitat integral</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary-cta w-100 fw-bold"><i class="bi bi-search"></i> Caută</button>
+                <a asp-action="Payments" class="btn btn-outline-secondary w-100 fw-bold" title="Reset"><i class="bi bi-arrow-counterclockwise"></i></a>
+            </div>
+        </form>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered align-middle mb-0 bg-white">
+                    <thead class="bg-navy text-white">
+                        <tr>
+                            <th class="py-3 px-3">#ID / Dată</th>
+                            <th class="py-3">Client & Mașină</th>
+                            <th class="py-3 text-center bg-secondary bg-opacity-25">Total Finalizat</th>
+                            <th class="py-3 text-center">Suma Achitată</th>
+                            <th class="py-3 text-center">Metoda Plată</th>
+                            <th class="py-3 text-center">Rest de Plată</th>
+                            <th class="py-3 text-center">Acțiune</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr><td colspan="7" class="text-center text-muted py-4">Nu am găsit nicio programare de facturat.</td></tr>
+                        }
+
+                        @foreach (var app in Model)
+                        {
+                            decimal total = app.FinalPrice ?? 0;
+                            decimal paid = app.AmountPaid;
+                            decimal remaining = total - paid;
+                            
+                            string remainingClass = remaining > 0 ? "text-danger fw-bold" : (remaining < 0 ? "text-warning fw-bold" : "text-success fw-bold");
+
+                            <tr>
+                                <form id="payForm_@app.Id" asp-controller="Admin" asp-action="UpdatePayment" method="post"></form>
+                                <input type="hidden" name="id" value="@app.Id" form="payForm_@app.Id" />
+
+                                <td class="px-3 text-nowrap">
+                                    <span class="text-muted fw-bold">#@app.Id</span><br/>
+                                    <small class="text-muted">@app.AppointmentDate.ToString("dd/MM/yyyy")</small>
+                                </td>
+                                
+                                <td class="text-nowrap">
+                                    <span class="fw-bold">@app.Client?.FirstName @app.Client?.LastName</span><br />
+                                    <small class="text-muted">@app.CarMake @app.CarModel</small>
+                                </td>
+                                
+                                <td class="text-center bg-light fw-bold text-navy fs-5">
+                                    @total MDL
+                                </td>
+
+                                <td class="text-center">
+                                    <div class="input-group input-group-sm mx-auto" style="width: 140px;">
+                                        <input type="number" step="0.01" name="amountPaid" class="form-control fw-bold" value="@paid.ToString("0.##")" form="payForm_@app.Id" />
+                                        <span class="input-group-text bg-white">MDL</span>
+                                    </div>
+                                </td>
+
+                                <td class="text-center">
+                                    <select name="paymentMethod" class="form-select form-select-sm mx-auto fw-bold" style="width: 130px;" form="payForm_@app.Id">
+                                        @foreach (PaymentMethod method in Enum.GetValues(typeof(PaymentMethod)))
+                                        {
+                                            <option value="@method" selected="@(app.PaymentMethod == method)">@method</option>
+                                        }
+                                    </select>
+                                </td>
+
+                                <td class="text-center text-nowrap @remainingClass fs-6">
+                                    @remaining MDL
+                                    @if(remaining == 0 && total > 0) { <i class="bi bi-check-circle-fill ms-1 text-success"></i> }
+                                </td>
+
+                                <td class="text-center">
+                                    <button type="submit" form="payForm_@app.Id" class="btn btn-sm btn-primary-cta fw-bold px-3">
+                                        <i class="bi bi-save"></i> Salvează
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

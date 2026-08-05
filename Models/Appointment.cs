@@ -39,5 +39,15 @@ namespace PremierAuto.Models
         public virtual ICollection<AppointmentMessage> Messages { get; set; } = new List<AppointmentMessage>();
         public int? FinalDurationMinutes { get; set; }
         public decimal? FinalPrice { get; set; }
+        public decimal AmountPaid { get; set; } = 0;
+        public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.Neachitat;
+    }
+
+    public enum PaymentMethod
+    {
+        Neachitat,
+        Cash,
+        Card,
+        Transfer
     }
 }
