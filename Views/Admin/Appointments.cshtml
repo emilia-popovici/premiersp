@@ -785,9 +785,10 @@
                 locale: "ro",
                 time_24hr: true,
                 minDate: "today",
+                allowInput: true,
                 disable: [
                     function(date) {
-                        return (date.getDay() === 0 || date.getDay() === 6);
+                        return (date.getDay() === 6);
                     }
                 ],
                 minTime: "09:00",
